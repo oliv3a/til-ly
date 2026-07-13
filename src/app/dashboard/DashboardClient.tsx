@@ -236,7 +236,9 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
               <span className="text-[0.4rem] font-mono font-medium text-muted-ink/60 uppercase tracking-wider">Day Streak</span>
             </div>
           )}
-          <MacSplitCard />
+          <div className="sm:col-span-2">
+            <MacSplitCard />
+          </div>
         </div>
       </motion.div>
 
