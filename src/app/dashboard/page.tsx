@@ -47,18 +47,28 @@ export default async function DashboardPage() {
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999)
   const monthlyLogs = await prisma.studyLog.findMany({
     where: { userId, createdAt: { gte: monthStart, lte: monthEnd } },
-    select: { createdAt: true },
+    orderBy: { createdAt: "asc" },
+    include: {
+      skillTags: { include: { skill: true } },
+    },
   })
-  const logsByDay: Record<number, number> = {}
+  const monthlyLogsByDay: Record<number, Array<{
+    id: string
+    title: string
+    createdAt: Date
+    aiSummary: string | null
+    skillTags: Array<{ id: string; xp: number; skill: { id: string; name: string } }>
+  }>> = {}
   monthlyLogs.forEach((log) => {
-    const day = new Date(log.createdAt).getDate()
-    logsByDay[day] = (logsByDay[day] || 0) + 1
-  })
-
-  const studiedToday = logs.some((log) => {
-    const logDate = new Date(log.createdAt)
-    logDate.setHours(0, 0, 0, 0)
-    return logDate.getTime() === today.getTime()
+    const day = log.createdAt.getDate()
+    if (!monthlyLogsByDay[day]) monthlyLogsByDay[day] = []
+    monthlyLogsByDay[day].push({
+      id: log.id,
+      title: log.title,
+      createdAt: log.createdAt,
+      aiSummary: log.aiSummary,
+      skillTags: log.skillTags,
+    })
   })
 
   return (
@@ -70,13 +80,12 @@ export default async function DashboardPage() {
         userName,
         streakCount: user?.streakCount || 0,
         logCount: logs.length,
-        studiedToday,
         recentLogs: JSON.parse(JSON.stringify(logs)),
         recentProjectUpdates: [],
         goals: JSON.parse(JSON.stringify(goals)),
         skills: JSON.parse(JSON.stringify(skills)),
         recommendation: null,
-        logsByDay,
+        monthlyLogsByDay: JSON.parse(JSON.stringify(monthlyLogsByDay)),
       }}
     />
     </>  )

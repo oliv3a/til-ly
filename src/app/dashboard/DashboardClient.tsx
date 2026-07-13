@@ -1,25 +1,33 @@
 "use client"
 
-import { useState, useEffect, useMemo, useRef } from "react"
+import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "motion/react"
 import Onigiri from "@/components/Onigiri"
 import { parseAiSummary } from "@/lib/ai-summary"
+import { colorForSkill } from "@/lib/skill-colors"
 import { staggerContainer, staggerItem } from "@/lib/motion/variants"
 import { easings } from "@/lib/motion/tokens"
+
+interface LogDayItem {
+  id: string
+  title: string
+  createdAt: string
+  aiSummary: string | null
+  skillTags: Array<{ id: string; xp: number; skill: { id: string; name: string } }>
+}
 
 interface DashboardData {
   userId: string
   userName: string
   streakCount: number
   logCount: number
-  studiedToday: boolean
   recentLogs: any[]
   recentProjectUpdates: any[]
   goals: any[]
   skills: any[]
   recommendation: { topic: string; reason: string; estimatedTime: string } | null
-  logsByDay?: Record<number, number>
+  monthlyLogsByDay: Record<number, LogDayItem[]>
 }
 
 function relativeDate(dateStr: string): string {
@@ -30,9 +38,14 @@ function relativeDate(dateStr: string): string {
   return `${days}d ago`
 }
 
+const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+function monthName(year: number, month: number) {
+  return new Date(year, month).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+}
+
 export default function DashboardClient({ initialData }: { initialData: DashboardData }) {
   const [data, setData] = useState(initialData)
-  const [expandedLogId, setExpandedLogId] = useState<string | null>(null)
 
   useEffect(() => {
     async function refresh() {
@@ -45,42 +58,150 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     refresh()
   }, [])
 
-  const mergedActivity = useMemo(() => {
-    const items: { type: "log" | "project_update"; createdAt: string; data: any }[] = [
-      ...(data.recentLogs?.map((log: any) => ({ type: "log" as const, createdAt: log.createdAt, data: log })) || []),
-      ...(data.recentProjectUpdates?.map((upd: any) => ({ type: "project_update" as const, createdAt: upd.createdAt, data: upd })) || []),
-    ]
-    return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  }, [data.recentLogs, data.recentProjectUpdates])
-
   const totalGoals = data.goals?.length ?? 0
   const totalTicked = data.goals?.reduce((s: number, g: any) =>
     s + (g.roadmapItems?.filter((i: any) => i.isComplete).length ?? 0), 0) ?? 0
   const totalItems = data.goals?.reduce((s: number, g: any) =>
     s + (g.roadmapItems?.length ?? 0), 0) ?? 0
 
+  // ─── Calendar state ──────────────────────────────────────
   const today = new Date()
-  const currentMonth = today.getMonth()
-  const currentYear = today.getFullYear()
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay()
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
-  const calendarDays = Array.from({ length: daysInMonth }, (_, i) => i + 1)
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const [navMonth, setNavMonth] = useState(today.getMonth())
+  const [navYear, setNavYear] = useState(today.getFullYear())
+  const [monthData, setMonthData] = useState<Record<number, LogDayItem[]>>(initialData.monthlyLogsByDay || {})
+  const [selectedLog, setSelectedLog] = useState<LogDayItem | null>(null)
+  const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 })
+  const popoverRef = useRef<HTMLDivElement>(null)
 
-  const streakDays = useMemo(() => {
-    const days = new Set<number>()
-    if (data.streakCount <= 0) return days
-    const now = new Date()
-    const end = data.studiedToday ? 0 : 1
-    for (let i = end; i < end + data.streakCount; i++) {
-      const d = new Date(now)
-      d.setDate(d.getDate() - i)
-      if (d.getMonth() === now.getMonth()) {
-        days.add(d.getDate())
+  const firstDay = new Date(navYear, navMonth, 1).getDay()
+  const daysInMonth = new Date(navYear, navMonth + 1, 0).getDate()
+  const prevMonthDays = new Date(navYear, navMonth, 0).getDate()
+
+  const fetchMonthData = useCallback(async (year: number, month: number) => {
+    const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`
+    const res = await fetch(`/api/dashboard?month=${monthStr}`)
+    if (res.ok) {
+      const json = await res.json()
+      setMonthData(json.monthlyLogsByDay || {})
+    }
+  }, [])
+
+  function goPrev() {
+    const m = navMonth - 1
+    if (m < 0) {
+      setNavYear(navYear - 1)
+      setNavMonth(11)
+      fetchMonthData(navYear - 1, 11)
+    } else {
+      setNavMonth(m)
+      fetchMonthData(navYear, m)
+    }
+  }
+
+  function goNext() {
+    const m = navMonth + 1
+    if (m > 11) {
+      setNavYear(navYear + 1)
+      setNavMonth(0)
+      fetchMonthData(navYear + 1, 0)
+    } else {
+      setNavMonth(m)
+      fetchMonthData(navYear, m)
+    }
+  }
+
+  function handleBarClick(e: React.MouseEvent, log: LogDayItem) {
+    e.stopPropagation()
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    setPopoverPos({ x: Math.min(rect.left, window.innerWidth - 180), y: rect.bottom + 4 })
+    setSelectedLog(log)
+  }
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setSelectedLog(null)
       }
     }
-    return days
-  }, [data.streakCount, data.studiedToday])
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") setSelectedLog(null)
+    }
+    if (selectedLog) {
+      document.addEventListener("mousedown", handleClick)
+      document.addEventListener("keydown", handleEscape)
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClick)
+      document.removeEventListener("keydown", handleEscape)
+    }
+  }, [selectedLog])
+
+  function renderDayCell(day: number, isCurrentMonth: boolean) {
+    const logs = isCurrentMonth ? monthData[day] || [] : []
+    const isToday = isCurrentMonth && day === today.getDate() && navMonth === today.getMonth() && navYear === today.getFullYear()
+
+    return (
+      <div
+        key={`${isCurrentMonth ? "c" : "o"}-${day}`}
+        className={`relative min-h-[3.5rem] p-[2px] border text-left ${
+          isToday
+            ? "border-soft-coral bg-soft-coral/[0.06]"
+            : "border-warm-brown/10"
+        } ${!isCurrentMonth ? "opacity-30" : ""}`}
+      >
+        <span className={`inline-flex items-center justify-center w-3.5 h-3.5 text-[0.4rem] font-mono leading-none ${
+          isToday ? "bg-soft-coral text-warm-paper rounded-full" : "text-muted-ink/60"
+        }`}>
+          {day}
+        </span>
+        <div className="mt-px space-y-[1px]">
+          {logs.map((log) => {
+            const skillName = log.skillTags?.[0]?.skill?.name
+            const c = skillName ? colorForSkill(skillName) : { bg: "#dae8fc", text: "#2b6cb0", border: "#2b6cb0" }
+            return (
+              <button
+                key={log.id}
+                onClick={(e) => handleBarClick(e, log)}
+                className="block w-full h-[3px] rounded-full cursor-pointer hover:scale-y-[2] hover:opacity-80 transition-all origin-center"
+                style={{ background: c.border }}
+                title={log.title}
+              />
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  function renderCalendar() {
+    const cells: React.ReactNode[] = []
+
+    dayNames.forEach((d) => {
+      cells.push(
+        <div key={`h-${d}`} className="text-[0.35rem] font-mono font-medium text-muted-ink/40 text-center py-[2px]">
+          {d}
+        </div>
+      )
+    })
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      cells.push(renderDayCell(prevMonthDays - i, false))
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      cells.push(renderDayCell(d, true))
+    }
+
+    const totalCells = cells.length
+    const remaining = 7 - (totalCells % 7)
+    if (remaining < 7) {
+      for (let d = 1; d <= remaining; d++) {
+        cells.push(renderDayCell(d, false))
+      }
+    }
+
+    return cells
+  }
 
   return (
     <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
@@ -116,134 +237,105 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
             </div>
           )}
           <MacSplitCard />
-          <div className="dash-card p-1">
-            <p className="text-[0.45rem] font-mono font-medium text-warm-brown text-center mb-0.5">
-              {today.toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-            </p>
-            <div className="grid grid-cols-7">
-              {dayNames.map((d) => (
-                <span key={d} className="inline-flex items-center justify-center text-[0.4rem] font-mono font-medium text-muted-ink/50" style={{ width: "1.1rem", height: "1.1rem", margin: "0 auto" }}>{d}</span>
-              ))}
-              {Array.from({ length: firstDay }).map((_, i) => (
-                <span key={`empty-${i}`} style={{ width: "1.1rem", height: "1.1rem", margin: "0 auto" }} />
-              ))}
-              {calendarDays.map((d) => {
-                const count = data.logsByDay?.[d] ?? 0
-                const isToday = d === today.getDate()
-                const isStreak = streakDays.has(d) && !isToday
-                const dot = count > 0 ? (count >= 3 ? "●●" : "●") : ""
-                return (
-                  <span
-                    key={d}
-                    className={`font-mono leading-none ${
-                      isToday
-                        ? "bg-soft-coral text-warm-paper rounded-full"
-                        : "text-muted-ink/70"
-                    } ${isStreak ? "text-soft-coral" : ""}`}
-                    style={{ fontSize: "0.4rem", width: "1.1rem", height: "1.1rem", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}
-                  >
-                    {d}
-                  </span>
-                )
-              })}
-            </div>
-          </div>
         </div>
       </motion.div>
 
       <div className="section-divider" />
 
-      {/* 2. Activity — what have I been doing? */}
+      {/* 2. Activity Calendar — what have I been doing? */}
       <motion.div variants={staggerItem} className="dash-section">
-        <p className="dash-section-title mb-4">
+        <p className="dash-section-title mb-2">
           <span className="text-muted-ink/25">02</span> Activity
         </p>
-        {mergedActivity.length > 0 ? (
-          <div>
-            {mergedActivity.slice(0, 6).map((item) => (
-              <motion.div key={item.data.id} variants={staggerItem}>
-                {item.type === "log" ? (
-                  <div>
-                    <button
-                      onClick={() =>
-                        setExpandedLogId(expandedLogId === item.data.id ? null : item.data.id)
-                      }
-                      className={`dash-list-item ${expandedLogId === item.data.id ? "selected" : ""}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="text-[0.5rem] shrink-0">📄</span>
-                          <h3 className="font-serif text-sm text-warm-brown truncate">{item.data.title}</h3>
-                        </div>
-                        <span className="text-[0.45rem] font-mono text-muted-ink/40 shrink-0 ml-2">
-                          {relativeDate(item.data.createdAt)}
-                        </span>
-                      </div>
-                      {item.data.aiSummary && (
-                        <p className="text-[0.55rem] font-mono text-muted-ink/60 mt-0.5 line-clamp-1">
-                          {parseAiSummary(item.data.aiSummary).summary}
-                        </p>
-                      )}
-                    </button>
-                    {expandedLogId === item.data.id && (
-                      <div className="inline-detail">
-                        <p className="text-[0.45rem] font-mono text-muted-ink/40 mb-2">
-                          {new Date(item.data.createdAt).toLocaleDateString("en-US", {
-                            weekday: "long",
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                        {item.data.aiSummary && (
-                          <p className="text-[0.55rem] font-mono text-muted-ink/70 leading-relaxed mb-2">
-                            {parseAiSummary(item.data.aiSummary).summary}
-                          </p>
-                        )}
-                        {item.data.content && (
-                          <p className="text-[0.55rem] font-mono text-muted-ink/60 whitespace-pre-wrap line-clamp-3 mb-2">
-                            {item.data.content}
-                          </p>
-                        )}
-                        <Link
-                          href={`/logs/${item.data.id}`}
-                          className="btn-base btn-sm btn-interact-bg text-[0.5rem]"
-                        >
-                          View full log &rarr;
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    href={`/projects/${item.data.project.id}`}
-                    className="dash-list-item block"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-[0.5rem] shrink-0">📦</span>
-                        <h3 className="font-serif text-sm text-warm-brown truncate">{item.data.project.title}</h3>
-                      </div>
-                      <span className="text-[0.45rem] font-mono text-muted-ink/40 shrink-0 ml-2">
-                        {relativeDate(item.data.createdAt)}
-                      </span>
-                    </div>
-                    {item.data.content && (
-                      <p className="text-[0.55rem] font-mono text-muted-ink/60 mt-0.5 line-clamp-1">{item.data.content}</p>
-                    )}
-                  </Link>
-                )}
-              </motion.div>
-            ))}
+
+        {/* Month header with navigation */}
+        <div className="flex items-center justify-between mb-2">
+          <button onClick={goPrev} className="btn-base btn-sm btn-interact-bg text-[0.45rem] px-1.5">
+            ◀
+          </button>
+          <p className="font-serif text-sm text-warm-brown font-medium">
+            {monthName(navYear, navMonth)}
+          </p>
+          <button onClick={goNext} className="btn-base btn-sm btn-interact-bg text-[0.45rem] px-1.5">
+            ▶
+          </button>
+        </div>
+
+        {/* Calendar grid */}
+        <div className="border border-warm-brown/10">
+          <div className="grid grid-cols-7">
+            {renderCalendar()}
           </div>
-        ) : (
-          <div className="dash-card text-center py-8">
+        </div>
+
+        {/* Empty state */}
+        {Object.keys(monthData).length === 0 && navMonth === today.getMonth() && navYear === today.getFullYear() && (
+          <div className="dash-card text-center py-6 mt-2">
             <p className="font-serif text-base text-warm-brown mb-1">No activity yet</p>
             <Link href="/logs/new" className="btn-base btn-sm btn-interact text-[0.6rem]">
               Start your first log
             </Link>
           </div>
         )}
+
+        {/* Floating popover */}
+        <AnimatePresence>
+          {selectedLog && (
+            <motion.div
+              ref={popoverRef}
+              initial={{ opacity: 0, y: -4, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -4, scale: 0.96 }}
+              transition={{ duration: 0.15, ease: easings.smooth }}
+              className="fixed z-50 w-44 frame-block p-2 shadow-lg"
+              style={{ left: popoverPos.x, top: popoverPos.y }}
+            >
+              <div className="flex items-start justify-between gap-1 mb-1">
+                <p className="font-serif text-[0.6rem] text-warm-brown font-medium leading-tight truncate">
+                  {selectedLog.title}
+                </p>
+                <button
+                  onClick={() => setSelectedLog(null)}
+                  className="text-muted-ink/30 hover:text-muted-ink/60 shrink-0 text-[0.45rem] leading-none"
+                >
+                  ✕
+                </button>
+              </div>
+              <p className="text-[0.4rem] font-mono text-muted-ink/40 mb-1.5">
+                {new Date(selectedLog.createdAt).toLocaleDateString("en-US", {
+                  weekday: "short", month: "short", day: "numeric",
+                })}
+              </p>
+              {selectedLog.skillTags && selectedLog.skillTags.length > 0 && (
+                <div className="flex flex-wrap gap-[2px] mb-1.5">
+                  {selectedLog.skillTags.map((tag) => {
+                    const c = colorForSkill(tag.skill.name)
+                    return (
+                      <span
+                        key={tag.id}
+                        className="px-[3px] py-[1px] text-[0.35rem] font-mono font-medium rounded-sm"
+                        style={{ background: c.bg, color: c.text }}
+                      >
+                        {tag.skill.name}
+                      </span>
+                    )
+                  })}
+                </div>
+              )}
+              {selectedLog.aiSummary && (
+                <p className="text-[0.45rem] font-mono text-muted-ink/70 leading-snug line-clamp-2 mb-1.5">
+                  {parseAiSummary(selectedLog.aiSummary).summary}
+                </p>
+              )}
+              <Link
+                href={`/logs/${selectedLog.id}`}
+                className="inline-block text-[0.45rem] font-mono text-soft-coral hover:underline"
+              >
+                View full log &rarr;
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       <div className="section-divider" />
@@ -340,7 +432,6 @@ function MacSplitCard() {
 
   return (
     <div className="dash-card p-0 overflow-visible relative flex">
-      {/* Left 40% — text info */}
       <div className="w-[40%] flex items-start gap-1.5 p-1.5 shrink-0">
         <Onigiri size={16} emotion="happy" className="shrink-0 mt-0.5" />
         <div className="leading-tight min-w-0">
@@ -368,7 +459,6 @@ function MacSplitCard() {
         </div>
       </div>
 
-      {/* Right 60% — slim menu bar at top */}
       <div className="flex-1 flex flex-col">
         <div className="h-[22px] bg-[#2b2b2b] rounded-tr flex items-center px-2 select-none">
           <div className="flex items-center gap-1.5 text-[0.4rem] font-mono text-white/70">
@@ -415,7 +505,6 @@ function MacSplitCard() {
         </div>
       </div>
 
-      {/* Popover above the menu bar */}
       <AnimatePresence>
         {popover && (
           <motion.div
