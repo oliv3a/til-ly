@@ -69,20 +69,53 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
   const [navMonth, setNavMonth] = useState(today.getMonth())
   const [navYear, setNavYear] = useState(today.getFullYear())
   const [monthData, setMonthData] = useState<Record<number, LogDayItem[]>>(initialData.monthlyLogsByDay || {})
+  const [loadingMonth, setLoadingMonth] = useState(false)
   const [selectedLog, setSelectedLog] = useState<LogDayItem | null>(null)
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 })
   const popoverRef = useRef<HTMLDivElement>(null)
+  const monthCache = useRef<Record<string, Record<number, LogDayItem[]>>>({})
 
   const firstDay = new Date(navYear, navMonth, 1).getDay()
   const daysInMonth = new Date(navYear, navMonth + 1, 0).getDate()
   const prevMonthDays = new Date(navYear, navMonth, 0).getDate()
 
+  // Seed cache with initial month data
+  if (Object.keys(monthCache.current).length === 0 && initialData.monthlyLogsByDay) {
+    const key = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`
+    monthCache.current[key] = initialData.monthlyLogsByDay
+  }
+
   const fetchMonthData = useCallback(async (year: number, month: number) => {
-    const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`
-    const res = await fetch(`/api/dashboard?month=${monthStr}`)
-    if (res.ok) {
-      const json = await res.json()
-      setMonthData(json.monthlyLogsByDay || {})
+    const key = `${year}-${String(month + 1).padStart(2, "0")}`
+
+    if (monthCache.current[key]) {
+      setMonthData(monthCache.current[key])
+      return
+    }
+
+    setLoadingMonth(true)
+    try {
+      const res = await fetch(`/api/dashboard?month=${key}`)
+      if (res.ok) {
+        const json = await res.json()
+        const data = json.monthlyLogsByDay || {}
+        monthCache.current[key] = data
+        setMonthData(data)
+
+        // Pre-fetch adjacent months
+        const prev = month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 }
+        const next = month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 }
+        ;[prev, next].forEach(({ year: y, month: m }) => {
+          const adjKey = `${y}-${String(m + 1).padStart(2, "0")}`
+          if (!monthCache.current[adjKey]) {
+            fetch(`/api/dashboard?month=${adjKey}`).then((r) => {
+              if (r.ok) r.json().then((j) => { monthCache.current[adjKey] = j.monthlyLogsByDay || {} })
+            }).catch(() => {})
+          }
+        })
+      }
+    } finally {
+      setLoadingMonth(false)
     }
   }, [])
 
@@ -265,9 +298,14 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
 
         {/* Calendar grid */}
         <div className="border border-warm-brown/10">
-          <div className="grid grid-cols-7">
+          <div className={`grid grid-cols-7 transition-opacity duration-200 ${loadingMonth ? "opacity-40" : ""}`}>
             {renderCalendar()}
           </div>
+          {loadingMonth && (
+            <div className="flex items-center justify-center py-3">
+              <span className="text-[0.4rem] font-mono text-muted-ink/40 animate-pulse">Loading...</span>
+            </div>
+          )}
         </div>
 
         {/* Empty state */}
