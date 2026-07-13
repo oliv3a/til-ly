@@ -154,14 +154,19 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         </span>
         <div className="mt-px space-y-[1px]">
           {logs.map((log) => {
-            const skillName = log.skillTags?.[0]?.skill?.name
-            const c = skillName ? colorForSkill(skillName) : { bg: "#dae8fc", text: "#2b6cb0", border: "#2b6cb0" }
+            const skillName = log.skillTags?.[0]?.skill?.name || "default"
+            let hash = 0
+            for (let i = 0; i < skillName.length; i++) {
+              hash = skillName.charCodeAt(i) + ((hash << 5) - hash)
+            }
+            const tealShades = ["#7AD8C8", "#4DC4B0", "#2BA88F", "#B8C8B0", "#6BC4B0", "#95D8C8"]
+            const barColor = tealShades[Math.abs(hash) % tealShades.length]
             return (
               <button
                 key={log.id}
                 onClick={(e) => handleBarClick(e, log)}
                 className="block w-full h-[3px] rounded-full cursor-pointer hover:scale-y-[2] hover:opacity-80 transition-all origin-center"
-                style={{ background: c.border }}
+                style={{ background: barColor }}
                 title={log.title}
               />
             )
