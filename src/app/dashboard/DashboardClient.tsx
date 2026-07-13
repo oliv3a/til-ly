@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import Link from "next/link"
-import { motion } from "motion/react"
+import { motion, AnimatePresence } from "motion/react"
+import Onigiri from "@/components/Onigiri"
 import { parseAiSummary } from "@/lib/ai-summary"
 import { staggerContainer, staggerItem } from "@/lib/motion/variants"
 import { easings } from "@/lib/motion/tokens"
@@ -58,35 +59,13 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
   const totalItems = data.goals?.reduce((s: number, g: any) =>
     s + (g.roadmapItems?.length ?? 0), 0) ?? 0
 
-  const chartData = useMemo(() => {
-    const days: { label: string; count: number }[] = []
-    const today = new Date()
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today)
-      d.setDate(d.getDate() - i)
-      const dayStart = new Date(d)
-      dayStart.setHours(0, 0, 0, 0)
-      const dayEnd = new Date(d)
-      dayEnd.setHours(23, 59, 59, 999)
-      const count = data.recentLogs?.filter((log: any) => {
-        const logDate = new Date(log.createdAt)
-        return logDate >= dayStart && logDate <= dayEnd
-      }).length ?? 0
-      const label = d.toLocaleDateString("en-US", { weekday: "short" }).slice(0, 2)
-      days.push({ label, count })
-    }
-    return days
-  }, [data.recentLogs])
-
-  const maxCount = Math.max(...chartData.map((d) => d.count), 1)
-
   const today = new Date()
   const currentMonth = today.getMonth()
   const currentYear = today.getFullYear()
   const firstDay = new Date(currentYear, currentMonth, 1).getDay()
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
   const calendarDays = Array.from({ length: daysInMonth }, (_, i) => i + 1)
-  const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
   const streakDays = useMemo(() => {
     const days = new Set<number>()
@@ -107,60 +86,66 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
       {/* 1. Continue Learning — what should I do now? */}
       <motion.div variants={staggerItem} className="dash-section">
-        <div className="flex items-start gap-6 continue-learning-row">
-          <div className="flex-1">
-            <p className="dash-section-title mb-4">
-              <span className="text-muted-ink/25">01</span> Continue Learning
+        <p className="dash-section-title mb-2">
+          <span className="text-muted-ink/25">01</span> Continue Learning
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          <div className="dash-card p-1.5">
+            <p className="font-serif text-xs text-warm-brown mb-0.5">
+              {data.recommendation
+                ? `Study ${data.recommendation.topic}`
+                : "What did you learn today?"}
             </p>
-            <div className="dash-card">
-              <p className="font-serif text-xl text-warm-brown mb-3">
-                {data.recommendation
-                  ? `Study ${data.recommendation.topic}`
-                  : "What did you learn today?"}
+            {data.recommendation && (
+              <p className="text-[0.5rem] font-mono font-medium text-muted-ink/70 mb-1">
+                {data.recommendation.reason} &middot; Est. {data.recommendation.estimatedTime}
               </p>
-              {data.recommendation && (
-                <p className="text-[0.55rem] font-mono text-muted-ink/50 mb-3">
-                  {data.recommendation.reason} &middot; Est. {data.recommendation.estimatedTime}
-                </p>
-              )}
-              <Link
-                href="/logs/new"
-                className="btn-base btn-coral btn-interact inline-flex items-center gap-1 text-[0.65rem]"
-              >
-                Log progress &rarr;
-              </Link>
-            </div>
+            )}
+            <Link
+              href="/logs/new"
+              className="btn-base btn-sm btn-coral btn-interact inline-flex items-center gap-1 text-[0.45rem] mt-1"
+            >
+              Log progress &rarr;
+            </Link>
           </div>
-          <div className="cal-widget shrink-0">
-            <div className="dash-card">
-              <div className="flex items-center justify-between mb-2">
-                <p className="dash-section-title mb-0">
-                  {today.toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                </p>
-                {data.streakCount > 0 && (
-                  <span className="font-mono text-[0.5rem] text-soft-coral">{data.streakCount}d</span>
-                )}
-                <span className="font-mono text-[0.45rem] text-muted-ink/30">{today.getFullYear()}</span>
-              </div>
-              <div className="cal-grid">
-                {dayNames.map((d) => (
-                  <span key={d} className="cal-day cal-day-header">{d}</span>
-                ))}
-                {Array.from({ length: firstDay }).map((_, i) => (
-                  <span key={`empty-${i}`} className="cal-day" />
-                ))}
-                {calendarDays.map((d) => {
-                  const count = data.logsByDay?.[d] ?? 0
-                  const cls = [
-                    "cal-day",
-                    d === today.getDate() ? "today" : "",
-                    streakDays.has(d) && d !== today.getDate() ? "streak-day" : "",
-                    count > 0 && !streakDays.has(d) ? "has-activity" : "",
-                    count >= 3 ? "many" : "",
-                  ].filter(Boolean).join(" ")
-                  return <span key={d} className={cls}>{d}</span>
-                })}
-              </div>
+          {data.streakCount > 0 && (
+            <div className="dash-card flex items-center justify-center gap-1.5 p-1.5">
+              <span className="text-base">🔥</span>
+              <span className="poster-heading text-sm">{data.streakCount}</span>
+              <span className="text-[0.4rem] font-mono font-medium text-muted-ink/60 uppercase tracking-wider">Day Streak</span>
+            </div>
+          )}
+          <MacSplitCard />
+          <div className="dash-card p-1">
+            <p className="text-[0.45rem] font-mono font-medium text-warm-brown text-center mb-0.5">
+              {today.toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+            </p>
+            <div className="grid grid-cols-7">
+              {dayNames.map((d) => (
+                <span key={d} className="inline-flex items-center justify-center text-[0.4rem] font-mono font-medium text-muted-ink/50" style={{ width: "1.1rem", height: "1.1rem", margin: "0 auto" }}>{d}</span>
+              ))}
+              {Array.from({ length: firstDay }).map((_, i) => (
+                <span key={`empty-${i}`} style={{ width: "1.1rem", height: "1.1rem", margin: "0 auto" }} />
+              ))}
+              {calendarDays.map((d) => {
+                const count = data.logsByDay?.[d] ?? 0
+                const isToday = d === today.getDate()
+                const isStreak = streakDays.has(d) && !isToday
+                const dot = count > 0 ? (count >= 3 ? "●●" : "●") : ""
+                return (
+                  <span
+                    key={d}
+                    className={`font-mono leading-none ${
+                      isToday
+                        ? "bg-soft-coral text-warm-paper rounded-full"
+                        : "text-muted-ink/70"
+                    } ${isStreak ? "text-soft-coral" : ""}`}
+                    style={{ fontSize: "0.4rem", width: "1.1rem", height: "1.1rem", display: "inline-flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}
+                  >
+                    {d}
+                  </span>
+                )
+              })}
             </div>
           </div>
         </div>
@@ -173,23 +158,6 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         <p className="dash-section-title mb-4">
           <span className="text-muted-ink/25">02</span> Activity
         </p>
-        <div className="flex items-end gap-[3px] h-8 mb-4 px-0.5">
-          {chartData.map((d, i) => (
-            <motion.div
-              key={i}
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 1 }}
-              transition={{ duration: 0.3, ease: easings.smooth, delay: i * 0.03 }}
-              className="flex-1 rounded-[1px]"
-              style={{
-                height: `${Math.max((d.count / maxCount) * 100, d.count > 0 ? 20 : 4)}%`,
-                background: "var(--color-warm-brown)",
-                opacity: d.count > 0 ? 0.5 : 0.12,
-                transformOrigin: "bottom",
-              }}
-            />
-          ))}
-        </div>
         {mergedActivity.length > 0 ? (
           <div>
             {mergedActivity.slice(0, 6).map((item) => (
@@ -330,5 +298,144 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           </div>
         </motion.div>
       </motion.div>
+  )
+}
+
+function MacSplitCard() {
+  const [popover, setPopover] = useState(false)
+  const [cursorPhase, setCursorPhase] = useState<"enter" | "click" | "done">("enter")
+  const cycleRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const mountedRef = useRef(true)
+  const now = new Date()
+  const time = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+
+  function runCycle() {
+    if (!mountedRef.current) return
+    setPopover(false)
+    setCursorPhase("enter")
+    cycleRef.current = setTimeout(() => {
+      if (!mountedRef.current) return
+      setCursorPhase("click")
+      cycleRef.current = setTimeout(() => {
+        if (!mountedRef.current) return
+        setCursorPhase("done")
+        setPopover(true)
+        cycleRef.current = setTimeout(() => {
+          if (!mountedRef.current) return
+          runCycle()
+        }, 3500)
+      }, 400)
+    }, 600)
+  }
+
+  useEffect(() => {
+    mountedRef.current = true
+    const start = setTimeout(() => runCycle(), 1500)
+    return () => {
+      mountedRef.current = false
+      if (cycleRef.current) clearTimeout(cycleRef.current)
+      clearTimeout(start)
+    }
+  }, [])
+
+  return (
+    <div className="dash-card p-0 overflow-visible relative flex">
+      {/* Left 40% — text info */}
+      <div className="w-[40%] flex items-start gap-1.5 p-1.5 shrink-0">
+        <Onigiri size={16} emotion="happy" className="shrink-0 mt-0.5" />
+        <div className="leading-tight min-w-0">
+          <div className="flex items-center gap-1 mb-px">
+            <p className="text-[0.45rem] font-serif font-bold text-warm-brown leading-tight">KeizoKode: Always There.</p>
+            <span className="tag text-[0.3rem] py-[1px]">Mac only</span>
+          </div>
+          <p className="text-[0.35rem] font-mono font-bold text-muted-ink/70 leading-tight">
+            One-click logging. No browser needed.
+          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <a
+              href="/downloads/keizokode-macos.zip"
+              className="font-mono font-bold text-[0.35rem] text-warm-paper bg-soft-coral py-[3px] px-2 border border-warm-brown hover:opacity-90 transition-opacity"
+              download
+            >
+              ⬇ Download
+            </a>
+          </div>
+          <div className="text-[0.4rem] font-mono font-bold text-muted-ink/70 mt-1.5 space-y-px leading-snug">
+            <p>1. Download &amp; unzip</p>
+            <p>2. Run <code className="text-muted-ink/50">xattr -c ~/Downloads/KeizoKode.app</code> in Terminal</p>
+            <p>3. Right‑click → Open (first launch)</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right 60% — slim menu bar at top */}
+      <div className="flex-1 flex flex-col">
+        <div className="h-[22px] bg-[#2b2b2b] rounded-tr flex items-center px-2 select-none">
+          <div className="flex items-center gap-1.5 text-[0.4rem] font-mono text-white/70">
+            <span className="text-xs leading-none"></span>
+            <span className="font-semibold text-white/90 text-[0.45rem]">Keizo</span>
+          </div>
+          <div className="ml-auto flex items-center gap-2 text-[0.35rem] font-mono text-white/50">
+            <span className="hidden sm:inline">📶</span>
+            <span className="hidden sm:inline">🔋</span>
+            <span>{time}</span>
+            <span className="relative inline-flex items-center justify-center">
+              <AnimatePresence>
+                {cursorPhase !== "done" && (
+                  <motion.span
+                    className="absolute z-40 text-[0.55rem] pointer-events-none"
+                    initial={{ y: -10, opacity: 0, scale: 0.5 }}
+                    animate={
+                      cursorPhase === "enter"
+                        ? { y: -8, opacity: 1, scale: 1 }
+                        : cursorPhase === "click"
+                        ? { y: -2, opacity: 1, scale: 1 }
+                        : {}
+                    }
+                    exit={{ opacity: 0, scale: 0.5, y: -10 }}
+                    transition={{ duration: 0.3, ease: easings.smooth }}
+                  >
+                    👆
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              <motion.div
+                animate={cursorPhase === "click" ? { scale: [1, 0.8, 1] } : {}}
+                transition={{ duration: 0.25 }}
+              >
+                <Onigiri size={14} emotion="happy" className="shrink-0 animate-keizo-wiggle-slow" style={{ animationDelay: "4s" }} />
+              </motion.div>
+              <motion.span
+                className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-soft-coral rounded-full"
+                animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Popover above the menu bar */}
+      <AnimatePresence>
+        {popover && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-[26px] right-1 z-50 w-32 frame-block p-1.5 shadow-lg"
+          >
+            <div className="flex items-center gap-1 w-full font-mono text-[0.4rem] text-warm-paper bg-soft-coral py-1 px-1.5 border-2 border-warm-brown text-left cursor-default">
+              <span className="text-[0.45rem]">✏️</span>
+              <span>New log</span>
+            </div>
+            <div className="flex items-center gap-1 w-full text-[0.35rem] font-mono text-muted-ink/60 py-1 px-1.5 text-left cursor-default mt-px">
+              <span className="text-[0.45rem]">📊</span>
+              <span>Dashboard →</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }

@@ -32,8 +32,8 @@ export default function AnimatedProgress({
       style={{
         width: "100%",
         height,
-        background: "var(--color-warm-paper)",
-        border: "2px solid var(--color-warm-brown)",
+        background: "color-mix(in srgb, var(--color-warm-brown) 8%, transparent)",
+        borderRadius: "2px",
         overflow: "hidden",
       }}
     >

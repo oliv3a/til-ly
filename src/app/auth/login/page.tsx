@@ -74,6 +74,11 @@ export default function LoginPage() {
                   placeholder="••••••••"
                 />
               </div>
+              <div className="text-right -mt-1">
+                <Link href="/auth/forgot-password" className="text-[0.55rem] font-mono text-muted-ink/50 underline hover:text-soft-coral">
+                  Forgot password?
+                </Link>
+              </div>
 
               {error && (
                 <motion.p

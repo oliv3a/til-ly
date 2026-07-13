@@ -14,38 +14,55 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
 
   if (!user) notFound()
 
-  const [logs, skills, goals, projects] = await Promise.all([
+  const [rawLogs, skills, rawGoals, projects, logCount, projectCount] = await Promise.all([
     prisma.studyLog.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
-      take: 10,
+      take: 3,
       include: {
-        files: true,
         skillTags: { include: { skill: true } },
-        goalLinks: { include: { goal: { select: { id: true, title: true } } } },
       },
     }),
     getComputedSkills(userId),
     prisma.goal.findMany({
-      where: { userId },
-      include: { roadmapItems: { orderBy: { order: "asc" } } },
+      where: { userId, status: "active" },
+      include: { roadmapItems: true },
     }),
     prisma.project.findMany({
       where: { userId, status: { not: "archived" } },
       orderBy: { updatedAt: "desc" },
-      take: 20,
-      include: {
-        _count: { select: { updates: true } },
-        updates: { orderBy: { createdAt: "desc" }, take: 1 },
-      },
+      take: 3,
+      select: { id: true, title: true, status: true, progressPct: true },
     }),
+    prisma.studyLog.count({ where: { userId } }),
+    prisma.project.count({ where: { userId, status: { not: "archived" } } }),
   ])
 
+  const goals = rawGoals.map((g) => ({
+    id: g.id,
+    title: g.title,
+    progressPct: g.roadmapItems.length > 0
+      ? Math.round((g.roadmapItems.filter((r) => r.isComplete).length / g.roadmapItems.length) * 100)
+      : 0,
+  }))
+
+  const logs = rawLogs.map((l) => ({
+    id: l.id,
+    title: l.title,
+    createdAt: l.createdAt,
+    skillTags: l.skillTags,
+  }))
+
   const session = await auth()
+  const isOwner = session?.user !== undefined && (session.user as any).id === userId
+
+  const userStreak = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { streakCount: true },
+  })
 
   return (
-    <div>
-      {/* Profile card */}
+    <div className="max-w-3xl mx-auto px-4">
       <div className="frame-block p-6 mb-6 text-center">
         <h1 className="poster-heading text-2xl">{user.name || "Anonymous"}</h1>
         {user.bio && <p className="text-[0.65rem] font-mono text-muted-ink/60 mt-1">{user.bio}</p>}
@@ -57,12 +74,14 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
       </div>
 
       <PortfolioClient
-        userId={userId}
         logs={JSON.parse(JSON.stringify(logs))}
         goals={JSON.parse(JSON.stringify(goals))}
         skills={JSON.parse(JSON.stringify(skills))}
         initialProjects={JSON.parse(JSON.stringify(projects))}
-        isOwner={session?.user !== undefined && (session.user as any).id === userId}
+        isOwner={isOwner}
+        streakCount={userStreak?.streakCount ?? 0}
+        logCount={logCount}
+        projectCount={projectCount}
       />
     </div>
   )

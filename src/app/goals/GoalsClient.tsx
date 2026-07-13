@@ -207,9 +207,9 @@ export default function GoalsClient({ initialGoals }: Props) {
         <form onSubmit={createGoal} className="frame-block p-4 mb-4 space-y-3">
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Master Python for Data Analysis" required className="field-coral w-full" />
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe what you want to achieve..." rows={3} className="field-coral w-full resize-y" />
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Category (e.g. Data Science)" className="field-coral flex-1" />
-            <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className="field-coral" />
+            <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className="field-coral sm:max-w-[160px]" />
           </div>
           <AnimatedButton type="submit" disabled={submitting} variant="sm-primary" className="w-full">
             {submitting ? "Generating roadmap..." : "Create Goal"}

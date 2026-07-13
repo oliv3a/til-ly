@@ -1,7 +1,10 @@
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import PageShell from "@/components/PageShell"
 import Onigiri from "@/components/Onigiri"
 import AnimatedCard from "@/lib/motion/components/AnimatedCard"
+
+const MacMenuBarDemo = dynamic(() => import("@/components/MacMenuBarDemo"))
 
 export default function LandingPage() {
   return (
@@ -47,17 +50,56 @@ export default function LandingPage() {
         </div>
 
         {/* features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto mt-20 w-full animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mt-20 w-full animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           {[
             { title: "📝 Daily Logs", desc: "Write what you learned. AI summarizes and extracts your skills automatically." },
             { title: "🎯 Smart Goals", desc: "Set learning goals. AI builds a roadmap and tracks your progress." },
             { title: "📂 Portfolio Wall", desc: "Your skills and projects visible to recruiters. Watch yourself grow." },
+            { title: "🖥️ macOS Companion", desc: "One-click logging from your menu bar. Keizo stays there, you keep coding." },
           ].map((card) => (
             <AnimatedCard key={card.title} className="frame-block">
               <h3 className="font-serif text-base text-warm-brown mb-1">{card.title}</h3>
               <p className="text-[0.7rem] font-mono text-muted-ink leading-relaxed">{card.desc}</p>
             </AnimatedCard>
           ))}
+        </div>
+
+        {/* macOS download + demo */}
+        <div className="max-w-3xl mx-auto mt-6 w-full animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+          <div className="frame-block p-4">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="shrink-0 mt-0.5">
+                <Onigiri size={40} emotion="happy" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-serif text-sm text-warm-brown">KeizoKode: Always There.</h3>
+                  <span className="tag text-[0.45rem] py-0.5">Mac only</span>
+                </div>
+                <p className="text-[0.65rem] font-mono font-medium text-muted-ink/80">
+                  One-click logging from your menu bar. Keizo stays in your status bar — no browser needed.
+                </p>
+                <div className="mt-3">
+                  <a
+                    href="/downloads/keizokode-macos.zip"
+                    className="btn-base btn-coral btn-interact text-[0.6rem]"
+                    download
+                  >
+                    ⬇ Download
+                  </a>
+                </div>
+                <div className="text-[0.5rem] font-mono font-bold text-muted-ink/50 mt-2 space-y-0.5">
+                  <p>1. Download &amp; unzip</p>
+                  <p>2. Run <code className="text-muted-ink/60">xattr -c ~/Downloads/KeizoKode.app</code> in Terminal</p>
+                  <p>3. Right‑click → Open (first launch)</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="section-divider" />
+
+            <MacMenuBarDemo />
+          </div>
         </div>
 
         {/* bottom mascot */}

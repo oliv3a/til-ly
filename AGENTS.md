@@ -17,17 +17,17 @@ Build KeizoKode, a study-log platform where CS students upload daily progress, A
 - Prisma 7 requires driver adapter (@prisma/adapter-pg + pg), prisma.config.ts at root, datasource `url` removed from schema
 - Next.js 16 uses proxy.ts instead of middleware.ts; route handler params must be awaited; Turbopack
 
-## Status (as of Jul 7, 2026)
+## Status (as of Jul 11, 2026)
 - Core features complete: auth, study log CRUD, AI summarization, skills engine, goals, portfolio, recruiter search, profile settings
 - Phase 1 complete: error/loading pages, fake delays removed, confirm-password + auto-login
-- Phase 2.1 (streak) — fixed with timezone offset from client
-- Phase 2.2 (XP rollback) — done; StudyLogSkill has `xp Int @default(0)`, old records backfilled via `scripts/backfill-xp.ts`
-- Phase 2.3 (AI error logging) — done; all 3 AI catch blocks log errors
-- Phase 2.4 (portfolio API auth) — done; email hidden for non-owners
-- Phase 2 extra: goal progress recalculates on link/unlink; DELETE returns fresh skills+goals
+- Phase 2 complete: streak, XP rollback, AI error logging, portfolio API auth, goal progress recalculation
 - **Dashboard redesign (Jul 7)** — 3-section narrative layout (Continue Learning → Activity → Progress), removed greeting/skills bar/panel-split, inline log expand, relative dates, compact stat row, `dash-card`/`dash-list-item`/`dash-section` CSS system, section dividers + numbered sections + left borders
 - **Calendar streak widget (Jul 7)** — calendar moved beside Continue Learning as compact widget; `logsByDay` month query on server; soft-coral dots on logged days; streak trail (`streak-day` class, ~22% coral fill) highlighting consecutive days; today as full coral circle; streak count shown in calendar header
-- **macOS menu bar app (Jul 7)** — SwiftPM executable in `macos/KeizoKode/`; NSStatusItem with Core Graphics Onigiri icon; NSPopover + WKWebView pointing to localhost:3000; right-click menu with Reload/Quit; activation policy `.accessory` (no dock icon); builds in ~3s, binary 81KB
+- **macOS menu bar app (Jul 7)** — SwiftPM executable in `macos/KeizoKode/`; NSStatusItem with Core Graphics Onigiri icon; NSPopover + WKWebView pointing to localhost:3000/menu-bar; right-click menu with Reload/Quit; activation policy `.accessory` (no dock icon); builds in ~3s, binary 81KB
+- **Forgot/reset password (Jul 8)** — PasswordResetToken model, Resend email integration, forgot-password + reset-password pages, "Forgot password?" link on login
+- **Menu-bar page (Jul 8)** — `/menu-bar` route with auth-aware client (logged out: greeting + login form; logged in: greeting + quick actions), macOS app URL updated to /menu-bar
+- **Push notifications (Jul 10)** — web-push, VAPID keys, PushSubscription model, subscribe/test APIs, service worker, PushSetup component integrated in DashboardClient
+- **Portfolio redesign — Option C (Jul 11)** — compact summary layout: 4-stat row (streak/skills/logs/projects), skill badges (no XP/pie chart/edit), goal progress bars, top 3 logs (title+date+tags), top 3 projects (title+status+progress), "View all" links (owner-only). `SkillsSection.tsx` deleted. `page.tsx` fetches only 3 logs/3 projects, computes goal progress from roadmap items.
 
 ## Fixed Bugs
 - **DELETE 500 error** — root cause: dev server ran stale Prisma client from before `xp` field was added to schema. `tag.xp` was `undefined`, causing `NaN` in XP calculation → Prisma rejected `NaN` as Int. Fix: restarted dev server + regenerated Prisma client + added `typeof tag.xp === "number" ? tag.xp : 0` guard.

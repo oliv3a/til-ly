@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import type { UserSkillWithSkill } from "@/types"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 import AnimatedCard from "@/lib/motion/components/AnimatedCard"
@@ -19,6 +19,27 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
   const [mergeId, setMergeId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
+
+  const closeMerge = useCallback(() => setMergeId(null), [])
+
+  useEffect(() => {
+    if (!mergeId) return
+    function handle(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        closeMerge()
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeMerge()
+    }
+    document.addEventListener("mousedown", handle)
+    document.addEventListener("keydown", handleKey)
+    return () => {
+      document.removeEventListener("mousedown", handle)
+      document.removeEventListener("keydown", handleKey)
+    }
+  }, [mergeId, closeMerge])
 
   function flash(msg: string) {
     setSuccess(msg)
@@ -73,7 +94,6 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
       )
       setEditingId(null)
       setEditName("")
-      flash("Skill renamed")
     } else {
       const err = await res.json()
       flashError(err.error || "Failed to rename")
@@ -109,7 +129,7 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
           .filter((s) => s.skill.id !== sourceId)
           .map((s) => (s.skill.id === targetId ? data.target : s)),
       )
-      setMergeId(null)
+      closeMerge()
       flash(`Merged into "${data.mergedInto}"`)
     } else {
       const err = await res.json()
@@ -162,7 +182,7 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
 
       <div className="space-y-1">
         {skills.map((s) => (
-          <AnimatedCard key={s.id} className="frame-block p-3 flex items-center gap-3">
+          <AnimatedCard key={s.id} hoverLift={false} className="frame-block p-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
               {editingId === s.skill.id ? (
                 <div className="flex items-center gap-1">
@@ -194,7 +214,7 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
                 variant="sm"
                 className="!px-1.5 !py-0.5 text-[0.5rem]"
               >
-                ✏
+                <span style={{ display: "inline-block", transform: "scaleX(-1)" }}>✏️</span>
               </AnimatedButton>
               <AnimatedButton
                 onClick={() => handleDelete(s.skill.id, s.skill.name)}
@@ -212,7 +232,10 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
                   Merge
                 </AnimatedButton>
                 {mergeId === s.skill.id && (
-                  <div className="absolute right-0 top-full mt-1 z-10 frame-block p-2 min-w-[160px]">
+                  <div
+                    ref={dropdownRef}
+                    className="absolute right-0 top-full mt-0.5 z-50 frame-block p-2 min-w-[160px]"
+                  >
                     <p className="text-[0.55rem] font-mono text-muted-ink/60 mb-1">Merge into...</p>
                     {skills
                       .filter((t) => t.skill.id !== s.skill.id)

@@ -1,17 +1,36 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { processCheckin } from "@/lib/checkin"
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const userId = (session.user as any).id
+  const { searchParams } = req.nextUrl
+  const search = searchParams.get("search")?.trim()
+  const skillId = searchParams.get("skill")
+  const sort = searchParams.get("sort") || "newest"
+
+  const where: any = { userId }
+
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { content: { contains: search, mode: "insensitive" } },
+    ]
+  }
+
+  if (skillId) {
+    where.skillTags = { some: { skillId } }
+  }
+
+  const orderBy = sort === "oldest" ? { createdAt: "asc" as const } : { createdAt: "desc" as const }
 
   const logs = await prisma.studyLog.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
+    where,
+    orderBy,
     include: {
       files: true,
       skillTags: { include: { skill: true } },

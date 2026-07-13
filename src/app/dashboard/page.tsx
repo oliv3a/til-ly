@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { getComputedSkills } from "@/lib/skills"
+import PushSetup from "@/components/PushSetup"
 
 import DashboardClient from "./DashboardClient"
 
@@ -61,7 +62,9 @@ export default async function DashboardPage() {
   })
 
   return (
-    <DashboardClient
+    <>
+      <PushSetup />
+      <DashboardClient
       initialData={{
         userId,
         userName,
@@ -76,5 +79,5 @@ export default async function DashboardPage() {
         logsByDay,
       }}
     />
-  )
+    </>  )
 }

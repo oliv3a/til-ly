@@ -37,7 +37,7 @@ export default function ProjectsClient({ initialProjects }: Props) {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex flex-wrap items-center gap-2 mb-3">
         <span className="text-[0.6rem] font-mono text-muted-ink/60">Filter:</span>
         {["all", "in_progress", "completed", "archived"].map((s) => (
           <AnimatedButton

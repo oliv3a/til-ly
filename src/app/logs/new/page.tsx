@@ -100,6 +100,12 @@ export default function NewLogPage() {
 
   return (
     <div>
+      <Link
+        href="/logs"
+        className="inline-flex items-center gap-1 text-[0.55rem] font-mono text-muted-ink/50 hover:text-warm-brown transition-colors mb-2"
+      >
+        ← Back to logs
+      </Link>
       <h1 className="poster-heading text-2xl mb-6">📝 Log your progress</h1>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div>
