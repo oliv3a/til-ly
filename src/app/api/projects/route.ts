@@ -1,0 +1,59 @@
+import { NextResponse } from "next/server"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+
+export async function GET() {
+  const session = await auth()
+  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const userId = (session.user as any).id
+
+  const projects = await prisma.project.findMany({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+    include: {
+      _count: { select: { updates: true, steps: true } },
+      steps: { orderBy: { order: "asc" } },
+    },
+  })
+
+  return NextResponse.json(projects)
+}
+
+export async function POST(req: Request) {
+  try {
+    const session = await auth()
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const userId = (session.user as any).id
+    const { title, description, techStack, repoUrl, fileUrls, generateSteps } = await req.json()
+
+    if (!title || !title.trim()) {
+      return NextResponse.json({ error: "Title is required" }, { status: 400 })
+    }
+
+    const project = await prisma.project.create({
+      data: {
+        userId,
+        title: title.trim(),
+        description: description || null,
+        techStack: techStack || null,
+        repoUrl: repoUrl || null,
+        files: fileUrls?.length
+          ? { create: fileUrls.map((f: { url: string; type: string; name: string; extractedText?: string | null }) => ({
+              fileUrl: f.url,
+              fileType: f.type,
+              fileName: f.name,
+              extractedText: f.extractedText || null,
+            })) }
+          : undefined,
+      },
+      include: { files: true, steps: true, updates: true },
+    })
+
+    return NextResponse.json(project)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error"
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}

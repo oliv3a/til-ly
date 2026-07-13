@@ -1,0 +1,44 @@
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="4" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    <filter id="roughLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- Outer stamp circle -->
+    <circle cx="110" cy="110" r="95" stroke-width="2.5" filter="url(#rough)" />
+
+    <!-- Inner dotted ring -->
+    <circle cx="110" cy="110" r="84" stroke-width="1" stroke-dasharray="3 5" filter="url(#roughLight)" />
+
+    <!-- Top word: keizo with curly braces -->
+    <text x="110" y="88" text-anchor="middle" font-family="'Courier New', 'IBM Plex Mono', monospace" font-size="26" font-weight="bold" fill="#1a1a1a" stroke="none" filter="url(#roughLight)">keizo</text>
+
+    <!-- Hand-drawn squiggle separator -->
+    <path d="M 60 115 Q 72 110 85 115 T 110 115 T 135 115 T 160 115" stroke-width="1.5" filter="url(#roughLight)" />
+
+    <!-- Tiny diamond dots on sides of separator -->
+    <polygon points="78,112 80,115 78,118 76,115" fill="#1a1a1a" stroke="none" filter="url(#roughLight)" />
+    <polygon points="142,112 144,115 142,118 140,115" fill="#1a1a1a" stroke="none" filter="url(#roughLight)" />
+
+    <!-- Bottom word: kode inside square brackets -->
+    <text x="110" y="148" text-anchor="middle" font-family="'Courier New', 'IBM Plex Mono', monospace" font-size="22" font-weight="bold" fill="#1a1a1a" stroke="none" filter="url(#roughLight)">kode</text>
+
+    <!-- Blinking cursor underscore -->
+    <line x1="102" y1="165" x2="118" y2="165" stroke-width="2.5" filter="url(#roughLight)" />
+
+    <!-- Tiny star/sparkle top-right -->
+    <path d="M 175 38 L 177 32 L 179 38 L 185 40 L 179 42 L 177 48 L 175 42 L 169 40 Z" stroke-width="1.2" filter="url(#roughLight)" />
+
+    <!-- Small filled circle bottom-left -->
+    <circle cx="40" cy="178" r="2" stroke="none" fill="#1a1a1a" filter="url(#roughLight)" />
+
+  </g>
+</svg>

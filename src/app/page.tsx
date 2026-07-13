@@ -1,65 +1,71 @@
-import Image from "next/image";
+import Link from "next/link"
+import PageShell from "@/components/PageShell"
+import Onigiri from "@/components/Onigiri"
+import AnimatedCard from "@/lib/motion/components/AnimatedCard"
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <PageShell showNav={false} showFooter={false}>
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        {/* hero */}
+        <div className="max-w-2xl mx-auto text-center animate-fade-in-up">
+          {/* onigiri hero */}
+          <div className="mb-6 inline-block group">
+            <Onigiri size={140} emotion="happy" accessory="laptop" className="animate-breathe group-hover:animate-keizo-wiggle" />
+          </div>
+
+          {/* badge */}
+          <div className="inline-block px-3 py-1 bg-warm-paper border-2 border-warm-brown text-[0.55rem] font-mono text-muted-ink tracking-widest uppercase mb-5">
+            your coding journal · reimagined
+          </div>
+
+          {/* poster heading */}
+          <h1 className="poster-heading mb-2">
+            Track your coding
+            <br />
+            journey, one log
+            <br />
+            at a time.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <span className="deco-dash deco-dash-wide mx-auto" />
+
+          <p className="font-mono text-sm text-muted-ink leading-relaxed max-w-md mx-auto mb-8">
+            Every day you code is a step forward. KeizoKode keeps track, AI summarizes
+            your work, and your portfolio shows recruiters exactly what you&apos;ve been building.
           </p>
+
+          {/* cta */}
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Link href="/auth/signup" className="btn-base btn-coral btn-interact">
+              Start your journey →
+            </Link>
+            <Link href="/auth/login" className="btn-base btn-outline btn-interact-bg">
+              I already have an account
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* features */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto mt-20 w-full animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+          {[
+            { title: "📝 Daily Logs", desc: "Write what you learned. AI summarizes and extracts your skills automatically." },
+            { title: "🎯 Smart Goals", desc: "Set learning goals. AI builds a roadmap and tracks your progress." },
+            { title: "📂 Portfolio Wall", desc: "Your skills and projects visible to recruiters. Watch yourself grow." },
+          ].map((card) => (
+            <AnimatedCard key={card.title} className="frame-block">
+              <h3 className="font-serif text-base text-warm-brown mb-1">{card.title}</h3>
+              <p className="text-[0.7rem] font-mono text-muted-ink leading-relaxed">{card.desc}</p>
+            </AnimatedCard>
+          ))}
         </div>
-      </main>
-    </div>
-  );
+
+        {/* bottom mascot */}
+        <div className="mt-16 text-center animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
+          <Onigiri size={48} emotion="sleepy" className="animate-breathe" />
+          <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-2">keizo the onigiri · keizokode</p>
+        </div>
+      </div>
+    </PageShell>
+  )
 }
