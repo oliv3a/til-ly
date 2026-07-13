@@ -222,9 +222,9 @@ export default function MacMenuBarDemo() {
                         <div className="pt-1">
                           <motion.div
                             className={`w-full font-mono text-[0.65rem] py-2.5 border-2 text-center rounded-none transition-colors ${
-                              stage === "logging-in" || stage === "logged-in"
+                              (stage as string) === "logging-in" || (stage as string) === "logged-in"
                                 ? "text-warm-paper bg-soft-coral border-warm-brown"
-                                : stage === "typing-pass" || stage === "typing-email"
+                                : (stage as string) === "typing-pass" || (stage as string) === "typing-email"
                                 ? "text-warm-paper bg-soft-coral border-warm-brown cursor-pointer"
                                 : "text-muted-ink/30 bg-cream border-warm-brown/20"
                             }`}

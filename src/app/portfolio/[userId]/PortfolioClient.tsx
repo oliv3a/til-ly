@@ -173,9 +173,9 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
               <div key={g.id} className="frame-block p-2.5">
                 <div className="flex items-center justify-between">
                   <h3 className="font-serif text-sm text-warm-brown truncate">{g.title}</h3>
-                  <span className="text-[0.5rem] font-mono text-muted-ink/50 shrink-0 ml-2">{g.progressPct}%</span>
+                  <span className="text-[0.5rem] font-mono text-muted-ink/50 shrink-0 ml-2">{g.progressPct ?? 0}%</span>
                 </div>
-                    <AnimatedProgress value={g.progressPct} height={4} className="mt-1.5" />
+                    <AnimatedProgress value={g.progressPct ?? 0} height={4} className="mt-1.5" />
               </div>
             ))}
           </div>

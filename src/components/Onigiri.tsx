@@ -8,9 +8,10 @@ interface Props {
   emotion?: Emotion
   accessory?: Accessory
   className?: string
+  style?: React.CSSProperties
 }
 
-export default function Onigiri({ size = 80, emotion = "neutral", accessory = null, className = "" }: Props) {
+export default function Onigiri({ size = 80, emotion = "neutral", accessory = null, className = "", style }: Props) {
   const eyeY = 46
   const blushY = 51
 
@@ -88,7 +89,7 @@ export default function Onigiri({ size = 80, emotion = "neutral", accessory = nu
       width={size}
       height={size}
       className={`inline-block select-none ${className}`}
-      style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.06))" }}
+      style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.06))", ...style }}
     >
       <g>
         {/* shadow */}
