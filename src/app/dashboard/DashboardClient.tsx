@@ -432,28 +432,26 @@ function MacSplitCard() {
 
   return (
     <div className="dash-card p-0 overflow-visible relative flex">
-      <div className="w-[40%] flex items-start gap-1.5 p-1.5 shrink-0">
-        <Onigiri size={16} emotion="happy" className="shrink-0 mt-0.5" />
-        <div className="leading-tight min-w-0">
-          <div className="flex items-center gap-1 mb-px">
-            <p className="text-[0.45rem] font-serif font-bold text-warm-brown leading-tight">KeizoKode: Always There.</p>
-            <span className="tag text-[0.3rem] py-[1px]">Mac only</span>
+      <div className="w-[40%] flex items-center gap-2.5 p-2.5 shrink-0">
+        <Onigiri size={24} emotion="happy" className="shrink-0" />
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 mb-1">
+            <p className="text-[0.65rem] font-serif font-bold text-warm-brown leading-tight">KeizoKode: Always There.</p>
+            <span className="tag text-[0.4rem] py-[1px]">Mac only</span>
           </div>
-          <p className="text-[0.35rem] font-mono font-bold text-muted-ink/70 leading-tight">
+          <p className="text-[0.5rem] font-mono font-bold text-muted-ink/70 leading-snug mb-1.5">
             One-click logging. No browser needed.
           </p>
-          <div className="flex items-center gap-2 mt-1">
-            <a
-              href="/downloads/keizokode-macos.zip"
-              className="font-mono font-bold text-[0.35rem] text-warm-paper bg-soft-coral py-[3px] px-2 border border-warm-brown hover:opacity-90 transition-opacity"
-              download
-            >
-              ⬇ Download
-            </a>
-          </div>
-          <div className="text-[0.4rem] font-mono font-bold text-muted-ink/70 mt-1.5 space-y-px leading-snug">
+          <a
+            href="/downloads/keizokode-macos.zip"
+            className="inline-block font-mono font-bold text-[0.45rem] text-warm-paper bg-soft-coral py-[4px] px-2.5 border border-warm-brown hover:opacity-90 transition-opacity"
+            download
+          >
+            ⬇ Download
+          </a>
+          <div className="text-[0.5rem] font-mono font-bold text-muted-ink/70 mt-1.5 space-y-[2px] leading-snug">
             <p>1. Download &amp; unzip</p>
-            <p>2. Run <code className="text-muted-ink/50">xattr -c ~/Downloads/KeizoKode.app</code> in Terminal</p>
+            <p>2. Run <code className="text-muted-ink/50">xattr -c ~/Downloads/KeizoKode.app</code></p>
             <p>3. Right‑click → Open (first launch)</p>
           </div>
         </div>
