@@ -141,8 +141,6 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     const count = logs.length
     const isToday = isCurrentMonth && day === today.getDate() && navMonth === today.getMonth() && navYear === today.getFullYear()
 
-    const tealShades = ["#7AD8C8", "#4DC4B0", "#2BA88F", "#B8C8B0", "#6BC4B0", "#95D8C8"]
-
     return (
       <div
         key={`${isCurrentMonth ? "c" : "o"}-${day}`}
@@ -162,21 +160,12 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         </span>
         {count > 0 && (
           <div className="mt-px space-y-[1px] px-[2px]">
-            {logs.slice(0, 3).map((log) => {
-              const skillName = log.skillTags?.[0]?.skill?.name || "default"
-              let hash = 0
-              for (let i = 0; i < skillName.length; i++) {
-                hash = skillName.charCodeAt(i) + ((hash << 5) - hash)
-              }
-              const barColor = tealShades[Math.abs(hash) % tealShades.length]
-              return (
-                <div
-                  key={log.id}
-                  className="h-[3px] rounded-full"
-                  style={{ background: barColor }}
-                />
-              )
-            })}
+            {logs.slice(0, 3).map((log) => (
+              <div
+                key={log.id}
+                className="h-[3px] rounded-full bg-[#4DC4B0]"
+              />
+            ))}
             {count > 3 && (
               <span className="text-[0.35rem] font-mono font-bold text-muted-ink/50 leading-none">
                 +{count - 3}
