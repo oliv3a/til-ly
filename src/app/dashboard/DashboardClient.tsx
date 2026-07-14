@@ -70,7 +70,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
   const [navMonth, setNavMonth] = useState(today.getMonth())
   const [navYear, setNavYear] = useState(today.getFullYear())
   const [monthData, setMonthData] = useState<Record<number, LogDayItem[]>>(initialData.initialMonthCache?.[currentMonthKey] || {})
-  const [selectedLog, setSelectedLog] = useState<LogDayItem | null>(null)
+  const [selectedDayLogs, setSelectedDayLogs] = useState<LogDayItem[] | null>(null)
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 })
   const popoverRef = useRef<HTMLDivElement>(null)
   const monthCache = useRef<Record<string, Record<number, LogDayItem[]>>>(initialData.initialMonthCache || {})
@@ -108,23 +108,25 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     }
   }
 
-  function handleBarClick(e: React.MouseEvent, log: LogDayItem) {
+  function handleDayClick(e: React.MouseEvent, day: number) {
+    const logs = monthData[day]
+    if (!logs || logs.length === 0) return
     e.stopPropagation()
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     setPopoverPos({ x: Math.min(rect.left, window.innerWidth - 180), y: rect.bottom + 4 })
-    setSelectedLog(log)
+    setSelectedDayLogs(logs)
   }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        setSelectedLog(null)
+        setSelectedDayLogs(null)
       }
     }
     function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") setSelectedLog(null)
+      if (e.key === "Escape") setSelectedDayLogs(null)
     }
-    if (selectedLog) {
+    if (selectedDayLogs) {
       document.addEventListener("mousedown", handleClick)
       document.addEventListener("keydown", handleEscape)
     }
@@ -132,16 +134,20 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       document.removeEventListener("mousedown", handleClick)
       document.removeEventListener("keydown", handleEscape)
     }
-  }, [selectedLog])
+  }, [selectedDayLogs])
 
   function renderDayCell(day: number, isCurrentMonth: boolean) {
     const logs = isCurrentMonth ? monthData[day] || [] : []
+    const count = logs.length
     const isToday = isCurrentMonth && day === today.getDate() && navMonth === today.getMonth() && navYear === today.getFullYear()
 
     return (
       <div
         key={`${isCurrentMonth ? "c" : "o"}-${day}`}
+        onClick={(e) => isCurrentMonth && handleDayClick(e, day)}
         className={`relative min-h-[3.5rem] p-[2px] border text-left ${
+          isCurrentMonth && count > 0 ? "cursor-pointer hover:bg-warm-brown/[0.03]" : ""
+        } ${
           isToday
             ? "border-soft-coral bg-soft-coral/[0.06]"
             : "border-warm-brown/10"
@@ -152,26 +158,12 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         }`}>
           {day}
         </span>
-        <div className="mt-px space-y-[1px]">
-          {logs.map((log) => {
-            const skillName = log.skillTags?.[0]?.skill?.name || "default"
-            let hash = 0
-            for (let i = 0; i < skillName.length; i++) {
-              hash = skillName.charCodeAt(i) + ((hash << 5) - hash)
-            }
-            const tealShades = ["#7AD8C8", "#4DC4B0", "#2BA88F", "#B8C8B0", "#6BC4B0", "#95D8C8"]
-            const barColor = tealShades[Math.abs(hash) % tealShades.length]
-            return (
-              <button
-                key={log.id}
-                onClick={(e) => handleBarClick(e, log)}
-                className="block w-full h-[3px] rounded-full cursor-pointer hover:scale-y-[2] hover:opacity-80 transition-all origin-center"
-                style={{ background: barColor }}
-                title={log.title}
-              />
-            )
-          })}
-        </div>
+        {count > 0 && (
+          <div className="flex items-center gap-[2px] mt-px px-[2px]">
+            <span className="w-[5px] h-[5px] rounded-full bg-soft-coral shrink-0" />
+            <span className="text-[0.4rem] font-mono text-muted-ink/60 leading-none">{count}</span>
+          </div>
+        )}
       </div>
     )
   }
@@ -283,61 +275,57 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           </div>
         )}
 
-        {/* Floating popover */}
+        {/* Floating popover — list of logs for the clicked day */}
         <AnimatePresence>
-          {selectedLog && (
+          {selectedDayLogs && (
             <motion.div
               ref={popoverRef}
               initial={{ opacity: 0, y: -4, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -4, scale: 0.96 }}
               transition={{ duration: 0.15, ease: easings.smooth }}
-              className="fixed z-50 w-44 frame-block p-2 shadow-lg"
+              className="fixed z-50 w-48 frame-block p-2 shadow-lg max-h-60 overflow-y-auto"
               style={{ left: popoverPos.x, top: popoverPos.y }}
             >
-              <div className="flex items-start justify-between gap-1 mb-1">
-                <p className="font-serif text-[0.6rem] text-warm-brown font-medium leading-tight truncate">
-                  {selectedLog.title}
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[0.45rem] font-mono font-medium text-muted-ink/50">
+                  {selectedDayLogs.length} log{selectedDayLogs.length !== 1 ? "s" : ""}
                 </p>
                 <button
-                  onClick={() => setSelectedLog(null)}
+                  onClick={() => setSelectedDayLogs(null)}
                   className="text-muted-ink/30 hover:text-muted-ink/60 shrink-0 text-[0.45rem] leading-none"
                 >
                   ✕
                 </button>
               </div>
-              <p className="text-[0.4rem] font-mono text-muted-ink/40 mb-1.5">
-                {new Date(selectedLog.createdAt).toLocaleDateString("en-US", {
-                  weekday: "short", month: "short", day: "numeric",
-                })}
-              </p>
-              {selectedLog.skillTags && selectedLog.skillTags.length > 0 && (
-                <div className="flex flex-wrap gap-[2px] mb-1.5">
-                  {selectedLog.skillTags.map((tag) => {
-                    const c = colorForSkill(tag.skill.name)
-                    return (
+              <div className="space-y-1">
+                {selectedDayLogs.map((log) => {
+                  const skillName = log.skillTags?.[0]?.skill?.name
+                  const dotColor = skillName ? colorForSkill(skillName).border : "#7AD8C8"
+                  return (
+                    <Link
+                      key={log.id}
+                      href={`/logs/${log.id}`}
+                      className="flex items-start gap-1.5 p-1 rounded-sm hover:bg-warm-brown/[0.05] transition-colors group"
+                    >
                       <span
-                        key={tag.id}
-                        className="px-[3px] py-[1px] text-[0.35rem] font-mono font-medium rounded-sm"
-                        style={{ background: c.bg, color: c.text }}
-                      >
-                        {tag.skill.name}
-                      </span>
-                    )
-                  })}
-                </div>
-              )}
-              {selectedLog.aiSummary && (
-                <p className="text-[0.45rem] font-mono text-muted-ink/70 leading-snug line-clamp-2 mb-1.5">
-                  {parseAiSummary(selectedLog.aiSummary).summary}
-                </p>
-              )}
-              <Link
-                href={`/logs/${selectedLog.id}`}
-                className="inline-block text-[0.45rem] font-mono text-soft-coral hover:underline"
-              >
-                View full log &rarr;
-              </Link>
+                        className="w-[5px] h-[5px] rounded-full mt-[5px] shrink-0"
+                        style={{ background: dotColor }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[0.55rem] font-mono text-warm-brown truncate group-hover:underline">
+                          {log.title}
+                        </p>
+                        <p className="text-[0.35rem] font-mono text-muted-ink/40">
+                          {new Date(log.createdAt).toLocaleDateString("en-US", {
+                            weekday: "short", month: "short", day: "numeric",
+                          })}
+                        </p>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
