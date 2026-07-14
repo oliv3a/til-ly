@@ -1,7 +1,7 @@
 import Cocoa
 import WebKit
 
-final class StatusBarController: NSObject, WKNavigationDelegate {
+final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private var webView: WKWebView!
@@ -33,6 +33,7 @@ final class StatusBarController: NSObject, WKNavigationDelegate {
 
         webView = WKWebView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight), configuration: config)
         webView.navigationDelegate = self
+        webView.uiDelegate = self
 
         popover = NSPopover()
         popover.contentSize = NSSize(width: popoverWidth, height: popoverHeight)
@@ -196,7 +197,7 @@ final class StatusBarController: NSObject, WKNavigationDelegate {
         return image
     }
 
-    // MARK: - WKNavigationDelegate
+    // MARK: - WKNavigationDelegate / WKUIDelegate
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         // Open link clicks in the default browser, keep initial load in the popover
@@ -206,6 +207,14 @@ final class StatusBarController: NSObject, WKNavigationDelegate {
         } else {
             decisionHandler(.allow)
         }
+    }
+
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        // Handle target="_blank" links — open in system browser
+        if let url = navigationAction.request.url {
+            NSWorkspace.shared.open(url)
+        }
+        return nil
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

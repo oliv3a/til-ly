@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { signIn, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { motion } from "motion/react"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 import AnimatedOnigiri from "@/components/AnimatedOnigiri"
@@ -59,19 +58,23 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
             What do you want to do?
           </p>
 
-          <Link
+          <a
             href="/logs/new"
+            target="_blank"
+            rel="noreferrer"
             className="block w-full font-mono text-[0.7rem] text-warm-paper bg-soft-coral py-3 border-2 border-warm-brown text-center hover:opacity-90 transition-opacity mb-2"
           >
             ✏️  Create a new log
-          </Link>
+          </a>
 
-          <Link
+          <a
             href="/logs"
+            target="_blank"
+            rel="noreferrer"
             className="block text-[0.6rem] font-mono text-muted-ink underline hover:text-soft-coral transition-colors"
           >
             View my study logs →
-          </Link>
+          </a>
 
           <hr className="my-5 border-t border-warm-brown/20" />
 
@@ -139,9 +142,9 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
 
           <p className="text-center text-[0.55rem] font-mono text-muted-ink/50 mt-3">
             Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="text-soft-coral underline hover:text-warm-brown">
+            <a href="/auth/signup" target="_blank" rel="noreferrer" className="text-soft-coral underline hover:text-warm-brown">
               Sign up
-            </Link>
+            </a>
           </p>
         </div>
       </div>
