@@ -153,10 +153,10 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           isToday
             ? "border-soft-coral bg-soft-coral/[0.06]"
             : "border-warm-brown/10"
-        } ${!isCurrentMonth ? "opacity-30" : ""}`}
+        }`}
       >
-        <span className={`inline-flex items-center justify-center w-3.5 h-3.5 text-[0.4rem] font-mono leading-none ${
-          isToday ? "bg-soft-coral text-warm-paper rounded-full" : "text-muted-ink/60"
+        <span className={`inline-flex items-center justify-center w-3.5 h-3.5 text-[0.4rem] font-mono font-bold leading-none ${
+          isToday ? "bg-soft-coral text-warm-paper rounded-full" : isCurrentMonth ? "text-muted-ink/60" : "text-muted-ink/30"
         }`}>
           {day}
         </span>
@@ -178,7 +178,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
               )
             })}
             {count > 3 && (
-              <span className="text-[0.35rem] font-mono text-muted-ink/50 leading-none">
+              <span className="text-[0.35rem] font-mono font-bold text-muted-ink/50 leading-none">
                 +{count - 3}
               </span>
             )}
