@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { signIn, signOut } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { motion } from "motion/react"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 import AnimatedOnigiri from "@/components/AnimatedOnigiri"
@@ -17,12 +16,15 @@ function greeting(): string {
   return "Hey night owl"
 }
 
+function openInBrowser(path: string) {
+  window.open(`http://localhost:3000${path}`, "_blank")
+}
+
 export default function MenuBarClient({ user }: { user: { name: string } | null }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -42,7 +44,7 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
       return
     }
 
-    router.refresh()
+    window.location.reload()
   }
 
   if (user) {
@@ -58,23 +60,19 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
             What do you want to do?
           </p>
 
-          <a
-            href="/logs/new"
-            target="_blank"
-            rel="noreferrer"
+          <button
+            onClick={() => openInBrowser("/logs/new")}
             className="block w-full font-mono text-[0.7rem] text-warm-paper bg-soft-coral py-3 border-2 border-warm-brown text-center hover:opacity-90 transition-opacity mb-2"
           >
             ✏️  Create a new log
-          </a>
+          </button>
 
-          <a
-            href="/logs"
-            target="_blank"
-            rel="noreferrer"
-            className="block text-[0.6rem] font-mono text-muted-ink underline hover:text-soft-coral transition-colors"
+          <button
+            onClick={() => openInBrowser("/logs")}
+            className="block w-full text-[0.6rem] font-mono text-muted-ink underline hover:text-soft-coral transition-colors text-center"
           >
             View my study logs →
-          </a>
+          </button>
 
           <hr className="my-5 border-t border-warm-brown/20" />
 
@@ -142,9 +140,12 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
 
           <p className="text-center text-[0.55rem] font-mono text-muted-ink/50 mt-3">
             Don&apos;t have an account?{" "}
-            <a href="/auth/signup" target="_blank" rel="noreferrer" className="text-soft-coral underline hover:text-warm-brown">
+            <button
+              onClick={() => openInBrowser("/auth/signup")}
+              className="text-soft-coral underline hover:text-warm-brown bg-transparent border-none p-0 cursor-pointer"
+            >
               Sign up
-            </a>
+            </button>
           </p>
         </div>
       </div>
