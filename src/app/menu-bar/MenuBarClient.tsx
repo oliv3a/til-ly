@@ -48,75 +48,86 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
 
   if (user) {
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
-        <div className="w-full max-w-xs text-center">
-          <AnimatedOnigiri size={64} emotion="happy" />
+      <div className="h-[660px] bg-cream flex flex-col justify-center px-8">
+        <div className="w-full max-w-sm mx-auto">
+          <div className="flex items-center gap-4 mb-6">
+            <AnimatedOnigiri size={40} emotion="happy" />
+            <div>
+              <h2 className="font-serif text-base text-warm-brown leading-tight">
+                {greeting()}, {user.name}!
+              </h2>
+              <p className="text-[0.55rem] font-mono text-muted-ink/50">
+                What do you want to do?
+              </p>
+            </div>
+          </div>
 
-          <h2 className="font-serif text-lg text-warm-brown mt-3 mb-1">
-            {greeting()}, {user.name}!
-          </h2>
-          <p className="text-[0.6rem] font-mono text-muted-ink/50 mb-6">
-            What do you want to do?
-          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              href="/logs/new"
+              className="flex items-center justify-center gap-2 font-mono text-[0.65rem] text-warm-paper bg-soft-coral py-3 border-2 border-warm-brown text-center hover:opacity-90 transition-opacity"
+            >
+              <span className="text-sm">✏️</span>
+              <span>New log</span>
+            </Link>
+            <Link
+              href="/logs"
+              className="flex items-center justify-center gap-2 font-mono text-[0.65rem] text-warm-paper bg-soft-coral py-3 border-2 border-warm-brown text-center hover:opacity-90 transition-opacity"
+            >
+              <span className="text-sm">📊</span>
+              <span>My logs</span>
+            </Link>
+          </div>
 
-          <Link
-            href="/logs/new"
-            className="block w-full font-mono text-[0.7rem] text-warm-paper bg-soft-coral py-3 border-2 border-warm-brown text-center hover:opacity-90 transition-opacity mb-2"
-          >
-            ✏️  Create a new log
-          </Link>
-
-          <Link
-            href="/logs"
-            className="block text-[0.6rem] font-mono text-muted-ink underline hover:text-soft-coral transition-colors"
-          >
-            View my study logs →
-          </Link>
-
-          <hr className="my-5 border-t border-warm-brown/20" />
-
-          <button
-            onClick={() => signOut({ callbackUrl: "/menu-bar" })}
-            className="text-[0.55rem] font-mono text-muted-ink/40 hover:text-soft-coral transition-colors"
-          >
-            Sign out
-          </button>
+          <div className="mt-6 pt-4 border-t border-warm-brown/15 flex justify-between items-center">
+            <span className="text-[0.45rem] font-mono text-muted-ink/30">
+              <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full mr-1" />
+              Logged in
+            </span>
+            <button
+              onClick={() => signOut({ callbackUrl: "/menu-bar" })}
+              className="text-[0.55rem] font-mono text-muted-ink/40 hover:text-soft-coral transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4">
-      <div className="w-full max-w-xs animate-fade-in-up">
-        <div className="text-center mb-4">
-          <AnimatedOnigiri size={64} emotion="neutral" />
+    <div className="h-[660px] bg-cream flex flex-col justify-center px-8">
+      <div className="w-full max-w-sm mx-auto">
+        <div className="flex items-center gap-4 mb-6">
+          <AnimatedOnigiri size={40} emotion="neutral" />
+          <div>
+            <h2 className="font-serif text-base text-warm-brown leading-tight">{greeting()}!</h2>
+            <p className="text-[0.55rem] font-mono text-muted-ink/50">Log in to continue</p>
+          </div>
         </div>
 
         <div className="frame-block">
-          <h2 className="font-serif text-lg text-warm-brown text-center mb-1">{greeting()}!</h2>
-          <p className="text-[0.6rem] font-mono text-muted-ink/50 text-center mb-4">Log in to continue</p>
-
-          <form id="menu-bar-login" onSubmit={handleSubmit} className="space-y-2">
+          <form id="menu-bar-login" onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-[0.6rem] font-mono text-muted-ink mb-0.5">Email</label>
+              <label className="block text-[0.55rem] font-mono text-muted-ink mb-0.5">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="field-coral text-[0.7rem]"
+                className="field-coral text-[0.65rem] w-full"
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label className="block text-[0.6rem] font-mono text-muted-ink mb-0.5">Password</label>
+              <label className="block text-[0.55rem] font-mono text-muted-ink mb-0.5">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="field-coral text-[0.7rem]"
+                className="field-coral text-[0.65rem] w-full"
                 placeholder="••••••••"
               />
             </div>
@@ -126,18 +137,18 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
                 initial="hidden"
                 animate="visible"
                 variants={fadeIn}
-                className="text-[0.6rem] font-mono text-warm-brown bg-peach/50 px-2 py-1 border-2 border-warm-brown"
+                className="text-[0.55rem] font-mono text-warm-brown bg-peach/50 px-2 py-1 border-2 border-warm-brown"
               >
                 {error}
               </motion.p>
             )}
 
-            <AnimatedButton type="submit" variant="coral" className="w-full justify-center !text-[0.65rem]" disabled={loading}>
+            <AnimatedButton type="submit" variant="coral" className="w-full justify-center !text-[0.6rem]" disabled={loading}>
               {loading ? "Logging in..." : "Log in"}
             </AnimatedButton>
           </form>
 
-          <p className="text-center text-[0.55rem] font-mono text-muted-ink/50 mt-3">
+          <p className="text-center text-[0.5rem] font-mono text-muted-ink/50 mt-4">
             Don&apos;t have an account?{" "}
             <Link href="/auth/signup" className="text-soft-coral underline hover:text-warm-brown">
               Sign up
