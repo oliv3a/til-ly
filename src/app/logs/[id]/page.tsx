@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
+import ContentEditor from "./ContentEditor"
 import RoadmapLinkEditor from "./RoadmapLinkEditor"
 import AiSummaryEditor from "./AiSummaryEditor"
 import SkillsEditor from "./SkillsEditor"
@@ -44,11 +45,7 @@ export default async function LogDetailPage({ params }: { params: Promise<{ id: 
           {new Date(log.createdAt).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
         </p>
 
-        {log.content && (
-          <div className="frame-block p-4 mb-4">
-            <p className="text-[0.7rem] font-mono text-muted-ink/80 whitespace-pre-wrap leading-relaxed">{log.content}</p>
-          </div>
-        )}
+        <ContentEditor logId={id} initialContent={log.content} />
 
         <AiSummaryEditor logId={id} initialSummary={log.aiSummary} />
 
