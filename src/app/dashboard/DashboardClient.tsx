@@ -141,11 +141,13 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     const count = logs.length
     const isToday = isCurrentMonth && day === today.getDate() && navMonth === today.getMonth() && navYear === today.getFullYear()
 
+    const tealShades = ["#7AD8C8", "#4DC4B0", "#2BA88F", "#B8C8B0", "#6BC4B0", "#95D8C8"]
+
     return (
       <div
         key={`${isCurrentMonth ? "c" : "o"}-${day}`}
         onClick={(e) => isCurrentMonth && handleDayClick(e, day)}
-        className={`relative min-h-[3.5rem] p-[2px] border text-left ${
+        className={`relative min-h-[4rem] p-[2px] border text-left ${
           isCurrentMonth && count > 0 ? "cursor-pointer hover:bg-warm-brown/[0.03]" : ""
         } ${
           isToday
@@ -159,9 +161,27 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           {day}
         </span>
         {count > 0 && (
-          <div className="flex items-center gap-[2px] mt-px px-[2px]">
-            <span className="w-[5px] h-[5px] rounded-full bg-soft-coral shrink-0" />
-            <span className="text-[0.4rem] font-mono text-muted-ink/60 leading-none">{count}</span>
+          <div className="mt-px space-y-[1px] px-[2px]">
+            {logs.slice(0, 3).map((log) => {
+              const skillName = log.skillTags?.[0]?.skill?.name || "default"
+              let hash = 0
+              for (let i = 0; i < skillName.length; i++) {
+                hash = skillName.charCodeAt(i) + ((hash << 5) - hash)
+              }
+              const barColor = tealShades[Math.abs(hash) % tealShades.length]
+              return (
+                <div
+                  key={log.id}
+                  className="h-[3px] rounded-full"
+                  style={{ background: barColor }}
+                />
+              )
+            })}
+            {count > 3 && (
+              <span className="text-[0.35rem] font-mono text-muted-ink/50 leading-none">
+                +{count - 3}
+              </span>
+            )}
           </div>
         )}
       </div>
