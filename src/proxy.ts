@@ -9,7 +9,7 @@ export async function proxy(req: Request) {
 
   const { pathname } = new URL(req.url)
 
-  const publicPaths = ["/auth/login", "/auth/signup", "/", "/api/auth"]
+  const publicPaths = ["/auth/login", "/auth/signup", "/", "/api/auth", "/menu-bar"]
   const isPublic = publicPaths.some((p) => pathname.startsWith(p))
 
   if (!session && !isPublic) {
