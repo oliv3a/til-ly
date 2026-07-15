@@ -4,6 +4,7 @@ import { Inter, IBM_Plex_Mono } from "next/font/google"
 import { auth } from "@/lib/auth"
 import SessionProvider from "@/components/SessionProvider"
 import DashboardShell from "@/components/DashboardShell"
+import { Toaster } from "sonner"
 import "./globals.css"
 
 const satoshi = localFont({
@@ -41,6 +42,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           ) : (
             children
           )}
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background: "#F0F0F0",
+                border: "2px solid #1C1C1C",
+                borderRadius: 0,
+                fontFamily: '"IBM Plex Mono", monospace',
+                fontSize: "0.75rem",
+                color: "#1C1C1C",
+              },
+            }}
+          />
         </SessionProvider>
       </body>
     </html>

@@ -7,7 +7,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ userId
   try {
     const { userId } = await params
     const session = await auth()
-    if (!session?.user || (session.user as any).id !== userId) {
+    if (!session?.user || session.user.id !== userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface Props {
   activeTab?: string
@@ -55,12 +56,12 @@ export default function Toolbar({ activeTab, onTabChange, tabs }: Props) {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <a
+        <Link
           href="/logs/new"
           className="btn-base btn-sm-primary btn-interact text-[0.6rem] !px-3 !py-1"
         >
           + Log
-        </a>
+        </Link>
       </div>
     </div>
   )

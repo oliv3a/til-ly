@@ -3,21 +3,26 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 export async function GET() {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  try {
+    const session = await auth()
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const userId = (session.user as any).id
+    const userId = session.user.id
 
-  const projects = await prisma.project.findMany({
-    where: { userId },
-    orderBy: { updatedAt: "desc" },
-    include: {
-      _count: { select: { updates: true, steps: true } },
-      steps: { orderBy: { order: "asc" } },
-    },
-  })
+    const projects = await prisma.project.findMany({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+      include: {
+        _count: { select: { updates: true, steps: true } },
+        steps: { orderBy: { order: "asc" } },
+      },
+    })
 
-  return NextResponse.json(projects)
+    return NextResponse.json(projects)
+  } catch (err) {
+    console.error("Projects GET failed:", err)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+  }
 }
 
 export async function POST(req: Request) {
@@ -25,11 +30,14 @@ export async function POST(req: Request) {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const userId = (session.user as any).id
-    const { title, description, techStack, repoUrl, fileUrls, generateSteps } = await req.json()
+    const userId = session.user.id
+    const { title, description, techStack, repoUrl, fileUrls } = await req.json()
 
     if (!title || !title.trim()) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 })
+    }
+    if (title.length > 200) {
+      return NextResponse.json({ error: "Title must be 200 characters or less" }, { status: 400 })
     }
 
     const project = await prisma.project.create({

@@ -1,44 +1,50 @@
 import { NextRequest, NextResponse } from "next/server"
+import type { Prisma } from "@prisma/client"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { processCheckin } from "@/lib/checkin"
 
 export async function GET(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  try {
+    const session = await auth()
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const userId = (session.user as any).id
-  const { searchParams } = req.nextUrl
-  const search = searchParams.get("search")?.trim()
-  const skillId = searchParams.get("skill")
-  const sort = searchParams.get("sort") || "newest"
+    const userId = session.user.id
+    const { searchParams } = req.nextUrl
+    const search = searchParams.get("search")?.trim()
+    const skillId = searchParams.get("skill")
+    const sort = searchParams.get("sort") || "newest"
 
-  const where: any = { userId }
+    const where: Prisma.StudyLogWhereInput = { userId }
 
-  if (search) {
-    where.OR = [
-      { title: { contains: search, mode: "insensitive" } },
-      { content: { contains: search, mode: "insensitive" } },
-    ]
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { content: { contains: search, mode: "insensitive" } },
+      ]
+    }
+
+    if (skillId) {
+      where.skillTags = { some: { skillId } }
+    }
+
+    const orderBy = sort === "oldest" ? { createdAt: "asc" as const } : { createdAt: "desc" as const }
+
+    const logs = await prisma.studyLog.findMany({
+      where,
+      orderBy,
+      include: {
+        files: true,
+        skillTags: { include: { skill: true } },
+        goalLinks: { include: { goal: { select: { id: true, title: true } } } },
+      },
+    })
+
+    return NextResponse.json(logs)
+  } catch (err) {
+    console.error("Logs GET failed:", err)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
-
-  if (skillId) {
-    where.skillTags = { some: { skillId } }
-  }
-
-  const orderBy = sort === "oldest" ? { createdAt: "asc" as const } : { createdAt: "desc" as const }
-
-  const logs = await prisma.studyLog.findMany({
-    where,
-    orderBy,
-    include: {
-      files: true,
-      skillTags: { include: { skill: true } },
-      goalLinks: { include: { goal: { select: { id: true, title: true } } } },
-    },
-  })
-
-  return NextResponse.json(logs)
 }
 
 export async function POST(req: Request) {
@@ -46,11 +52,14 @@ export async function POST(req: Request) {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const { title, content, fileUrls, roadmapItemIds, timezoneOffset } = await req.json()
 
-    if (!title) {
+    if (!title || (typeof title === "string" && title.trim().length < 1)) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 })
+    }
+    if (typeof title === "string" && title.length > 200) {
+      return NextResponse.json({ error: "Title must be 200 characters or less" }, { status: 400 })
     }
 
     const log = await prisma.studyLog.create({

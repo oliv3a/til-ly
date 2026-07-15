@@ -2,18 +2,17 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
+import { toast } from "sonner"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 
 export default function ProfileClient() {
-  const { data: session, update } = useSession()
+  const { update } = useSession()
   const [name, setName] = useState("")
   const [bio, setBio] = useState("")
   const [school, setSchool] = useState("")
   const [year, setYear] = useState("")
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -38,8 +37,6 @@ export default function ProfileClient() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    setError(null)
-    setSuccess(false)
 
     try {
       const res = await fetch("/api/profile", {
@@ -54,11 +51,9 @@ export default function ProfileClient() {
       }
 
       await update()
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      toast.success("Profile saved!")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong")
-      setTimeout(() => setError(null), 5000)
+      toast.error(err instanceof Error ? err.message : "Something went wrong")
     } finally {
       setSaving(false)
     }
@@ -82,23 +77,14 @@ export default function ProfileClient() {
 
   return (
     <form onSubmit={handleSubmit} className="frame-block space-y-3">
-      {error && (
-        <div className="frame-block p-3 text-[0.65rem] font-mono text-warm-brown">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="frame-block p-3 text-[0.65rem] font-mono text-warm-brown">
-          Profile saved!
-        </div>
-      )}
 
       <div>
-        <label className="text-[0.65rem] font-mono text-warm-brown block mb-0.5">Name</label>
+        <label className="text-[0.65rem] font-mono text-warm-brown block mb-0.5">Name *</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          maxLength={100}
           className="field-coral w-full"
         />
       </div>
@@ -108,6 +94,7 @@ export default function ProfileClient() {
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           rows={3}
+          maxLength={500}
           placeholder="A short bio for your portfolio..."
           className="field-coral w-full resize-y"
         />
@@ -119,6 +106,7 @@ export default function ProfileClient() {
             type="text"
             value={school}
             onChange={(e) => setSchool(e.target.value)}
+            maxLength={100}
             placeholder="University of ..."
             className="field-coral w-full"
           />
@@ -129,6 +117,7 @@ export default function ProfileClient() {
             type="text"
             value={year}
             onChange={(e) => setYear(e.target.value)}
+            maxLength={50}
             placeholder="Sophomore"
             className="field-coral w-full"
           />
@@ -136,7 +125,7 @@ export default function ProfileClient() {
       </div>
       <AnimatedButton
         type="submit"
-        disabled={saving}
+        disabled={saving || !name.trim()}
         variant="coral"
         className="w-full"
       >

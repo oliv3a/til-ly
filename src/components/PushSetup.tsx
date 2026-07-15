@@ -15,27 +15,27 @@ export default function PushSetup() {
     }
   }, [])
 
-  async function subscribe() {
-    try {
-      const reg = await navigator.serviceWorker.register("/service-worker.js")
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-        ) as BufferSource,
-      })
-
-      await fetch("/api/push/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sub.toJSON()),
-      })
-    } catch {
-      // user declined or blocked
-    }
-  }
-
   return null
+}
+
+async function subscribe() {
+  try {
+    const reg = await navigator.serviceWorker.register("/service-worker.js")
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      ) as BufferSource,
+    })
+
+    await fetch("/api/push/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sub.toJSON()),
+    })
+  } catch {
+    // user declined or blocked
+  }
 }
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {

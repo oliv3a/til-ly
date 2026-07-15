@@ -5,7 +5,7 @@ import StudentsClient from "./StudentsClient"
 export default async function RecruitStudentsPage() {
   const session = await auth()
   if (!session?.user) redirect("/auth/login")
-  if ((session.user as any).role !== "recruiter") redirect("/dashboard")
+  if (session.user.role !== "recruiter") redirect("/dashboard")
 
   return (
     <div>

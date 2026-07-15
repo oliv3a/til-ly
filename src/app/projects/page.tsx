@@ -7,7 +7,7 @@ export default async function ProjectsPage() {
   const session = await auth()
   if (!session?.user) redirect("/auth/login")
 
-  const userId = (session.user as any).id
+  const userId = session.user.id
   const projects = await prisma.project.findMany({
     where: { userId },
     orderBy: { updatedAt: "desc" },

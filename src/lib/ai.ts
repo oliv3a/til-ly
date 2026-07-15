@@ -264,7 +264,6 @@ export async function reviewProjectUpdate(
   project: { title: string; description?: string; techStack?: string; files?: { name: string; content: string }[] },
   updateContent: string,
   pastFeedback?: string,
-  existingSteps?: string[],
 ): Promise<ProjectReviewResult> {
   const fileBlock = project.files?.length
     ? `\nFiles uploaded:\n${project.files.map((f) => `--- ${f.name} ---\n${f.content}`).join("\n\n")}`

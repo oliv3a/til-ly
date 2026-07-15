@@ -93,6 +93,45 @@ export interface ProjectStepType {
   isComplete: boolean
 }
 
+export interface DashboardGoal {
+  id: string
+  title: string
+  roadmapItems?: { isComplete: boolean; order: number; _count?: { studyLogLinks: number } }[]
+}
+
+export interface DashboardSkill {
+  id: string
+  logCount: number
+  skill: { id: string; name: string; category: string | null }
+}
+
+export interface PortfolioLog {
+  id: string
+  title: string
+  createdAt: string
+  aiSummary: string | null
+  skillTags: { id: string; xp: number; skill: { id: string; name: string } }[]
+}
+
+export interface PortfolioGoal {
+  id: string
+  title: string
+  roadmapItems?: { isComplete: boolean; _count?: { studyLogLinks: number } }[]
+}
+
+export interface PortfolioSkill {
+  id: string
+  logCount: number
+  skill: { id: string; name: string }
+}
+
+export interface PortfolioProject {
+  id: string
+  title: string
+  status: string
+  progressPct: number
+}
+
 export interface ProjectUpdateType {
   id: string
   content: string | null

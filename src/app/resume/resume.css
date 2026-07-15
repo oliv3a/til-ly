@@ -1,0 +1,75 @@
+@media print {
+  @page {
+    margin: 0.75in;
+  }
+
+  body {
+    font-family: Georgia, "Times New Roman", serif !important;
+    font-size: 11pt !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .resume-document {
+    border: none !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .resume-document h1 {
+    font-size: 18pt !important;
+    color: #000 !important;
+  }
+
+  .resume-document p,
+  .resume-document li {
+    font-family: Georgia, "Times New Roman", serif !important;
+    color: #000 !important;
+  }
+
+  .resume-document a {
+    color: #000 !important;
+    text-decoration: none !important;
+  }
+
+  .section-divider {
+    margin: 0.5rem 0 !important;
+  }
+
+  .frame-block,
+  .dash-section,
+  .dash-card {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .poster-heading,
+  .dash-section-title,
+  .dash-stat-value,
+  .dash-stat-label {
+    color: #000 !important;
+  }
+
+  /* Keep section breaks clean */
+  .resume-document > div {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Hide scrollbars */
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Force white backgrounds */
+  body * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

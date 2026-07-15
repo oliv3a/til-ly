@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import type { ProjectType, ProjectStepType, ProjectUpdateType } from "@/types"
+import { toast } from "sonner"
+import type { ProjectType } from "@/types"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 import AnimatedCard from "@/lib/motion/components/AnimatedCard"
 import AnimatedProgress from "@/lib/motion/components/AnimatedProgress"
@@ -29,7 +30,6 @@ export default function ProjectDetailClient({ initialProject }: Props) {
   const [deletingUpdateId, setDeletingUpdateId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
-  const [generateMessage, setGenerateMessage] = useState<string | null>(null)
   const [level, setLevel] = useState<"beginner" | "intermediate" | "advanced">("intermediate")
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [editingStepId, setEditingStepId] = useState<string | null>(null)
@@ -38,10 +38,6 @@ export default function ProjectDetailClient({ initialProject }: Props) {
   const [notesOpen, setNotesOpen] = useState(!!project.notes)
   const [notesDraft, setNotesDraft] = useState(project.notes || "")
   const [notesSaving, setNotesSaving] = useState(false)
-
-  function updateProject(patch: Partial<ProjectType>) {
-    setProject((prev) => ({ ...prev, ...patch }))
-  }
 
   async function toggleStep(stepId: string) {
     const step = project.steps.find((s) => s.id === stepId)
@@ -150,7 +146,6 @@ export default function ProjectDetailClient({ initialProject }: Props) {
 
   async function generateSteps() {
     setGenerating(true)
-    setGenerateMessage(null)
     try {
       const res = await fetch(`/api/projects/${project.id}/steps/generate`, {
         method: "POST",
@@ -161,15 +156,15 @@ export default function ProjectDetailClient({ initialProject }: Props) {
       if (res.ok) {
         setProject((prev) => ({ ...prev, steps: data.steps, progressPct: data.progressPct }))
         if (data.created?.length > 0) {
-          setGenerateMessage(`✨ Added: ${data.created.join(", ")}`)
+          toast.success(`Added: ${data.created.join(", ")}`)
         } else {
-          setGenerateMessage("No new steps needed — nice!")
+          toast.success("No new steps needed — nice!")
         }
       } else {
-        setGenerateMessage(data.error || "Failed to generate")
+        toast.error(data.error || "Failed to generate")
       }
     } catch {
-      setGenerateMessage("Something went wrong")
+      toast.error("Something went wrong")
     }
     setGenerating(false)
   }
@@ -408,13 +403,6 @@ export default function ProjectDetailClient({ initialProject }: Props) {
             </div>
           </div>
 
-          {generateMessage && (
-            <div className="frame-block p-2 text-[0.55rem] font-mono text-warm-brown mb-2 flex items-center justify-between">
-              <span>{generateMessage}</span>
-              <AnimatedButton onClick={() => setGenerateMessage(null)} variant="sm" className="!px-1 !py-0 text-[0.5rem]">✕</AnimatedButton>
-            </div>
-          )}
-
           {addingStep && (
             <div className="flex gap-1 mb-2">
               <input
@@ -431,7 +419,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
           )}
 
           {project.steps.length === 0 && (
-            <p className="text-[0.6rem] font-mono text-muted-ink/40">No steps yet. Add one or click "Gen AI" to generate from your updates.</p>
+            <p className="text-[0.6rem] font-mono text-muted-ink/40">No steps yet. Add one or click &ldquo;Gen AI&rdquo; to generate from your updates.</p>
           )}
 
           <div className="space-y-0.5">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import type { UserSkillWithSkill } from "@/types"
+import { toast } from "sonner"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 import AnimatedCard from "@/lib/motion/components/AnimatedCard"
 
@@ -17,8 +18,6 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
   const [mergeId, setMergeId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
 
   const closeMerge = useCallback(() => setMergeId(null), [])
@@ -41,21 +40,10 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
     }
   }, [mergeId, closeMerge])
 
-  function flash(msg: string) {
-    setSuccess(msg)
-    setTimeout(() => setSuccess(null), 3000)
-  }
-
-  function flashError(msg: string) {
-    setError(msg)
-    setTimeout(() => setError(null), 5000)
-  }
-
   async function createSkill(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
     setSubmitting(true)
-    setError(null)
 
     const res = await fetch("/api/skills", {
       method: "POST",
@@ -68,17 +56,16 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
       setSkills((prev) => [{ id: "", logCount: 0, skill }, ...prev])
       setShowForm(false)
       setName("")
-      flash(`"${skill.name}" created`)
+      toast.success(`"${skill.name}" created`)
     } else {
       const err = await res.json()
-      flashError(err.error || "Failed to create skill")
+      toast.error(err.error || "Failed to create skill")
     }
     setSubmitting(false)
   }
 
   async function handleRename(skillId: string) {
     if (!editName.trim()) return
-    setError(null)
 
     const res = await fetch(`/api/skills/${skillId}`, {
       method: "PATCH",
@@ -96,27 +83,24 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
       setEditName("")
     } else {
       const err = await res.json()
-      flashError(err.error || "Failed to rename")
+      toast.error(err.error || "Failed to rename")
     }
   }
 
   async function handleDelete(skillId: string, skillName: string) {
     if (!confirm(`Delete "${skillName}"? It will be removed from all logs.`)) return
-    setError(null)
 
     const res = await fetch(`/api/skills/${skillId}`, { method: "DELETE" })
     if (res.ok) {
       setSkills((prev) => prev.filter((s) => s.skill.id !== skillId))
-      flash(`"${skillName}" deleted`)
+      toast.success(`"${skillName}" deleted`)
     } else {
       const err = await res.json()
-      flashError(err.error || "Failed to delete")
+      toast.error(err.error || "Failed to delete")
     }
   }
 
   async function handleMerge(sourceId: string, targetId: string) {
-    setError(null)
-
     const res = await fetch(`/api/skills/${sourceId}/merge`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -130,10 +114,10 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
           .map((s) => (s.skill.id === targetId ? data.target : s)),
       )
       closeMerge()
-      flash(`Merged into "${data.mergedInto}"`)
+      toast.success(`Merged into "${data.mergedInto}"`)
     } else {
       const err = await res.json()
-      flashError(err.error || "Failed to merge")
+      toast.error(err.error || "Failed to merge")
     }
   }
 
@@ -145,17 +129,6 @@ export default function ManageSkillsClient({ initialSkills }: Props) {
           {showForm ? "Cancel" : "+ New Skill"}
         </AnimatedButton>
       </div>
-
-      {error && (
-        <div className="frame-block p-3 text-[0.65rem] font-mono text-warm-brown mb-3">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="frame-block p-3 text-[0.65rem] font-mono text-muted-teal mb-3">
-          {success}
-        </div>
-      )}
 
       {showForm && (
         <form onSubmit={createSkill} className="frame-block p-3 mb-3 space-y-2">

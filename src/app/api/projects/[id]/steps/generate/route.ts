@@ -13,7 +13,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       where: { id },
       include: { steps: { orderBy: { order: "asc" } } },
     })
-    if (!project || project.userId !== (session.user as any).id) {
+    if (!project || project.userId !== session.user.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 

@@ -6,7 +6,7 @@ import { getComputedSkills } from "@/lib/skills"
 export async function GET(req: Request, { params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params
   const session = await auth()
-  const isOwner = session?.user && (session.user as any).id === userId
+  const isOwner = session?.user && session.user.id === userId
 
   const url = new URL(req.url)
   const offset = parseInt(url.searchParams.get("offset") || "0")

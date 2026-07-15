@@ -56,7 +56,7 @@ export default async function RecruitStudentPage({ params }: { params: Promise<{
         <div className="mb-6">
           <div className="section-header">⚡ Skills</div>
           <div className="flex flex-wrap gap-1 mt-2">
-            {skills.map((us: any) => (
+            {skills.map((us: { id: string; logCount: number; skill: { name: string; category: string | null } }) => (
               <div key={us.id} className="tag flex items-center gap-1">
                 {us.skill.name}
                 <span className="text-muted-ink/50">{us.logCount} logs</span>
@@ -71,10 +71,10 @@ export default async function RecruitStudentPage({ params }: { params: Promise<{
         <div className="mb-6">
           <div className="section-header">🎯 Goals</div>
           <div className="space-y-2 mt-2">
-            {goals.map((g: any) => {
+            {goals.map((g: { id: string; title: string; roadmapItems?: { isComplete: boolean; _count?: { studyLogLinks: number } }[] }) => {
               const total = g.roadmapItems?.length ?? 0
-              const ticked = g.roadmapItems?.filter((r: any) => r.isComplete).length ?? 0
-              const logTotal = g.roadmapItems?.reduce((s: number, r: any) => s + (r._count?.studyLogLinks ?? 0), 0) ?? 0
+              const ticked = g.roadmapItems?.filter((r) => r.isComplete).length ?? 0
+              const logTotal = g.roadmapItems?.reduce((s: number, r) => s + (r._count?.studyLogLinks ?? 0), 0) ?? 0
               return (
                 <AnimatedCard key={g.id} className="frame-block p-3">
                   <div className="flex items-center justify-between">

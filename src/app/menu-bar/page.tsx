@@ -4,5 +4,5 @@ import MenuBarClient from "./MenuBarClient"
 export default async function MenuBarPage() {
   const session = await auth()
 
-  return <MenuBarClient user={session?.user ? { name: (session.user as any).name || "there" } : null} />
+  return <MenuBarClient user={session?.user ? { name: session.user.name || "there" } : null} />
 }

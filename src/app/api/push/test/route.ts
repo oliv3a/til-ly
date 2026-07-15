@@ -17,7 +17,7 @@ export async function GET() {
     process.env.VAPID_PRIVATE_KEY,
   )
 
-  const userId = (session.user as any).id
+  const userId = session.user.id
   const subs = await prisma.pushSubscription.findMany({ where: { userId } })
 
   if (subs.length === 0) {
@@ -40,8 +40,9 @@ export async function GET() {
         }),
       )
       results.push({ endpoint: sub.endpoint.slice(0, 30), ok: true })
-    } catch (err: any) {
-      results.push({ endpoint: sub.endpoint.slice(0, 30), ok: false, error: err.message })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error"
+      results.push({ endpoint: sub.endpoint.slice(0, 30), ok: false, error: message })
     }
   }
 

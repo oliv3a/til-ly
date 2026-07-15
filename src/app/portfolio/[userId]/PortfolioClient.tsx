@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
+import type { PortfolioLog, PortfolioSkill, PortfolioProject } from "@/types"
 import AnimatedProgress from "@/lib/motion/components/AnimatedProgress"
 import { colorForSkill } from "@/lib/skill-colors"
 
@@ -28,10 +29,10 @@ interface GoalInfo {
 }
 
 interface Props {
-  logs: any[]
+  logs: PortfolioLog[]
   goals: GoalInfo[]
-  skills: any[]
-  initialProjects: any[]
+  skills: PortfolioSkill[]
+  initialProjects: PortfolioProject[]
   isOwner: boolean
   streakCount: number
   logCount: number
@@ -42,12 +43,12 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)
 
-  const totalLogs = useMemo(() => skills.reduce((s: number, sk: any) => s + sk.logCount, 0), [skills])
-  const visibleSkills = useMemo(() => skills.filter((sk: any) => sk.logCount > 0), [skills])
+  const totalLogs = useMemo(() => skills.reduce((s: number, sk: PortfolioSkill) => s + sk.logCount, 0), [skills])
+  const visibleSkills = useMemo(() => skills.filter((sk: PortfolioSkill) => sk.logCount > 0), [skills])
 
   const slices = useMemo(() => {
     if (visibleSkills.length === 0) return []
-    const total = visibleSkills.reduce((s: number, sk: any) => s + sk.logCount, 0)
+    const total = visibleSkills.reduce((s: number, sk: PortfolioSkill) => s + sk.logCount, 0)
     const result: { index: number; startDeg: number; endDeg: number; color: string }[] = []
     let currentDeg = 0
     for (let i = 0; i < visibleSkills.length; i++) {
@@ -139,7 +140,7 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
             </div>
             <div className="flex-1 min-w-0 w-full sm:w-auto">
               <div className="space-y-1">
-                {skills.map((sk: any, i: number) => (
+                {skills.map((sk: PortfolioSkill, i: number) => (
                   <div
                     key={sk.skill.id}
                     className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-colors hover:bg-warm-paper/60 ${sk.logCount === 0 ? "opacity-50" : ""}`}
@@ -196,7 +197,7 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
         </div>
         {logs.length > 0 ? (
           <div className="space-y-1.5">
-            {logs.map((log: any) => (
+            {logs.map((log: PortfolioLog) => (
               <Link key={log.id} href={`/logs/${log.id}`} className="block">
                 <div className="frame-block p-2.5 hover:bg-warm-paper/80 transition-colors">
                   <div className="flex items-start justify-between">
@@ -207,7 +208,7 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
                   </div>
                   {log.skillTags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {log.skillTags.map((st: any) => (
+                      {log.skillTags.map((st) => (
                         <span key={st.skill.id} className="text-[0.45rem] font-mono font-medium px-1 py-px leading-none" style={{ background: colorForSkill(st.skill.name).bg, color: colorForSkill(st.skill.name).text, border: `1px solid ${colorForSkill(st.skill.name).border}` }}>{st.skill.name}</span>
                       ))}
                     </div>
@@ -233,7 +234,7 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
         </div>
         {initialProjects.length > 0 ? (
           <div className="space-y-1.5">
-            {initialProjects.map((p: any) => (
+            {initialProjects.map((p: PortfolioProject) => (
               <a key={p.id} href={`/projects/${p.id}`} className="block">
                 <div className="frame-block p-2.5 hover:bg-warm-paper/80 transition-colors">
                   <div className="flex items-start justify-between">

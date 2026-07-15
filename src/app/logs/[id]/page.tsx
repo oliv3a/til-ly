@@ -12,7 +12,7 @@ export default async function LogDetailPage({ params }: { params: Promise<{ id: 
   const session = await auth()
   if (!session?.user) redirect("/auth/login")
 
-  const userId = (session.user as any).id
+  const userId = session.user.id
   const log = await prisma.studyLog.findUnique({
     where: { id },
     include: {
@@ -26,10 +26,6 @@ export default async function LogDetailPage({ params }: { params: Promise<{ id: 
   })
 
   if (!log || log.userId !== userId) notFound()
-
-  const roadmapLabels = log.roadmapLinks.map(
-    (rl) => `${rl.roadmapItem.goal.title} › ${rl.roadmapItem.topic}`,
-  )
 
   return (
     <div className="max-w-2xl mx-auto">

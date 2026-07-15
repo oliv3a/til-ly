@@ -17,7 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       },
     })
 
-    if (!project || project.userId !== (session.user as any).id) {
+    if (!project || project.userId !== session.user.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
@@ -35,7 +35,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const project = await prisma.project.findUnique({ where: { id } })
-    if (!project || project.userId !== (session.user as any).id) {
+    if (!project || project.userId !== session.user.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
@@ -68,7 +68,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const project = await prisma.project.findUnique({ where: { id } })
-    if (!project || project.userId !== (session.user as any).id) {
+    if (!project || project.userId !== session.user.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 

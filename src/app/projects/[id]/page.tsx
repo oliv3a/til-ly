@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import ProjectDetailClient from "./ProjectDetailClient"
 
@@ -8,7 +8,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   if (!session?.user) redirect("/auth/login")
 
   const { id } = await params
-  const userId = (session.user as any).id
+  const userId = session.user.id
 
   const project = await prisma.project.findUnique({
     where: { id },
@@ -19,7 +19,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     },
   })
 
-  if (!project || project.userId !== userId) redirect("/projects")
+  if (!project || project.userId !== userId) notFound()
 
   return (
     <div>

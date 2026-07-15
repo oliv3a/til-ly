@@ -8,7 +8,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const project = await prisma.project.findUnique({ where: { id } })
     if (!project || project.userId !== userId) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -54,7 +54,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const project = await prisma.project.findUnique({ where: { id } })
     if (!project || project.userId !== userId) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })

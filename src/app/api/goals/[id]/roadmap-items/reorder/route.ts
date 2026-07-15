@@ -8,7 +8,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const goal = await prisma.goal.findUnique({ where: { id: gid }, select: { userId: true } })
     if (!goal || goal.userId !== userId)
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })

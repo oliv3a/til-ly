@@ -7,7 +7,7 @@ export default async function GoalsPage() {
   const session = await auth()
   if (!session?.user) redirect("/auth/login")
 
-  const userId = (session.user as any).id
+  const userId = session.user.id
   const goals = await prisma.goal.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },

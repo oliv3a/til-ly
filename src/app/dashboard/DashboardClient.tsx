@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "motion/react"
 import Onigiri from "@/components/Onigiri"
-import { parseAiSummary } from "@/lib/ai-summary"
 import { colorForSkill } from "@/lib/skill-colors"
 import { staggerContainer, staggerItem } from "@/lib/motion/variants"
 import { easings } from "@/lib/motion/tokens"
@@ -17,25 +16,45 @@ interface LogDayItem {
   skillTags: Array<{ id: string; xp: number; skill: { id: string; name: string } }>
 }
 
+interface DashboardLog {
+  id: string
+  title: string
+  createdAt: string
+  aiSummary: string | null
+  skillTags: { id: string; xp: number; skill: { id: string; name: string } }[]
+}
+
+interface DashboardProjectUpdate {
+  id: string
+  projectId: string
+  content: string | null
+  createdAt: string
+  project: { id: string; title: string }
+}
+
+interface DashboardGoal {
+  id: string
+  title: string
+  roadmapItems?: { isComplete: boolean; _count?: { studyLogLinks: number } }[]
+}
+
+interface DashboardSkill {
+  id: string
+  logCount: number
+  skill: { id: string; name: string }
+}
+
 interface DashboardData {
   userId: string
   userName: string
   streakCount: number
   logCount: number
-  recentLogs: any[]
-  recentProjectUpdates: any[]
-  goals: any[]
-  skills: any[]
+  recentLogs: DashboardLog[]
+  recentProjectUpdates: DashboardProjectUpdate[]
+  goals: DashboardGoal[]
+  skills: DashboardSkill[]
   recommendation: { topic: string; reason: string; estimatedTime: string } | null
   initialMonthCache: Record<string, Record<number, LogDayItem[]>>
-}
-
-function relativeDate(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const days = Math.floor(diff / 86400000)
-  if (days === 0) return "today"
-  if (days === 1) return "yesterday"
-  return `${days}d ago`
 }
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -59,9 +78,9 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
   }, [])
 
   const totalGoals = data.goals?.length ?? 0
-  const totalTicked = data.goals?.reduce((s: number, g: any) =>
-    s + (g.roadmapItems?.filter((i: any) => i.isComplete).length ?? 0), 0) ?? 0
-  const totalItems = data.goals?.reduce((s: number, g: any) =>
+  const totalTicked = data.goals?.reduce((s: number, g: DashboardGoal) =>
+    s + (g.roadmapItems?.filter((i) => i.isComplete).length ?? 0), 0) ?? 0
+  const totalItems = data.goals?.reduce((s: number, g: DashboardGoal) =>
     s + (g.roadmapItems?.length ?? 0), 0) ?? 0
 
   // ─── Calendar state ──────────────────────────────────────
@@ -368,8 +387,8 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           <p className="dash-section-title mb-3">Goals</p>
             {data.goals && data.goals.length > 0 ? (
               <div className="space-y-2">
-                {data.goals.map((goal: any) => {
-                  const done = goal.roadmapItems?.filter((i: any) => i.isComplete).length ?? 0
+                {data.goals.map((goal: DashboardGoal) => {
+                  const done = goal.roadmapItems?.filter((i) => i.isComplete).length ?? 0
                   const total = goal.roadmapItems?.length ?? 0
                   return (
                     <div key={goal.id} className="flex items-center gap-2">
@@ -430,7 +449,7 @@ function MacSplitCard() {
       if (cycleRef.current) clearTimeout(cycleRef.current)
       clearTimeout(start)
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="dash-card p-0 overflow-visible relative flex">

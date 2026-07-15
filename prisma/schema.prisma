@@ -29,6 +29,7 @@ model User {
   projects   Project[]
   checkins         DailyCheckin[]
   pushSubscriptions PushSubscription[]
+  resume           Resume?
 }
 
 model Account {
@@ -257,6 +258,18 @@ model PasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime @default(now())
+}
+
+model Resume {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  targetRole String
+  content    String
+  atsData    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model DailyCheckin {

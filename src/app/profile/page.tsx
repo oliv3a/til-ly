@@ -8,7 +8,7 @@ export default async function ProfilePage() {
   const session = await auth()
   if (!session?.user) redirect("/auth/login")
 
-  const userId = (session.user as any).id
+  const userId = session.user.id
   const initialSkills = await getComputedSkills(userId)
 
   return (

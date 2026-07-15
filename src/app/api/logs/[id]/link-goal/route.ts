@@ -28,7 +28,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const log = await prisma.studyLog.findUnique({ where: { id }, select: { userId: true } })
     if (!log || log.userId !== userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
@@ -63,7 +63,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const log = await prisma.studyLog.findUnique({ where: { id }, select: { userId: true } })
     if (!log || log.userId !== userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })

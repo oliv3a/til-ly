@@ -1,14 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useParams } from "next/navigation"
 import Link from "next/link"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 import AnimatedOnigiri from "@/components/AnimatedOnigiri"
 import PageShell from "@/components/PageShell"
 
 export default function ResetPasswordPage() {
-  const router = useRouter()
   const params = useParams()
   const token = params.token as string
 

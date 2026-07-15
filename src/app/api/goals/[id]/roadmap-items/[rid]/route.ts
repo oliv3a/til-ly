@@ -3,37 +3,42 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; rid: string }> }) {
-  const { id: gid, rid } = await params
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  try {
+    const { id: gid, rid } = await params
+    const session = await auth()
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const goal = await prisma.goal.findUnique({ where: { id: gid }, select: { userId: true } })
-  if (!goal || goal.userId !== (session.user as any).id)
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    const goal = await prisma.goal.findUnique({ where: { id: gid }, select: { userId: true } })
+    if (!goal || goal.userId !== session.user.id)
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
-  const body = await req.json()
+    const body = await req.json()
 
-  const data: Record<string, unknown> = {}
-  if (body.isComplete !== undefined) data.isComplete = body.isComplete
-  if (body.topic !== undefined) data.topic = body.topic
-  if (body.description !== undefined) data.description = body.description
-  if (body.estimatedLogs !== undefined) data.estimatedLogs = body.estimatedLogs
-  if (Object.keys(data).length === 0)
-    return NextResponse.json({ error: "No fields to update" }, { status: 400 })
+    const data: Record<string, unknown> = {}
+    if (body.isComplete !== undefined) data.isComplete = body.isComplete
+    if (body.topic !== undefined) data.topic = body.topic
+    if (body.description !== undefined) data.description = body.description
+    if (body.estimatedLogs !== undefined) data.estimatedLogs = body.estimatedLogs
+    if (Object.keys(data).length === 0)
+      return NextResponse.json({ error: "No fields to update" }, { status: 400 })
 
-  await prisma.roadmapItem.update({ where: { id: rid }, data })
+    await prisma.roadmapItem.update({ where: { id: rid }, data })
 
-  const goalWithRoadmap = await prisma.goal.findUnique({
-    where: { id: gid },
-    include: {
-      roadmapItems: {
-        orderBy: { order: "asc" },
-        include: { _count: { select: { studyLogLinks: true } } },
+    const goalWithRoadmap = await prisma.goal.findUnique({
+      where: { id: gid },
+      include: {
+        roadmapItems: {
+          orderBy: { order: "asc" },
+          include: { _count: { select: { studyLogLinks: true } } },
+        },
       },
-    },
-  })
+    })
 
-  return NextResponse.json({ goal: goalWithRoadmap })
+    return NextResponse.json({ goal: goalWithRoadmap })
+  } catch (err) {
+    console.error("Roadmap item PATCH failed:", err)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+  }
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string; rid: string }> }) {
@@ -42,7 +47,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const goal = await prisma.goal.findUnique({ where: { id: gid }, select: { userId: true } })
     if (!goal || goal.userId !== userId)
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })

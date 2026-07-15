@@ -1,4 +1,5 @@
 import NavBar from "./NavBar"
+import Footer from "./Footer"
 
 interface Props {
   children: React.ReactNode
@@ -14,13 +15,7 @@ export default function PageShell({ children, showNav = true, showFooter = true,
       <main className={`flex-1 w-full ${maxWidth} mx-auto p-4 md:p-6`}>
         {children}
       </main>
-      {showFooter && (
-        <footer className="text-center py-6 px-4">
-          <p className="text-[0.55rem] font-mono text-muted-ink/30">
-            keizo the onigiri · keizokode
-          </p>
-        </footer>
-      )}
+      {showFooter && <Footer />}
     </div>
   )
 }

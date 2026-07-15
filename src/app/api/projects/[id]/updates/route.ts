@@ -13,7 +13,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       where: { id },
       include: { files: true, steps: { orderBy: { order: "asc" } } },
     })
-    if (!project || project.userId !== (session.user as any).id) {
+    if (!project || project.userId !== session.user.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
@@ -35,7 +35,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       },
       content,
       project.aiOverallFeedback || undefined,
-      project.steps.map((s) => s.topic),
     )
 
     // Create the update

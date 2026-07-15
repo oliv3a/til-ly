@@ -11,12 +11,13 @@ const navLinks = [
   { href: "/logs", label: "Logs" },
   { href: "/projects", label: "Projects" },
   { href: "/goals", label: "Goals" },
+  { href: "/resume", label: "Resume" },
 ]
 
 export default function NavBar() {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const userId = (session?.user as any)?.id
+  const userId = session?.user?.id
   const [menuOpen, setMenuOpen] = useState(false)
 
   function isActive(href: string) {

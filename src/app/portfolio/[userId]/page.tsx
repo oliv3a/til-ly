@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
@@ -54,7 +55,7 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
   }))
 
   const session = await auth()
-  const isOwner = session?.user !== undefined && (session.user as any).id === userId
+  const isOwner = session?.user !== undefined && session.user.id === userId
 
   const userStreak = await prisma.user.findUnique({
     where: { id: userId },
@@ -70,6 +71,11 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
           <p className="text-[0.6rem] font-mono text-muted-ink/40 mt-1">
             {[user.school, user.year].filter(Boolean).join(" · ")}
           </p>
+        )}
+        {isOwner && (
+          <Link href="/resume" className="btn-base btn-coral btn-interact text-[0.65rem] mt-3 inline-flex">
+            Generate Resume
+          </Link>
         )}
       </div>
 

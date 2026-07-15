@@ -24,11 +24,11 @@ export default function SkillsEditor({ logId, initialSkillTags }: Props) {
   useEffect(() => {
     fetch("/api/skills")
       .then((res) => res.ok && res.json())
-      .then((data) => {
+      .then((data: { id: string; skill: { id: string; name: string; category: string | null } }[]) => {
         if (Array.isArray(data)) {
           const names = data
-            .filter((s: any) => !skillTags.some((st) => st.skill.id === s.skill?.id))
-            .map((s: any) => s.skill.name)
+            .filter((s) => !skillTags.some((st) => st.skill.id === s.skill?.id))
+            .map((s) => s.skill.name)
           setKnownSkills(names)
         }
       })

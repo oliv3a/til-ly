@@ -4,14 +4,19 @@ import { prisma } from "@/lib/prisma"
 import { getComputedSkills } from "@/lib/skills"
 
 export async function GET() {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  try {
+    const session = await auth()
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const userId = (session.user as any).id
+    const userId = session.user.id
 
-  const skills = await getComputedSkills(userId)
+    const skills = await getComputedSkills(userId)
 
-  return NextResponse.json(skills)
+    return NextResponse.json(skills)
+  } catch (err) {
+    console.error("Skills GET failed:", err)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+  }
 }
 
 export async function POST(req: Request) {

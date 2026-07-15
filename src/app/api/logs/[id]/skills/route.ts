@@ -9,7 +9,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const log = await prisma.studyLog.findUnique({ where: { id } })
-    if (!log || log.userId !== (session.user as any).id) {
+    if (!log || log.userId !== session.user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
