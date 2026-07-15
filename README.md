@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KeizoKode
 
-## Getting Started
+A daily study-log platform for CS students. In tech you have to consistently learn, stay up to date, and be adaptable. KeizoKode helps you build that habit — log what you study each day, AI summarizes your work, tracks skills and streaks, and generates a resume from your actual learning journey.
 
-First, run the development server:
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router, TypeScript)
+- **Database:** PostgreSQL + Prisma 7
+- **Auth:** NextAuth.js (email/password + JWT)
+- **AI:** OpenAI GPT-4o-mini
+- **Email:** Resend
+- **Styling:** Tailwind CSS v4
+- **Deploy:** Vercel
+
+## Features
+
+- Study log CRUD with AI analysis — summaries, skill extraction, next-topic recommendations
+- Goals with AI-generated roadmaps
+- Streak tracking + daily check-in
+- AI-generated resume from study logs and projects (editable, PDF export)
+- Portfolio page showing skills, goals, and progress
+- Push notifications (daily reminders)
+- macOS menu bar app (quick status glance)
+- Forgot/reset password
+
+## Live App
+
+Visit [keizokode.vercel.app](https://keizokode.vercel.app) — just sign up.
+
+## Running Locally
+
+Only needed if you want to modify the code. Otherwise use the live app above.
+
+1. Ensure PostgreSQL is running
+2. Copy `.env.example` to `.env` and fill in the values
+3. Install dependencies and generate the Prisma client:
+
+```bash
+npm install
+npx prisma generate
+npx prisma db push
+```
+
+4. Start the dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run lint` | Run ESLint |
+| `npx prisma studio` | Open database browser |
+| `npx prisma generate` | Regenerate Prisma client (after schema changes) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## macOS Menu Bar App
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+cd macos/KeizoKode && swift build -c release && open .build/release/KeizoKode
+```
