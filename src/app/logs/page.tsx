@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "motion/react"
@@ -45,24 +45,51 @@ export default function LogsPage() {
   const [logs, setLogs] = useState<Log[]>([])
   const [skills, setSkills] = useState<SkillOption[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
+  const pageRef = useRef(1)
 
   const search = searchParams.get("search") || ""
   const skillFilter = searchParams.get("skill") || ""
   const sort = searchParams.get("sort") || "newest"
 
   useEffect(() => {
+    setLoading(true)
+    setLogs([])
+    setHasMore(false)
+    pageRef.current = 1
     const params = new URLSearchParams()
     if (search) params.set("search", search)
     if (skillFilter) params.set("skill", skillFilter)
     if (sort !== "newest") params.set("sort", sort)
+    params.set("page", "1")
 
     fetch(`/api/logs?${params.toString()}`)
       .then((r) => r.json())
       .then((data) => {
-        setLogs(data)
+        setLogs(data.logs)
+        setHasMore(data.hasMore)
         setLoading(false)
       })
   }, [search, skillFilter, sort])
+
+  async function loadMore() {
+    setLoadingMore(true)
+    pageRef.current += 1
+    const params = new URLSearchParams()
+    if (search) params.set("search", search)
+    if (skillFilter) params.set("skill", skillFilter)
+    if (sort !== "newest") params.set("sort", sort)
+    params.set("page", String(pageRef.current))
+    try {
+      const res = await fetch(`/api/logs?${params.toString()}`)
+      const data = await res.json()
+      setLogs((prev) => [...prev, ...data.logs])
+      setHasMore(data.hasMore)
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   useEffect(() => {
     fetch("/api/skills")
@@ -133,6 +160,7 @@ export default function LogsPage() {
           </Link>
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {logs.map((log) => (
             <motion.div key={log.id} variants={staggerItem}>
@@ -174,6 +202,18 @@ export default function LogsPage() {
             </motion.div>
           ))}
         </div>
+        {hasMore && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="btn-base btn-outline btn-interact text-[0.55rem]"
+            >
+              {loadingMore ? "Loading…" : "Load more"}
+            </button>
+          </div>
+        )}
+      </>
       )}
     </motion.div>
   )

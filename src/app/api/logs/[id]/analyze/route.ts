@@ -3,6 +3,18 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { summarizeStudyLog, analyzeCode, matchLogToRoadmap, type AiExtractResult } from "@/lib/ai"
 
+async function withRetry<T>(fn: () => Promise<T>, label: string, retries = 3): Promise<T | null> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn()
+    } catch (err) {
+      console.error(`${label} attempt ${i + 1}/${retries} failed:`, err)
+      if (i < retries - 1) await new Promise((r) => setTimeout(r, 1000 * (i + 1)))
+    }
+  }
+  return null
+}
+
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
@@ -23,10 +35,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const codeFiles = log.files.filter((f) => f.extractedText)
     if (codeFiles.length > 0) {
-      const codeResult = await analyzeCode(
+      const codeResult = await withRetry(() => analyzeCode(
         codeFiles.map((f) => ({ name: f.fileName, content: f.extractedText! })),
-      )
-      if (codeResult.isValid && codeResult.bulletpoints.length > 0) {
+      ), "analyzeCode")
+      if (codeResult && codeResult.isValid && codeResult.bulletpoints.length > 0) {
         const bulletStr = codeResult.bulletpoints.map((b) => `  • ${b}`).join("\n")
         aiSummary = bulletStr
         aiSkills = codeResult.skills || []
@@ -36,26 +48,30 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (log.content || !aiSummary) {
       try {
         const textToAnalyze = log.content || log.title
-        const existingSkillNames = (await prisma.skill.findMany({
-          select: { name: true },
-        })).map((s) => s.name)
-        const textResult: AiExtractResult = await summarizeStudyLog(textToAnalyze, undefined, existingSkillNames)
-        if (textResult.summary) {
-          const combined = textResult.motivation
-            ? `${textResult.summary}\n\n—\n💡 ${textResult.motivation}`
-            : textResult.summary
-          aiSummary = aiSummary ? `${combined}\n\n${aiSummary}` : combined
-        }
-        if (textResult.skills?.length) {
-          const existingNames = new Set(aiSkills.map((s) => s.name.toLowerCase()))
-          for (const s of textResult.skills) {
-            if (!existingNames.has(s.name.toLowerCase())) {
-              aiSkills.push(s)
-              existingNames.add(s.name.toLowerCase())
+        const textResult: AiExtractResult | null = await withRetry(async () => {
+          const existingSkillNames = (await prisma.skill.findMany({
+            select: { name: true },
+          })).map((s) => s.name)
+          return summarizeStudyLog(textToAnalyze, undefined, existingSkillNames)
+        }, "summarizeStudyLog")
+        if (textResult) {
+          if (textResult.summary) {
+            const combined = textResult.motivation
+              ? `${textResult.summary}\n\n—\n💡 ${textResult.motivation}`
+              : textResult.summary
+            aiSummary = aiSummary ? `${combined}\n\n${aiSummary}` : combined
+          }
+          if (textResult.skills?.length) {
+            const existingNames = new Set(aiSkills.map((s) => s.name.toLowerCase()))
+            for (const s of textResult.skills) {
+              if (!existingNames.has(s.name.toLowerCase())) {
+                aiSkills.push(s)
+                existingNames.add(s.name.toLowerCase())
+              }
             }
           }
+          if (textResult.nextRecommendation) recommendation = textResult.nextRecommendation
         }
-        if (textResult.nextRecommendation) recommendation = textResult.nextRecommendation
       } catch (err) {
         console.error("Text AI analysis failed:", err)
       }
@@ -101,7 +117,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       )
       if (items.length > 0) {
         const textToMatch = log.content || log.title
-        const match = await matchLogToRoadmap(textToMatch, items)
+        const match = await withRetry(() => matchLogToRoadmap(textToMatch, items), "matchLogToRoadmap")
         if (match?.matches && match.matches.length > 0) {
           await prisma.studyLogRoadmapItem.createMany({
             data: match.matches.map((m) => ({

@@ -108,6 +108,8 @@ model StudyLog {
   skillTags    StudyLogSkill[]
   goalLinks    GoalStudyLog[]
   roadmapLinks StudyLogRoadmapItem[]
+
+  @@index([userId, createdAt])
 }
 
 model StudyLogFile {

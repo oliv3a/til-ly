@@ -14,6 +14,9 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search")?.trim()
     const skillId = searchParams.get("skill")
     const sort = searchParams.get("sort") || "newest"
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10))
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50", 10)))
+    const skip = (page - 1) * limit
 
     const where: Prisma.StudyLogWhereInput = { userId }
 
@@ -30,17 +33,25 @@ export async function GET(req: NextRequest) {
 
     const orderBy = sort === "oldest" ? { createdAt: "asc" as const } : { createdAt: "desc" as const }
 
-    const logs = await prisma.studyLog.findMany({
-      where,
-      orderBy,
-      include: {
-        files: true,
-        skillTags: { include: { skill: true } },
-        goalLinks: { include: { goal: { select: { id: true, title: true } } } },
-      },
-    })
+    const [rawLogs, total] = await Promise.all([
+      prisma.studyLog.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit + 1,
+        include: {
+          files: true,
+          skillTags: { include: { skill: true } },
+          goalLinks: { include: { goal: { select: { id: true, title: true } } } },
+        },
+      }),
+      prisma.studyLog.count({ where }),
+    ])
 
-    return NextResponse.json(logs)
+    const hasMore = rawLogs.length > limit
+    if (hasMore) rawLogs.pop()
+
+    return NextResponse.json({ logs: rawLogs, hasMore, total, page, limit })
   } catch (err) {
     console.error("Logs GET failed:", err)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })

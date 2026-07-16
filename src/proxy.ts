@@ -1,13 +1,21 @@
 import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
+import { rateLimit } from "@/lib/rate-limiter"
 
 export async function proxy(req: Request) {
+  const { pathname } = new URL(req.url)
+
+  if (pathname.startsWith("/api/auth/callback/credentials")) {
+    const { allowed } = rateLimit(req, 5, 60_000)
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many login attempts. Try again later." }, { status: 429 })
+    }
+  }
+
   let session = null
   try {
     session = await auth()
   } catch {}
-
-  const { pathname } = new URL(req.url)
 
   const publicPaths = ["/auth/login", "/auth/signup", "/", "/api/auth", "/menu-bar"]
   const isPublic = publicPaths.some((p) => pathname.startsWith(p))
