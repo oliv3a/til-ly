@@ -82,7 +82,7 @@ export default function MascotChat() {
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
       {open && (
-        <div className="frame-block w-[360px] max-w-[calc(100vw-2rem)] max-h-[70vh] flex flex-col bg-warm-paper shadow-lg">
+        <div className="frame-block w-[400px] max-w-[calc(100vw-2rem)] max-h-[75vh] flex flex-col bg-warm-paper shadow-lg">
           <div className="flex items-center justify-between p-3 border-b border-warm-brown/10">
             <div className="flex items-center gap-2">
               <OnigiriIcon className="w-6 h-6" />
@@ -94,9 +94,10 @@ export default function MascotChat() {
           <div className="p-3 overflow-y-auto flex-1 space-y-3">
             {!analysis && !loading && (
               <>
-                <p className="text-[0.6rem] font-mono text-muted-ink/70 leading-relaxed">
-                  👋 {prompts[currentPrompt]}
-                </p>
+                <div className="flex items-center gap-2 pb-1">
+                  <OnigiriIcon className="w-5 h-5" />
+                  <span className="text-[0.65rem] font-mono text-warm-brown font-medium">{prompts[currentPrompt]}</span>
+                </div>
                 <textarea
                   ref={textareaRef}
                   value={code}
@@ -131,65 +132,77 @@ export default function MascotChat() {
             )}
 
             {loading && (
-              <div className="flex items-center justify-center py-8">
-                <span className="text-[0.6rem] font-mono text-muted-ink/50 animate-pulse">Keizo is reviewing your code...</span>
+              <div className="flex flex-col items-center justify-center py-12 gap-3">
+                <OnigiriIcon className="w-10 h-10 animate-bounce" />
+                <span className="text-[0.65rem] font-mono text-warm-brown/70">Keizo is reviewing your code...</span>
               </div>
             )}
 
             {analysis && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-warm-brown/20">
                   <OnigiriIcon className="w-5 h-5" />
-                  <span className="text-[0.55rem] font-mono text-muted-ink/60">Here's my review:</span>
+                  <span className="text-[0.65rem] font-mono text-warm-brown font-semibold">Keizo's Review</span>
                 </div>
 
                 {analysis.style && (
-                  <div>
-                    <p className="text-[0.55rem] font-mono text-warm-brown font-medium mb-0.5">Style</p>
-                    <p className="text-[0.6rem] font-mono text-muted-ink/70 leading-relaxed">{analysis.style}</p>
+                  <div className="frame-block p-3 bg-white/60">
+                    <p className="text-[0.65rem] font-mono text-ink font-bold mb-1">🎨 Style</p>
+                    <p className="text-[0.65rem] font-mono text-ink/90 leading-relaxed">{analysis.style}</p>
                   </div>
                 )}
 
                 {analysis.strengths.length > 0 && (
-                  <div>
-                    <p className="text-[0.55rem] font-mono text-muted-teal font-medium mb-0.5">Strengths</p>
-                    <ul className="list-disc list-inside space-y-0.5">
+                  <div className="frame-block p-3 bg-muted-teal/5 border-l-2 border-muted-teal">
+                    <p className="text-[0.65rem] font-mono text-ink font-bold mb-1">✅ Strengths</p>
+                    <ul className="space-y-1">
                       {analysis.strengths.map((s, i) => (
-                        <li key={i} className="text-[0.6rem] font-mono text-muted-ink/70">{s}</li>
+                        <li key={i} className="text-[0.65rem] font-mono text-ink/90 flex items-start gap-2">
+                          <span className="text-muted-teal shrink-0 mt-0.5">•</span>
+                          <span>{s}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
 
                 {analysis.weaknesses.length > 0 && (
-                  <div>
-                    <p className="text-[0.55rem] font-mono text-warm-brown font-medium mb-0.5">Areas to Improve</p>
-                    <ul className="list-disc list-inside space-y-0.5">
+                  <div className="frame-block p-3 bg-warm-brown/5 border-l-2 border-warm-brown">
+                    <p className="text-[0.65rem] font-mono text-ink font-bold mb-1">🔧 Areas to Improve</p>
+                    <ul className="space-y-1">
                       {analysis.weaknesses.map((w, i) => (
-                        <li key={i} className="text-[0.6rem] font-mono text-muted-ink/70">{w}</li>
+                        <li key={i} className="text-[0.65rem] font-mono text-ink/90 flex items-start gap-2">
+                          <span className="text-warm-brown shrink-0 mt-0.5">•</span>
+                          <span>{w}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
 
                 {analysis.improvements.length > 0 && (
-                  <div>
-                    <p className="text-[0.55rem] font-mono text-warm-brown font-medium mb-0.5">Suggestions</p>
-                    <ul className="list-disc list-inside space-y-0.5">
+                  <div className="frame-block p-3 bg-[#FFF5E6]/80 border-l-2 border-[#D4A574]">
+                    <p className="text-[0.65rem] font-mono text-ink font-bold mb-1">💡 Suggestions</p>
+                    <ul className="space-y-1">
                       {analysis.improvements.map((imp, i) => (
-                        <li key={i} className="text-[0.6rem] font-mono text-muted-ink/70">{imp}</li>
+                        <li key={i} className="text-[0.65rem] font-mono text-ink/90 flex items-start gap-2">
+                          <span className="text-[#D4A574] shrink-0 mt-0.5">•</span>
+                          <span>{imp}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
 
                 {analysis.summary && (
-                  <div className="pt-2 border-t border-warm-brown/10">
-                    <p className="text-[0.6rem] font-mono text-muted-ink/70 leading-relaxed italic">{analysis.summary}</p>
+                  <div className="pt-3 border-t-2 border-warm-brown/10 mt-4">
+                    <p className="text-[0.7rem] font-serif text-ink font-medium leading-relaxed italic">
+                      {analysis.summary}
+                    </p>
                   </div>
                 )}
 
-                <button onClick={reset} className="btn-base btn-outline btn-interact text-[0.5rem] w-full mt-2">
+                <button onClick={reset} className="btn-base btn-interact-bg text-[0.6rem] w-full mt-2 font-medium">
                   Review more code
                 </button>
               </div>
