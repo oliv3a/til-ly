@@ -38,6 +38,9 @@ export default function ProjectDetailClient({ initialProject }: Props) {
   const [notesOpen, setNotesOpen] = useState(!!project.notes)
   const [notesDraft, setNotesDraft] = useState(project.notes || "")
   const [notesSaving, setNotesSaving] = useState(false)
+  const [chatGptOpen, setChatGptOpen] = useState(false)
+  const [chatGptResponse, setChatGptResponse] = useState("")
+  const [applyingGpt, setApplyingGpt] = useState(false)
 
   async function toggleStep(stepId: string) {
     const step = project.steps.find((s) => s.id === stepId)
@@ -210,6 +213,52 @@ export default function ProjectDetailClient({ initialProject }: Props) {
       setProject(data)
     }
     setNotesSaving(false)
+  }
+
+  function buildStepsPrompt(): string {
+    const items = project.steps.map((s) => `  - ${s.topic}`).join("\n")
+    return `I'm working on a project: "${project.title}"${project.description ? ` (${project.description})` : ""}.
+
+I currently have these checklist items:
+${items || "  (none yet)"}
+
+Please help me create a better, more detailed checklist. Return a JSON array of objects with:
+- "topic": short actionable step name (e.g. "Set up database schema")
+
+Aim for 5-15 steps ordered from first to last.
+Do not wrap the JSON in markdown or code fences — return only the raw JSON array.`
+  }
+
+  async function applyChatGptSteps() {
+    if (!chatGptResponse.trim()) return
+    setApplyingGpt(true)
+    try {
+      let items: { topic: string }[] = []
+      const trimmed = chatGptResponse.trim()
+      const jsonStart = trimmed.indexOf("[")
+      const jsonEnd = trimmed.lastIndexOf("]")
+      if (jsonStart !== -1 && jsonEnd > jsonStart) {
+        items = JSON.parse(trimmed.slice(jsonStart, jsonEnd + 1))
+      } else {
+        items = JSON.parse(trimmed)
+      }
+      if (!Array.isArray(items) || items.length === 0) throw new Error("No items found")
+      const res = await fetch(`/api/projects/${project.id}/steps/bulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setProject((prev) => ({ ...prev, steps: data.steps, progressPct: data.progressPct }))
+        setChatGptOpen(false)
+        setChatGptResponse("")
+      }
+    } catch {
+      // silent
+    } finally {
+      setApplyingGpt(false)
+    }
   }
 
   function startEditing(step: typeof project.steps[0]) {
@@ -400,6 +449,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
               <AnimatedButton onClick={() => setAddingStep(!addingStep)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">
                 {addingStep ? "Cancel" : "+ Step"}
               </AnimatedButton>
+              <AnimatedButton onClick={() => setChatGptOpen(!chatGptOpen)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">✨ AI</AnimatedButton>
             </div>
           </div>
 
@@ -415,6 +465,37 @@ export default function ProjectDetailClient({ initialProject }: Props) {
                 onKeyDown={(e) => { if (e.key === "Enter") addStep() }}
               />
               <AnimatedButton onClick={addStep} variant="sm-primary" className="!px-2 !py-0.5 text-[0.55rem]">Add</AnimatedButton>
+            </div>
+          )}
+
+          {chatGptOpen && (
+            <div className="frame-block p-2 mb-2 space-y-1.5 bg-warm-paper/50">
+              <p className="text-[0.5rem] font-mono text-warm-brown font-medium">✨ ChatGPT Prompt</p>
+              <pre className="text-[0.5rem] font-mono text-muted-ink/70 bg-white p-2 rounded whitespace-pre-wrap max-h-24 overflow-y-auto">{buildStepsPrompt()}</pre>
+              <button
+                onClick={() => navigator.clipboard.writeText(buildStepsPrompt())}
+                className="btn-base btn-outline btn-interact text-[0.5rem]"
+              >
+                Copy Prompt
+              </button>
+              <textarea
+                value={chatGptResponse}
+                onChange={(e) => setChatGptResponse(e.target.value)}
+                placeholder="Paste ChatGPT response here..."
+                rows={3}
+                className="field-coral w-full resize-y text-[0.5rem]"
+              />
+              <div className="flex items-center gap-1">
+                <AnimatedButton
+                  onClick={applyChatGptSteps}
+                  disabled={!chatGptResponse.trim() || applyingGpt}
+                  variant="sm-primary"
+                  className="text-[0.5rem]"
+                >
+                  {applyingGpt ? "Applying..." : "Apply to Checklist"}
+                </AnimatedButton>
+                <AnimatedButton onClick={() => { setChatGptOpen(false); setChatGptResponse("") }} variant="sm" className="text-[0.5rem]">Cancel</AnimatedButton>
+              </div>
             </div>
           )}
 

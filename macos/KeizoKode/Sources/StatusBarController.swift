@@ -37,13 +37,15 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
 
         popover = NSPopover()
         popover.contentSize = NSSize(width: popoverWidth, height: popoverHeight)
-        popover.behavior = .transient
+        popover.behavior = .applicationDefined
         popover.contentViewController = NSViewController()
 
         webView.frame = NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight)
         webView.autoresizingMask = [.width, .height]
 
         popover.contentViewController?.view = webView
+
+        loadURL()
     }
 
     @objc private func handleClick() {
@@ -63,7 +65,6 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
         if popover.isShown {
             popover.performClose(nil)
         } else {
-            reload()
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
             // Ensure web view gets focus
@@ -90,6 +91,10 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
     }
 
     @objc private func reload() {
+        loadURL()
+    }
+
+    private func loadURL() {
         guard let url = URL(string: "http://localhost:3000/menu-bar") else { return }
         webView.load(URLRequest(url: url))
     }

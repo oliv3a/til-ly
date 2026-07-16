@@ -10,6 +10,22 @@ interface Props {
   initialGoals: GoalWithRoadmap[]
 }
 
+function buildPrompt(goal: GoalWithRoadmap): string {
+  const items = goal.roadmapItems.map((i) => `  - ${i.topic}${i.description ? `: ${i.description}` : ""}`).join("\n")
+  return `I'm working toward a learning goal: "${goal.title}"${goal.description ? ` (${goal.description})` : ""}.
+
+I currently have these roadmap steps:
+${items || "  (none yet)"}
+
+Please help me create a better, more detailed roadmap. Return a JSON array of objects with:
+- "topic": short step name
+- "description": what to learn or do in this step
+- "estimatedLogs": number of study sessions needed (1-10)
+
+Aim for 5-13 steps ordered beginner to advanced.
+Do not wrap the JSON in markdown or code fences — return only the raw JSON array.`
+}
+
 export default function GoalsClient({ initialGoals }: Props) {
   const [goals, setGoals] = useState(initialGoals)
   const [showForm, setShowForm] = useState(false)
@@ -25,6 +41,9 @@ export default function GoalsClient({ initialGoals }: Props) {
   const [addFields, setAddFields] = useState({ topic: "", description: "", estimatedLogs: 2 })
   const [dragItemId, setDragItemId] = useState<string | null>(null)
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null)
+  const [chatGptGoalId, setChatGptGoalId] = useState<string | null>(null)
+  const [chatGptResponse, setChatGptResponse] = useState("")
+  const [applyingGpt, setApplyingGpt] = useState(false)
 
   function updateGoalInState(goal: GoalWithRoadmap) {
     setGoals((prev) => prev.map((g) => (g.id === goal.id ? goal : g)))
@@ -193,6 +212,49 @@ export default function GoalsClient({ initialGoals }: Props) {
     if (res.ok) setGoals((prev) => prev.filter((g) => g.id !== id))
   }
 
+  function openChatGpt(goal: GoalWithRoadmap) {
+    setChatGptGoalId(goal.id)
+    setChatGptResponse("")
+  }
+
+  function closeChatGpt() {
+    setChatGptGoalId(null)
+    setChatGptResponse("")
+  }
+
+  async function applyChatGpt(goalId: string) {
+    if (!chatGptResponse.trim()) return
+    setApplyingGpt(true)
+    try {
+      let items: { topic: string; description?: string; estimatedLogs?: number }[] = []
+      const trimmed = chatGptResponse.trim()
+      const jsonStart = trimmed.indexOf("[")
+      const jsonEnd = trimmed.lastIndexOf("]")
+      if (jsonStart !== -1 && jsonEnd > jsonStart) {
+        items = JSON.parse(trimmed.slice(jsonStart, jsonEnd + 1))
+      } else {
+        items = JSON.parse(trimmed)
+      }
+      if (!Array.isArray(items) || items.length === 0) throw new Error("No items found")
+      const res = await fetch(`/api/goals/${goalId}/roadmap-items/bulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.goal) {
+          setGoals((prev) => prev.map((g) => (g.id === goalId ? data.goal : g)))
+          closeChatGpt()
+        }
+      }
+    } catch {
+      // If parsing fails, let the user know silently — they can fix the format
+    } finally {
+      setApplyingGpt(false)
+    }
+  }
+
   function isEditing(goalId: string, itemId: string) {
     return editingItem?.goalId === goalId && editingItem?.itemId === itemId
   }
@@ -256,7 +318,10 @@ export default function GoalsClient({ initialGoals }: Props) {
             <div className="mt-3">
               <div className="section-header mb-2 flex items-center justify-between">
                 <span>Roadmap</span>
-                <AnimatedButton onClick={() => startAdd(goal.id)} variant="sm" className="!px-1.5 !py-0 text-[0.5rem] text-warm-brown bg-white">+ Add Step</AnimatedButton>
+                <div className="flex items-center gap-1">
+                  <AnimatedButton onClick={() => openChatGpt(goal)} variant="sm" className="!px-1.5 !py-0 text-[0.5rem]">✨ AI</AnimatedButton>
+                  <AnimatedButton onClick={() => startAdd(goal.id)} variant="sm" className="!px-1.5 !py-0 text-[0.5rem] text-warm-brown bg-white">+ Add Step</AnimatedButton>
+                </div>
               </div>
 
               {addingItemGoalId === goal.id && (
@@ -347,6 +412,37 @@ export default function GoalsClient({ initialGoals }: Props) {
                 ))}
               </div>
             </div>
+
+            {chatGptGoalId === goal.id && (
+              <div className="mt-3 frame-block p-3 space-y-2 bg-warm-paper/50">
+                <p className="text-[0.55rem] font-mono text-warm-brown font-medium">✨ ChatGPT Prompt</p>
+                <pre className="text-[0.5rem] font-mono text-muted-ink/70 bg-white p-2 rounded whitespace-pre-wrap max-h-32 overflow-y-auto">{buildPrompt(goal)}</pre>
+                <button
+                  onClick={() => navigator.clipboard.writeText(buildPrompt(goal))}
+                  className="btn-base btn-outline btn-interact text-[0.5rem]"
+                >
+                  Copy Prompt
+                </button>
+                <textarea
+                  value={chatGptResponse}
+                  onChange={(e) => setChatGptResponse(e.target.value)}
+                  placeholder="Paste ChatGPT response here..."
+                  rows={5}
+                  className="field-coral w-full resize-y text-[0.55rem]"
+                />
+                <div className="flex items-center gap-2">
+                  <AnimatedButton
+                    onClick={() => applyChatGpt(goal.id)}
+                    disabled={!chatGptResponse.trim() || applyingGpt}
+                    variant="sm-primary"
+                    className="text-[0.55rem]"
+                  >
+                    {applyingGpt ? "Applying..." : "Apply to Roadmap"}
+                  </AnimatedButton>
+                  <AnimatedButton onClick={closeChatGpt} variant="sm" className="text-[0.55rem]">Cancel</AnimatedButton>
+                </div>
+              </div>
+            )}
 
             {goal.targetDate && (
               <p className="text-[0.55rem] font-mono text-muted-ink/50 mt-2">
