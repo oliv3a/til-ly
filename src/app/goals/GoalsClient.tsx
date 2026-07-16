@@ -26,6 +26,18 @@ Aim for 5-13 steps ordered beginner to advanced.
 Do not wrap the JSON in markdown or code fences — return only the raw JSON array.`
 }
 
+function buildNewGoalPrompt(title: string, description: string): string {
+  return `I'm planning a learning goal: "${title}"${description ? ` (${description})` : ""}.
+
+I haven't created a roadmap yet. Please help me build one from scratch. Return a JSON array of objects with:
+- "topic": short step name
+- "description": what to learn or do in this step
+- "estimatedLogs": number of study sessions needed (1-10)
+
+Aim for 5-13 steps ordered beginner to advanced.
+Do not wrap the JSON in markdown or code fences — return only the raw JSON array.`
+}
+
 export default function GoalsClient({ initialGoals }: Props) {
   const [goals, setGoals] = useState(initialGoals)
   const [showForm, setShowForm] = useState(false)
@@ -44,6 +56,8 @@ export default function GoalsClient({ initialGoals }: Props) {
   const [chatGptGoalId, setChatGptGoalId] = useState<string | null>(null)
   const [chatGptResponse, setChatGptResponse] = useState("")
   const [applyingGpt, setApplyingGpt] = useState(false)
+  const [createGptOpen, setCreateGptOpen] = useState(false)
+  const [createGptResponse, setCreateGptResponse] = useState("")
 
   function updateGoalInState(goal: GoalWithRoadmap) {
     setGoals((prev) => prev.map((g) => (g.id === goal.id ? goal : g)))
@@ -196,12 +210,37 @@ export default function GoalsClient({ initialGoals }: Props) {
 
     if (res.ok) {
       const goal = await res.json()
+      if (createGptResponse.trim()) {
+        try {
+          const trimmed = createGptResponse.trim()
+          const jsonStart = trimmed.indexOf("[")
+          const jsonEnd = trimmed.lastIndexOf("]")
+          const items = jsonStart !== -1 && jsonEnd > jsonStart
+            ? JSON.parse(trimmed.slice(jsonStart, jsonEnd + 1))
+            : JSON.parse(trimmed)
+          if (Array.isArray(items) && items.length > 0) {
+            const bulkRes = await fetch(`/api/goals/${goal.id}/roadmap-items/bulk`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ items }),
+            })
+            if (bulkRes.ok) {
+              const data = await bulkRes.json()
+              if (data.goal) goal.roadmapItems = data.goal.roadmapItems
+            }
+          }
+        } catch {
+          // silent
+        }
+      }
       setGoals((prev) => [goal, ...prev])
       setShowForm(false)
       setTitle("")
       setDescription("")
       setTargetDate("")
       setCategory("")
+      setCreateGptOpen(false)
+      setCreateGptResponse("")
     }
     setSubmitting(false)
   }
@@ -273,6 +312,29 @@ export default function GoalsClient({ initialGoals }: Props) {
             <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Category (e.g. Data Science)" className="field-coral flex-1" />
             <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className="field-coral sm:max-w-[160px]" />
           </div>
+          <AnimatedButton type="button" onClick={() => setCreateGptOpen(!createGptOpen)} variant="sm" className="w-full text-[0.55rem]">
+            {createGptOpen ? "– Hide AI Roadmap" : "✨ AI Roadmap (optional)"}
+          </AnimatedButton>
+          {createGptOpen && (
+            <div className="frame-block p-3 space-y-2 bg-warm-paper/50">
+              <p className="text-[0.55rem] font-mono text-warm-brown font-medium">✨ ChatGPT Prompt</p>
+              <pre className="text-[0.5rem] font-mono text-muted-ink/70 bg-white p-2 rounded whitespace-pre-wrap max-h-24 overflow-y-auto">{buildNewGoalPrompt(title || "my goal", description)}</pre>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(buildNewGoalPrompt(title || "my goal", description))}
+                className="btn-base btn-outline btn-interact text-[0.5rem]"
+              >
+                Copy Prompt
+              </button>
+              <textarea
+                value={createGptResponse}
+                onChange={(e) => setCreateGptResponse(e.target.value)}
+                placeholder="Paste ChatGPT response here..."
+                rows={4}
+                className="field-coral w-full resize-y text-[0.55rem]"
+              />
+            </div>
+          )}
           <AnimatedButton type="submit" disabled={submitting} variant="sm-primary" className="w-full">
             {submitting ? "Generating roadmap..." : "Create Goal"}
           </AnimatedButton>

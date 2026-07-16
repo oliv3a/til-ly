@@ -15,6 +15,8 @@ export default function NewProjectPage() {
   const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [chatGptOpen, setChatGptOpen] = useState(false)
+  const [chatGptResponse, setChatGptResponse] = useState("")
 
   const onDrop = useCallback(async (accepted: File[]) => {
     setUploading(true)
@@ -33,6 +35,16 @@ export default function NewProjectPage() {
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
+
+  function buildStepsPrompt(): string {
+    return `I'm planning a project: "${title || "my project"}"${description ? ` (${description})` : ""}.
+
+I don't have any checklist items yet. Please generate a detailed checklist for this project. Return a JSON array of objects with:
+- "topic": short actionable step name
+
+Aim for 5-15 steps ordered from first to last.
+Do not wrap the JSON in markdown or code fences — return only the raw JSON array.`
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -55,6 +67,25 @@ export default function NewProjectPage() {
 
       if (res.ok) {
         const project = await res.json()
+        if (chatGptResponse.trim()) {
+          try {
+            const trimmed = chatGptResponse.trim()
+            const jsonStart = trimmed.indexOf("[")
+            const jsonEnd = trimmed.lastIndexOf("]")
+            const items = jsonStart !== -1 && jsonEnd > jsonStart
+              ? JSON.parse(trimmed.slice(jsonStart, jsonEnd + 1))
+              : JSON.parse(trimmed)
+            if (Array.isArray(items) && items.length > 0) {
+              await fetch(`/api/projects/${project.id}/steps/bulk`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ items }),
+              })
+            }
+          } catch {
+            // silent
+          }
+        }
         router.push(`/projects/${project.id}`)
       } else {
         const err = await res.json()
@@ -163,6 +194,30 @@ export default function NewProjectPage() {
               </div>
             )}
           </div>
+
+          <AnimatedButton type="button" onClick={() => setChatGptOpen(!chatGptOpen)} variant="sm" className="w-full text-[0.55rem]">
+            {chatGptOpen ? "– Hide AI Checklist" : "✨ AI Checklist (optional)"}
+          </AnimatedButton>
+          {chatGptOpen && (
+            <div className="frame-block p-3 space-y-2 bg-warm-paper/50">
+              <p className="text-[0.55rem] font-mono text-warm-brown font-medium">✨ ChatGPT Prompt</p>
+              <pre className="text-[0.5rem] font-mono text-muted-ink/70 bg-white p-2 rounded whitespace-pre-wrap max-h-24 overflow-y-auto">{buildStepsPrompt()}</pre>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(buildStepsPrompt())}
+                className="btn-base btn-outline btn-interact text-[0.5rem]"
+              >
+                Copy Prompt
+              </button>
+              <textarea
+                value={chatGptResponse}
+                onChange={(e) => setChatGptResponse(e.target.value)}
+                placeholder="Paste ChatGPT response here..."
+                rows={4}
+                className="field-coral w-full resize-y text-[0.55rem]"
+              />
+            </div>
+          )}
 
           <AnimatedButton
             type="submit"
