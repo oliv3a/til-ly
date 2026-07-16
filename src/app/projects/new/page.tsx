@@ -15,7 +15,6 @@ export default function NewProjectPage() {
   const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [chatGptOpen, setChatGptOpen] = useState(false)
   const [chatGptResponse, setChatGptResponse] = useState("")
 
   const onDrop = useCallback(async (accepted: File[]) => {
@@ -35,16 +34,6 @@ export default function NewProjectPage() {
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
-
-  function buildStepsPrompt(): string {
-    return `I'm planning a project: "${title || "my project"}"${description ? ` (${description})` : ""}.
-
-I don't have any checklist items yet. Please generate a detailed checklist for this project. Return a JSON array of objects with:
-- "topic": short actionable step name
-
-Aim for 5-15 steps ordered from first to last.
-Do not wrap the JSON in markdown or code fences — return only the raw JSON array.`
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -195,29 +184,13 @@ Do not wrap the JSON in markdown or code fences — return only the raw JSON arr
             )}
           </div>
 
-          <AnimatedButton type="button" onClick={() => setChatGptOpen(!chatGptOpen)} variant="sm" className="w-full text-[0.55rem]">
-            {chatGptOpen ? "– Hide AI Checklist" : "✨ AI Checklist (optional)"}
-          </AnimatedButton>
-          {chatGptOpen && (
-            <div className="frame-block p-3 space-y-2 bg-warm-paper/50">
-              <p className="text-[0.55rem] font-mono text-warm-brown font-medium">✨ ChatGPT Prompt</p>
-              <pre className="text-[0.5rem] font-mono text-muted-ink/70 bg-white p-2 rounded whitespace-pre-wrap max-h-24 overflow-y-auto">{buildStepsPrompt()}</pre>
-              <button
-                type="button"
-                onClick={() => navigator.clipboard.writeText(buildStepsPrompt())}
-                className="btn-base btn-outline btn-interact text-[0.5rem]"
-              >
-                Copy Prompt
-              </button>
-              <textarea
-                value={chatGptResponse}
-                onChange={(e) => setChatGptResponse(e.target.value)}
-                placeholder="Paste ChatGPT response here..."
-                rows={4}
-                className="field-coral w-full resize-y text-[0.55rem]"
-              />
-            </div>
-          )}
+          <textarea
+            value={chatGptResponse}
+            onChange={(e) => setChatGptResponse(e.target.value)}
+            placeholder="Have a ChatGPT prompt for a detailed checklist? Paste ChatGPT response here..."
+            rows={3}
+            className="field-coral w-full resize-y text-[0.55rem]"
+          />
 
           <AnimatedButton
             type="submit"
