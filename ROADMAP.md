@@ -42,5 +42,10 @@ User, Account, Session, VerificationToken, Skill, UserSkill, StudyLog, StudyLogF
 - Push notifications (daily reminders)
 - macOS menu bar app
 
+## Future Ideas
+- [ ] **Every mistake you've made** — log and categorize coding mistakes (bug type, language, root cause) so you can review patterns and avoid repeating them
+- [ ] **Your coding style** — AI analyses your logs and code snippets to identify your coding style (e.g. functional vs OOP, naming conventions, preferred patterns)
+- [ ] **Your strengths and weaknesses** — from your study history and mistakes, AI generates a strengths/weaknesses profile to guide what to focus on next
+
 ## Post-MVP
 See POSTMVP.md
