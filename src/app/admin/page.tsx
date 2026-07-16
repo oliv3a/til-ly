@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic"
 export default async function AdminPage() {
   const session = await auth()
   if (!session?.user) redirect("/login")
+  if (session.user.email !== process.env.ADMIN_EMAIL) redirect("/dashboard")
 
   const [totalUsers, users, totalLogs, totalGoals, totalProjects] = await Promise.all([
     prisma.user.count(),
