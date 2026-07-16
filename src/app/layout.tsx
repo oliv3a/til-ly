@@ -4,6 +4,7 @@ import { Inter, IBM_Plex_Mono } from "next/font/google"
 import { auth } from "@/lib/auth"
 import SessionProvider from "@/components/SessionProvider"
 import DashboardShell from "@/components/DashboardShell"
+import MascotChat from "@/components/MascotChat"
 import { Toaster } from "sonner"
 import "./globals.css"
 
@@ -38,7 +39,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <SessionProvider>
           {session?.user ? (
-            <DashboardShell>{children}</DashboardShell>
+            <>
+              <DashboardShell>{children}</DashboardShell>
+              <MascotChat />
+            </>
           ) : (
             children
           )}

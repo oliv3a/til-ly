@@ -46,6 +46,7 @@ User, Account, Session, VerificationToken, Skill, UserSkill, StudyLog, StudyLogF
 - [ ] **Every mistake you've made** — log and categorize coding mistakes (bug type, language, root cause) so you can review patterns and avoid repeating them
 - [ ] **Your coding style** — AI analyses your logs and code snippets to identify your coding style (e.g. functional vs OOP, naming conventions, preferred patterns)
 - [ ] **Your strengths and weaknesses** — from your study history and mistakes, AI generates a strengths/weaknesses profile to guide what to focus on next
+- [ ] **Upgrade code review model** — swap GPT-4o-mini for GPT-4o or a specialized code model once the app gains traction
 
 ## Post-MVP
 See POSTMVP.md

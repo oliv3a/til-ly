@@ -411,3 +411,58 @@ Respond with JSON: { "matches": [{ "itemId": "...", "goalId": "..." }] }`
 
   return null
 }
+
+export async function reviewCode(code: string, fileName?: string) {
+  const client = getClient()
+  if (!client) {
+    return {
+      style: "AI client not configured",
+      strengths: [],
+      weaknesses: [],
+      improvements: [],
+      summary: "",
+    }
+  }
+
+  const prompt = `You are a senior software engineer reviewing code written by a student.
+
+Code to review:
+\`\`\`
+${code.slice(0, 8000)}
+\`\`\`
+${fileName ? `\nFile: ${fileName}` : ""}
+
+Analyze the code and return a JSON object with these fields:
+- "style": a brief paragraph describing their coding style (e.g. naming conventions, functional vs OOP, indentation, patterns they use)
+- "strengths": an array of strings listing what they do well
+- "weaknesses": an array of strings listing areas to improve (be constructive, not harsh)
+- "improvements": an array of strings with specific actionable suggestions for the code above
+- "summary": a 1-2 sentence encouraging summary of the overall quality
+
+Keep each item concise and specific to the code provided. Do not be generic. Be honest but encouraging, like a senior engineer mentoring a junior.`
+
+  try {
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+    })
+    const result = JSON.parse(response.choices[0]?.message?.content || "{}")
+    return {
+      style: result.style || "",
+      strengths: Array.isArray(result.strengths) ? result.strengths : [],
+      weaknesses: Array.isArray(result.weaknesses) ? result.weaknesses : [],
+      improvements: Array.isArray(result.improvements) ? result.improvements : [],
+      summary: result.summary || "",
+    }
+  } catch (err) {
+    console.error("reviewCode failed:", err)
+    return {
+      style: "",
+      strengths: [],
+      weaknesses: [],
+      improvements: [],
+      summary: "Sorry, I couldn't analyze the code right now.",
+    }
+  }
+}
