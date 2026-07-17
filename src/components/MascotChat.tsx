@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef } from "react"
 
 const prompts = [
-  "Want me to review your code?",
-  "Need feedback on your code?",
-  "Want me to identify your strengths and weaknesses?",
-  "Want me to suggest what you can improve?",
-  "Got some code you want a senior dev to look at?",
+  "Ask me anything — coding, debugging, or just chat.",
+  "Got a coding question? I'm here to help.",
+  "Stuck on something? Talk it through with me.",
+  "Want a second pair of eyes on your code?",
+  "Need advice on learning or career stuff? Let's talk.",
 ]
 
 const LIMIT_WARN_1 = 10
