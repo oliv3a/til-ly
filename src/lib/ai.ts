@@ -466,3 +466,94 @@ Keep each item concise and specific to the code provided. Do not be generic. Be 
     }
   }
 }
+
+const CODE_REVIEW_SYSTEM = `You are a senior software engineer reviewing code for a computer science student. Be encouraging but honest, like a mentor who remembers what it was like to learn.
+
+When this is the first review, return structured JSON with:
+- "style": a paragraph about their coding style
+- "strengths": array of specific things they do well
+- "weaknesses": array of constructive areas to improve
+- "improvements": array of actionable suggestions
+- "summary": 1-2 sentence encouraging summary
+
+For follow-up questions, answer conversationally as a senior dev mentoring a junior. Reference their code when helpful.`
+
+const CHAT_SYSTEM = `You are Keizo, a senior software engineer who mentors computer science students. You're warm, relatable, and remember what it was like to be a student.
+
+- Talk like a real person, not a robot
+- Use casual tech chat, occasional friendly humor
+- Relate to the student experience (deadlines, imposter syndrome, debugging frustration)
+- Give clear, practical advice
+- Never use markdown or structured formatting — just natural conversation
+- Be concise but thoughtful — like a senior dev grabbing coffee with a junior`
+
+export async function codeChat(options: {
+  mode: "review" | "chat"
+  code?: string
+  fileName?: string
+  messages: { role: "user" | "assistant"; content: string }[]
+  isFirstReview: boolean
+}) {
+  const client = getClient()
+  if (!client) {
+    return { type: "review" as const, style: "", strengths: [], weaknesses: [], improvements: [], summary: "AI not configured" }
+  }
+
+  const { mode, code, fileName, messages, isFirstReview } = options
+
+  if (mode === "review" && isFirstReview) {
+    const codeBlock = code ? `\n\`\`\`\n${code.slice(0, 8000)}\n\`\`\`\n${fileName ? `\nFile: ${fileName}` : ""}` : ""
+    const prompt = `${CODE_REVIEW_SYSTEM}
+
+Code to review:
+${codeBlock}
+
+Remember: return valid JSON only, no markdown wrapping.`
+
+    try {
+      const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+      })
+      const result = JSON.parse(response.choices[0]?.message?.content || "{}")
+      return {
+        type: "review" as const,
+        style: result.style || "",
+        strengths: Array.isArray(result.strengths) ? result.strengths : [],
+        weaknesses: Array.isArray(result.weaknesses) ? result.weaknesses : [],
+        improvements: Array.isArray(result.improvements) ? result.improvements : [],
+        summary: result.summary || "",
+      }
+    } catch (err) {
+      console.error("codeChat review failed:", err)
+      return {
+        type: "review" as const,
+        style: "",
+        strengths: [],
+        weaknesses: [],
+        improvements: [],
+        summary: "Sorry, I couldn't analyze the code right now.",
+      }
+    }
+  }
+
+  const systemPrompt = mode === "review"
+    ? `${CODE_REVIEW_SYSTEM}\n\nThe user's code:\n\`\`\`\n${(code || "").slice(0, 8000)}\n\`\`\`\n${fileName ? `\nFile: ${fileName}` : ""}`
+    : CHAT_SYSTEM
+
+  try {
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages.slice(-10),
+      ],
+    })
+    const text = response.choices[0]?.message?.content || ""
+    return { type: "chat" as const, text }
+  } catch (err) {
+    console.error("codeChat chat failed:", err)
+    return { type: "chat" as const, text: "Sorry, I got distracted. Can you say that again?" }
+  }
+}

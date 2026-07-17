@@ -10,22 +10,37 @@ const prompts = [
   "Got some code you want a senior dev to look at?",
 ]
 
+const LIMIT_WARN_1 = 10
+const LIMIT_WARN_2 = 18
+const MAX_MESSAGES = 20
+
+interface ChatMessage {
+  role: "user" | "assistant"
+  content: string
+  type?: "review" | "chat"
+  style?: string
+  strengths?: string[]
+  weaknesses?: string[]
+  improvements?: string[]
+  summary?: string
+}
+
 export default function MascotChat() {
   const [open, setOpen] = useState(false)
+  const [mode, setMode] = useState<"review" | "chat">("review")
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [code, setCode] = useState("")
   const [fileName, setFileName] = useState("")
   const [loading, setLoading] = useState(false)
-  const [analysis, setAnalysis] = useState<{
-    style: string
-    strengths: string[]
-    weaknesses: string[]
-    improvements: string[]
-    summary: string
-  } | null>(null)
-  const [currentPrompt, setCurrentPrompt] = useState(0)
+  const [input, setInput] = useState("")
+  const [messageCount, setMessageCount] = useState(0)
   const [sentCode, setSentCode] = useState("")
+  const [showCode, setShowCode] = useState<string | false>(false)
+  const [currentPrompt, setCurrentPrompt] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const chatEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -35,8 +50,15 @@ export default function MascotChat() {
   }, [])
 
   useEffect(() => {
-    if (open && textareaRef.current) textareaRef.current.focus()
-  }, [open])
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages, loading])
+
+  useEffect(() => {
+    if (open && !loading) {
+      if (mode === "chat") inputRef.current?.focus()
+      else textareaRef.current?.focus()
+    }
+  }, [open, mode, loading])
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -50,20 +72,88 @@ export default function MascotChat() {
     reader.readAsText(file)
   }
 
-  async function sendForReview() {
-    if (!code.trim()) return
+  async function sendMessage() {
+    if (mode === "review" && messages.length === 0) {
+      if (!code.trim()) return
+      setSentCode(code)
+      const userMsg: ChatMessage = { role: "user", content: code }
+      setMessages([userMsg])
+      setLoading(true)
+      try {
+        const res = await fetch("/api/code-review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "review", code, fileName: fileName || undefined, messages: [] }),
+        })
+        const data = await res.json()
+        if (data.type === "limit") {
+          setMessageCount(data.messageCount)
+          return
+        }
+        setMessageCount(data.messageCount)
+        setMessages([userMsg, {
+          role: "assistant",
+          content: "",
+          type: "review",
+          style: data.style,
+          strengths: data.strengths,
+          weaknesses: data.weaknesses,
+          improvements: data.improvements,
+          summary: data.summary,
+        }])
+      } catch {
+        // silent
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+
+    if (!input.trim()) return
+    const text = input.trim()
+    setInput("")
+
+    const userMsg: ChatMessage = { role: "user", content: text }
+    const updated = [...messages, userMsg]
+    setMessages(updated)
     setLoading(true)
-    setAnalysis(null)
-    setSentCode(code)
+
     try {
       const res = await fetch("/api/code-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, fileName: fileName || undefined }),
+        body: JSON.stringify({
+          mode,
+          code: mode === "review" ? sentCode : undefined,
+          fileName: mode === "review" ? fileName : undefined,
+          messages: updated.map((m) => ({ role: m.role, content: m.type === "review" ? "I shared my code for review earlier." : m.content })),
+        }),
       })
-      if (res.ok) {
-        const data = await res.json()
-        setAnalysis(data)
+      const data = await res.json()
+      setMessageCount(data.messageCount)
+
+      if (data.type === "limit") {
+        setMessages(updated)
+        return
+      }
+
+      if (data.type === "review") {
+        setMessages([...updated, {
+          role: "assistant",
+          content: "",
+          type: "review",
+          style: data.style,
+          strengths: data.strengths,
+          weaknesses: data.weaknesses,
+          improvements: data.improvements,
+          summary: data.summary,
+        }])
+      } else if (data.type === "chat") {
+        setMessages([...updated, {
+          role: "assistant",
+          content: data.text,
+          type: "chat",
+        }])
       }
     } catch {
       // silent
@@ -73,37 +163,89 @@ export default function MascotChat() {
   }
 
   function reset() {
+    setMessages([])
     setCode("")
     setFileName("")
-    setAnalysis(null)
     setSentCode("")
+    setShowCode(false)
+    setMessageCount(0)
   }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      sendMessage()
+    }
+  }
+
+  const hasMessages = messages.length > 0
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
       {open && (
-        <div className="frame-block w-[400px] max-w-[calc(100vw-2rem)] max-h-[75vh] flex flex-col bg-warm-paper shadow-lg">
+        <div className="frame-block w-[420px] max-w-[calc(100vw-2rem)] max-h-[80vh] flex flex-col bg-warm-paper shadow-xl">
           <div className="flex items-center justify-between p-3 border-b border-warm-brown/10">
             <div className="flex items-center gap-2">
               <OnigiriIcon className="w-6 h-6" />
-              <span className="text-[0.65rem] font-mono text-warm-brown font-medium">Keizo</span>
+              <span className="text-[0.65rem] font-mono text-warm-brown font-semibold">Keizo</span>
             </div>
-            <button onClick={() => setOpen(false)} className="text-muted-ink/40 hover:text-warm-brown text-[0.65rem]">✕</button>
+            <button onClick={() => setOpen(false)} className="text-muted-ink/40 hover:text-warm-brown text-[0.7rem] cursor-pointer">✕</button>
           </div>
 
-          <div className="p-3 overflow-y-auto flex-1 space-y-3">
-            {!analysis && !loading && (
-              <>
-                <div className="flex items-center gap-2 pb-1">
-                  <OnigiriIcon className="w-5 h-5" />
-                  <span className="text-[0.65rem] font-mono text-warm-brown font-medium">{prompts[currentPrompt]}</span>
-                </div>
+          <div className="px-3 pt-2 pb-1">
+            <div className="flex bg-warm-brown/5 rounded-sm p-0.5">
+              <button
+                onClick={() => { if (!loading) { setMode("review"); if (!hasMessages) setCode("") } }}
+                className={`flex-1 text-[0.55rem] font-mono py-1 rounded-sm transition-colors cursor-pointer ${
+                  mode === "review" ? "bg-white text-warm-brown font-medium shadow-sm" : "text-muted-ink/50 hover:text-warm-brown"
+                }`}
+              >
+                Review
+              </button>
+              <button
+                onClick={() => { if (!loading) setMode("chat") }}
+                className={`flex-1 text-[0.55rem] font-mono py-1 rounded-sm transition-colors cursor-pointer ${
+                  mode === "chat" ? "bg-white text-warm-brown font-medium shadow-sm" : "text-muted-ink/50 hover:text-warm-brown"
+                }`}
+              >
+                Chat
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-y-auto flex-1 px-3 py-2 space-y-3 min-h-[200px] max-h-[400px]">
+            {messageCount >= LIMIT_WARN_1 && messageCount < LIMIT_WARN_2 && (
+              <p className="text-[0.5rem] font-mono text-warm-brown/60 text-center py-1 px-2 bg-warm-brown/5 rounded-sm">
+                You're having a good chat! About {MAX_MESSAGES - messageCount} replies left on the free plan.
+              </p>
+            )}
+            {messageCount >= LIMIT_WARN_2 && messageCount < MAX_MESSAGES && (
+              <p className="text-[0.5rem] font-mono text-warm-brown text-center py-1 px-2 bg-warm-brown/10 rounded-sm">
+                Almost at the chat limit! You'll be able to get more soon.
+              </p>
+            )}
+            {messageCount >= MAX_MESSAGES && (
+              <div className="text-center py-4">
+                <p className="text-[0.6rem] font-mono text-muted-ink/50">Chat limit reached for now.</p>
+                <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-0.5">More will be available soon!</p>
+              </div>
+            )}
+
+            {!hasMessages && !loading && (
+              <div className="flex items-center gap-2 py-3">
+                <OnigiriIcon className="w-5 h-5 shrink-0" />
+                <span className="text-[0.6rem] font-mono text-muted-ink/60">{prompts[currentPrompt]}</span>
+              </div>
+            )}
+
+            {mode === "review" && !hasMessages && !loading && (
+              <div className="space-y-2">
                 <textarea
                   ref={textareaRef}
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   placeholder="Paste your code here..."
-                  rows={8}
+                  rows={6}
                   className="field-coral w-full resize-y text-[0.6rem] font-mono"
                 />
                 <div className="flex items-center gap-2">
@@ -116,98 +258,166 @@ export default function MascotChat() {
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="btn-base btn-outline btn-interact text-[0.5rem]"
+                    className="btn-base btn-outline btn-interact text-[0.5rem] cursor-pointer"
                   >
                     {fileName ? `📎 ${fileName}` : "+ Upload file"}
                   </button>
                   <button
-                    onClick={sendForReview}
+                    onClick={sendMessage}
                     disabled={!code.trim()}
-                    className="btn-base btn-interact-bg text-[0.55rem] ml-auto disabled:opacity-40"
+                    className="btn-base btn-interact-bg text-[0.55rem] ml-auto disabled:opacity-40 cursor-pointer"
                   >
                     Send for Review
                   </button>
                 </div>
-              </>
+              </div>
             )}
+
+            {hasMessages && messages.map((msg, i) => (
+              <div key={i}>
+                {msg.role === "user" && (
+                  <div className="flex justify-end">
+                    <div className="bg-warm-brown/10 rounded-sm px-3 py-2 max-w-[85%]">
+                      {i === 0 && mode === "review" && sentCode ? (
+                        <div>
+                          <button
+                            onClick={() => setShowCode(showCode === msg.content ? false : msg.content)}
+                            className="text-[0.55rem] font-mono text-warm-brown underline cursor-pointer"
+                          >
+                            {showCode === msg.content ? "Hide code" : "View code"}
+                          </button>
+                          {showCode === msg.content && (
+                            <pre className="text-[0.5rem] font-mono text-ink/70 mt-1 whitespace-pre-wrap max-h-24 overflow-y-auto">{sentCode}</pre>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-[0.6rem] font-mono text-ink/80 whitespace-pre-wrap">{msg.content}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {msg.role === "assistant" && msg.type === "review" && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <OnigiriIcon className="w-4 h-4" />
+                      <span className="text-[0.5rem] font-mono text-muted-ink/50">Keizo</span>
+                    </div>
+                    <div className="space-y-2 pl-6">
+                      {/* @ts-ignore */}
+                      {msg.style && (
+                        <div className="frame-block p-2.5 bg-white/70">
+                          <p className="text-[0.55rem] font-mono text-ink font-bold mb-0.5">🎨 Style</p>
+                          <p className="text-[0.6rem] font-mono text-ink/85 leading-relaxed">{msg.style}</p>
+                        </div>
+                      )}
+                      {msg.strengths && msg.strengths.length > 0 && (
+                        <div className="frame-block p-2.5 bg-muted-teal/5 border-l-2 border-muted-teal">
+                          <p className="text-[0.55rem] font-mono text-ink font-bold mb-0.5">✅ Strengths</p>
+                          <ul className="space-y-0.5">
+                            {msg.strengths.map((s, si) => (
+                              <li key={si} className="text-[0.6rem] font-mono text-ink/85 flex items-start gap-1.5">
+                                <span className="text-muted-teal shrink-0">•</span>
+                                <span>{s}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {msg.weaknesses && msg.weaknesses.length > 0 && (
+                        <div className="frame-block p-2.5 bg-warm-brown/5 border-l-2 border-warm-brown">
+                          <p className="text-[0.55rem] font-mono text-ink font-bold mb-0.5">🔧 Areas to Improve</p>
+                          <ul className="space-y-0.5">
+                            {msg.weaknesses.map((w, wi) => (
+                              <li key={wi} className="text-[0.6rem] font-mono text-ink/85 flex items-start gap-1.5">
+                                <span className="text-warm-brown shrink-0">•</span>
+                                <span>{w}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {msg.improvements && msg.improvements.length > 0 && (
+                        <div className="frame-block p-2.5 bg-[#FFF5E6]/80 border-l-2 border-[#D4A574]">
+                          <p className="text-[0.55rem] font-mono text-ink font-bold mb-0.5">💡 Suggestions</p>
+                          <ul className="space-y-0.5">
+                            {msg.improvements.map((imp, ii) => (
+                              <li key={ii} className="text-[0.6rem] font-mono text-ink/85 flex items-start gap-1.5">
+                                <span className="text-[#D4A574] shrink-0">•</span>
+                                <span>{imp}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {msg.summary && (
+                        <div className="pt-1">
+                          <p className="text-[0.65rem] font-serif text-ink font-medium leading-relaxed italic">{msg.summary}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {msg.role === "assistant" && msg.type === "chat" && msg.content && (
+                  <div className="flex items-start gap-2">
+                    <OnigiriIcon className="w-4 h-4 shrink-0 mt-1" />
+                    <p className="text-[0.6rem] font-mono text-ink/85 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                )}
+              </div>
+            ))}
 
             {loading && (
-              <div className="flex flex-col items-center justify-center py-12 gap-3">
-                <OnigiriIcon className="w-10 h-10 animate-bounce" />
-                <span className="text-[0.65rem] font-mono text-warm-brown/70">Keizo is reviewing your code...</span>
+              <div className="flex items-center gap-2 py-3">
+                <OnigiriIcon className="w-5 h-5 animate-bounce" />
+                <span className="text-[0.6rem] font-mono text-warm-brown/60">Keizo is thinking...</span>
               </div>
             )}
 
-            {analysis && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-warm-brown/20">
-                  <OnigiriIcon className="w-5 h-5" />
-                  <span className="text-[0.65rem] font-mono text-warm-brown font-semibold">Keizo's Review</span>
-                </div>
-
-                {analysis.style && (
-                  <div className="frame-block p-3 bg-white/60">
-                    <p className="text-[0.65rem] font-mono text-ink font-bold mb-1">🎨 Style</p>
-                    <p className="text-[0.65rem] font-mono text-ink/90 leading-relaxed">{analysis.style}</p>
-                  </div>
-                )}
-
-                {analysis.strengths.length > 0 && (
-                  <div className="frame-block p-3 bg-muted-teal/5 border-l-2 border-muted-teal">
-                    <p className="text-[0.65rem] font-mono text-ink font-bold mb-1">✅ Strengths</p>
-                    <ul className="space-y-1">
-                      {analysis.strengths.map((s, i) => (
-                        <li key={i} className="text-[0.65rem] font-mono text-ink/90 flex items-start gap-2">
-                          <span className="text-muted-teal shrink-0 mt-0.5">•</span>
-                          <span>{s}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {analysis.weaknesses.length > 0 && (
-                  <div className="frame-block p-3 bg-warm-brown/5 border-l-2 border-warm-brown">
-                    <p className="text-[0.65rem] font-mono text-ink font-bold mb-1">🔧 Areas to Improve</p>
-                    <ul className="space-y-1">
-                      {analysis.weaknesses.map((w, i) => (
-                        <li key={i} className="text-[0.65rem] font-mono text-ink/90 flex items-start gap-2">
-                          <span className="text-warm-brown shrink-0 mt-0.5">•</span>
-                          <span>{w}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {analysis.improvements.length > 0 && (
-                  <div className="frame-block p-3 bg-[#FFF5E6]/80 border-l-2 border-[#D4A574]">
-                    <p className="text-[0.65rem] font-mono text-ink font-bold mb-1">💡 Suggestions</p>
-                    <ul className="space-y-1">
-                      {analysis.improvements.map((imp, i) => (
-                        <li key={i} className="text-[0.65rem] font-mono text-ink/90 flex items-start gap-2">
-                          <span className="text-[#D4A574] shrink-0 mt-0.5">•</span>
-                          <span>{imp}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {analysis.summary && (
-                  <div className="pt-3 border-t-2 border-warm-brown/10 mt-4">
-                    <p className="text-[0.7rem] font-serif text-ink font-medium leading-relaxed italic">
-                      {analysis.summary}
-                    </p>
-                  </div>
-                )}
-
-                <button onClick={reset} className="btn-base btn-interact-bg text-[0.6rem] w-full mt-2 font-medium">
-                  Review more code
-                </button>
-              </div>
-            )}
+            <div ref={chatEndRef} />
           </div>
+
+          {messageCount < MAX_MESSAGES && (
+            <div className="border-t border-warm-brown/10 p-3 space-y-2">
+              {mode === "review" && !hasMessages && null}
+              {mode === "chat" && !hasMessages && (
+                <p className="text-[0.55rem] font-mono text-muted-ink/50 text-center py-2">
+                  Ask me anything — coding, debugging, career, study tips.
+                </p>
+              )}
+              {(hasMessages || mode === "chat") && (
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={mode === "review" ? "Ask a follow-up..." : "Ask me anything..."}
+                    disabled={loading}
+                    className="field-coral flex-1 text-[0.6rem] font-mono disabled:opacity-40"
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!input.trim() || loading}
+                    className="btn-base btn-interact-bg text-[0.55rem] disabled:opacity-40 cursor-pointer"
+                  >
+                    Send
+                  </button>
+                  {(hasMessages || !hasMessages) && (
+                    <button
+                      onClick={reset}
+                      className="btn-base btn-outline btn-interact text-[0.5rem] cursor-pointer"
+                      title="New conversation"
+                    >
+                      ↺
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
