@@ -239,38 +239,38 @@ export default function MascotChat() {
             )}
 
             {mode === "review" && !hasMessages && !loading && (
-              <div className="space-y-2">
-                <textarea
-                  ref={textareaRef}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder="Paste your code here..."
-                  rows={6}
-                  className="field-coral w-full resize-y text-[0.6rem] font-mono"
-                />
-                <div className="flex items-center gap-2">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".js,.ts,.tsx,.jsx,.py,.rb,.go,.rs,.java,.cpp,.c,.h,.cs,.swift,.kt,.scala,.php,.html,.css,.scss,.sql,.sh,.yaml,.json,.xml,.md,.txt"
-                    onChange={handleFile}
-                    className="hidden"
+                <div className="space-y-2">
+                  <textarea
+                    ref={textareaRef}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder="Paste your code here..."
+                    rows={6}
+                    className="field-coral w-full resize-y text-[0.6rem] font-mono"
                   />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="btn-base btn-outline btn-interact text-[0.5rem] cursor-pointer"
-                  >
-                    {fileName ? `📎 ${fileName}` : "+ Upload file"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".js,.ts,.tsx,.jsx,.py,.rb,.go,.rs,.java,.cpp,.c,.h,.cs,.swift,.kt,.scala,.php,.html,.css,.scss,.sql,.sh,.yaml,.json,.xml,.md,.txt"
+                      onChange={handleFile}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="btn-base btn-outline btn-interact text-[0.5rem] cursor-pointer"
+                    >
+                      {fileName ? `📎 ${fileName}` : "+ Upload file"}
+                    </button>
+                  </div>
                   <button
                     onClick={sendMessage}
                     disabled={!code.trim()}
-                    className="btn-base bg-warm-brown text-white text-[0.6rem] py-2 ml-auto disabled:opacity-40 cursor-pointer font-medium"
+                    className="w-full py-2.5 bg-warm-brown text-white text-[0.6rem] font-mono font-semibold rounded-sm hover:bg-warm-brown/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                   >
                     Send for Review
                   </button>
                 </div>
-              </div>
             )}
 
             {hasMessages && messages.map((msg, i) => (
@@ -401,7 +401,7 @@ export default function MascotChat() {
                   <button
                     onClick={sendMessage}
                     disabled={!input.trim() || loading}
-                    className="btn-base btn-interact-bg text-[0.55rem] disabled:opacity-40 cursor-pointer"
+                    className="px-4 py-2 bg-warm-brown text-white text-[0.55rem] font-mono font-semibold rounded-sm hover:bg-warm-brown/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shrink-0"
                   >
                     Send
                   </button>
