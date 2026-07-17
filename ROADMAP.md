@@ -42,6 +42,10 @@ User, Account, Session, VerificationToken, Skill, UserSkill, StudyLog, StudyLogF
 - Push notifications (daily reminders)
 - macOS menu bar app
 
+## Pricing Plan (future)
+- **Free tier**: GPT-4o-mini, ~20 messages/session, remembers last ~10 messages
+- **Paid tier** (TBD): better model (GPT-4o+), unlimited/higher messages, full conversation memory, priority speed
+
 ## Future Ideas
 - [ ] **Every mistake you've made** — log and categorize coding mistakes (bug type, language, root cause) so you can review patterns and avoid repeating them
 - [ ] **Your coding style** — AI analyses your logs and code snippets to identify your coding style (e.g. functional vs OOP, naming conventions, preferred patterns)
