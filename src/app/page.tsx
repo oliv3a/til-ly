@@ -55,7 +55,7 @@ export default function LandingPage() {
             { title: "📝 Daily Logs", desc: "Write what you learned. AI summarizes and extracts your skills automatically." },
             { title: "🎯 Smart Goals", desc: "Set learning goals. AI builds a roadmap and tracks your progress." },
             { title: "🤖 Keizo Chat", desc: "Paste code for AI review or chat with a senior dev who gets the student grind." },
-            { title: "📄 AI Resume", desc: "Generate a polished resume from your study logs and projects. Editable and exportable." },
+            { title: "📄 AI Resume", desc: "Generate a polished, ATS-optimized resume from your logs and projects. Edit anytime, export as PDF." },
           ].map((card) => (
             <AnimatedCard key={card.title} className="frame-block">
               <h3 className="font-serif text-base text-warm-brown mb-1">{card.title}</h3>
