@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import Onigiri from "./Onigiri"
 
 const prompts = [
   "Ask me anything — coding, debugging, or just chat.",
@@ -194,7 +195,7 @@ export default function MascotChat() {
         <div className="frame-block w-[420px] max-w-[calc(100vw-2rem)] max-h-[80vh] flex flex-col bg-warm-paper shadow-xl">
           <div className="flex items-center justify-between p-3 border-b border-warm-brown/10">
             <div className="flex items-center gap-2">
-              <OnigiriIcon className="w-6 h-6" />
+              <Onigiri size={24} emotion="happy" />
               <span className="text-[0.65rem] font-mono text-warm-brown font-semibold">Keizo</span>
             </div>
             <button onClick={() => setOpen(false)} className="text-muted-ink/40 hover:text-warm-brown text-[0.7rem] cursor-pointer">✕</button>
@@ -241,7 +242,7 @@ export default function MascotChat() {
 
             {!hasMessages && !loading && (
               <div className="flex items-center gap-2 py-3">
-                <OnigiriIcon className="w-5 h-5 shrink-0" />
+                <Onigiri size={20} emotion="happy" className="shrink-0" />
                 <span className="text-[0.6rem] font-mono text-muted-ink/60">{prompts[currentPrompt]}</span>
               </div>
             )}
@@ -308,7 +309,7 @@ export default function MascotChat() {
                 {msg.role === "assistant" && msg.type === "review" && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <OnigiriIcon className="w-4 h-4" />
+                      <Onigiri size={16} emotion="happy" />
                       <span className="text-[0.5rem] font-mono text-muted-ink/50">Keizo</span>
                     </div>
                     <div className="space-y-2 pl-6">
@@ -369,7 +370,7 @@ export default function MascotChat() {
 
                 {msg.role === "assistant" && msg.type === "chat" && msg.content && (
                   <div className="flex items-start gap-2">
-                    <OnigiriIcon className="w-4 h-4 shrink-0 mt-1" />
+                    <Onigiri size={16} emotion="happy" className="shrink-0 mt-1" />
                     <p className="text-[0.6rem] font-mono text-ink/85 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 )}
@@ -378,7 +379,7 @@ export default function MascotChat() {
 
             {loading && (
               <div className="flex items-center gap-2 py-3">
-                <OnigiriIcon className="w-5 h-5 animate-bounce" />
+                <Onigiri size={20} emotion="happy" className="animate-bounce" />
                 <span className="text-[0.6rem] font-mono text-warm-brown/60">Keizo is thinking...</span>
               </div>
             )}
@@ -443,23 +444,9 @@ export default function MascotChat() {
           className="w-12 h-12 rounded-full bg-warm-brown text-white flex items-center justify-center shadow-lg hover:bg-warm-brown/90 transition-colors cursor-pointer"
           title={open ? "Close" : prompts[currentPrompt]}
         >
-          <OnigiriIcon className="w-7 h-7" />
+          <Onigiri size={28} emotion="happy" className="-translate-y-[1px]" />
         </button>
       </div>
     </div>
-  )
-}
-
-function OnigiriIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 100 100" className={className} xmlns="http://www.w3.org/2000/svg">
-      <path d="M 50 8 C 56 8 62 18 68 30 L 84 72 C 88 80 82 88 74 88 L 26 88 C 18 88 12 80 16 72 L 32 30 C 38 18 44 8 50 8 Z" fill="#FFF5E6" stroke="#E8D5C4" strokeWidth="1.5" />
-      <path d="M 16 62 L 84 62 C 86 70 86 78 74 88 L 26 88 C 14 78 14 70 16 62 Z" fill="#2D4A3E" />
-      <path d="M 33 45 Q 36 40 39 45" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M 61 45 Q 64 40 67 45" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
-      <ellipse cx="26" cy="51" rx="5" ry="3" fill="#F2C4C4" opacity="0.7" />
-      <ellipse cx="74" cy="51" rx="5" ry="3" fill="#F2C4C4" opacity="0.7" />
-      <path d="M 42 56 Q 50 64 58 56" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
-    </svg>
   )
 }
