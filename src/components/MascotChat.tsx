@@ -200,7 +200,7 @@ export default function MascotChat() {
                   mode === "review" ? "bg-white text-warm-brown font-medium shadow-sm" : "text-muted-ink/50 hover:text-warm-brown"
                 }`}
               >
-                Review
+                Code Review
               </button>
               <button
                 onClick={() => { if (!loading) setMode("chat") }}
