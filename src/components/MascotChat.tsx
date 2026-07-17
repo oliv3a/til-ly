@@ -441,10 +441,10 @@ export default function MascotChat() {
         </div>
         <button
           onClick={() => setOpen(!open)}
-          className="w-12 h-12 rounded-full bg-warm-brown text-white flex items-center justify-center shadow-lg hover:bg-warm-brown/90 transition-colors cursor-pointer"
+          className="cursor-pointer hover:opacity-80 transition-opacity"
           title={open ? "Close" : prompts[currentPrompt]}
         >
-          <Onigiri size={28} emotion="happy" className="-translate-y-[1px]" />
+          <Onigiri size={56} emotion="happy" accessory="laptop" className="drop-shadow-lg animate-breathe hover:animate-keizo-wiggle" />
         </button>
       </div>
     </div>
