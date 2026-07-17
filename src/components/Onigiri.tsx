@@ -71,10 +71,19 @@ export default function Onigiri({ size = 80, emotion = "neutral", accessory = nu
   )
 
   const accessoryEl = accessory === "laptop" ? (
-    <g transform={`translate(50, 70)`}>
-      <rect x={-16} y={-2} width={32} height={20} rx={2} fill="#E8D5C4" stroke="#1a1a1a" strokeWidth={1.5} />
-      <rect x={-12} y={1} width={24} height={14} rx={1} fill="#7BA89A" />
-      <rect x={-4} y={12} width={8} height={3} fill="#1a1a1a" opacity={0.3} />
+    <g transform={`translate(50, 68)`}>
+      <rect x={-18} y={-2} width={36} height={22} rx={2} fill="#E8D5C4" stroke="#1a1a1a" strokeWidth={1.5} />
+      <rect x={-15} y={0} width={30} height={14} rx={1} fill="#4A6B8A" />
+      <rect x={-13} y={2} width={6} height={1.5} rx={0.5} fill="#7FB8D8" opacity={0.8} />
+      <rect x={-5} y={2} width={10} height={1.5} rx={0.5} fill="#7FB8D8" opacity={0.6} />
+      <rect x={-13} y={4.5} width={8} height={1.5} rx={0.5} fill="#E8D5C4" opacity={0.7} />
+      <rect x={-3} y={4.5} width={6} height={1.5} rx={0.5} fill="#7FB8D8" opacity={0.5} />
+      <rect x={-13} y={7} width={4} height={1.5} rx={0.5} fill="#7FB8D8" opacity={0.7} />
+      <rect x={-7} y={7} width={12} height={1.5} rx={0.5} fill="#E8D5C4" opacity={0.6} />
+      <rect x={-13} y={9.5} width={10} height={1.5} rx={0.5} fill="#7FB8D8" opacity={0.5} />
+      <line x1={-16} y1={15} x2={16} y2={15} stroke="#1a1a1a" strokeWidth={1} />
+      <rect x={-14} y={15} width={28} height={5} rx={1} fill="#E8D5C4" stroke="#1a1a1a" strokeWidth={1} />
+      <rect x={-3} y={18} width={6} height={1.5} rx={2} fill="#1a1a1a" opacity={0.15} />
     </g>
   ) : accessory === "pencil" ? (
     <g transform={`translate(85, 45) rotate(-30)`}>
