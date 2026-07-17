@@ -403,7 +403,7 @@ export default function MascotChat() {
                     disabled={!input.trim() || loading}
                     className="px-4 py-2 bg-warm-brown text-white text-[0.55rem] font-mono font-semibold rounded-sm hover:bg-warm-brown/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shrink-0"
                   >
-                    Send
+                    Send →
                   </button>
                   {(hasMessages || !hasMessages) && (
                     <button
