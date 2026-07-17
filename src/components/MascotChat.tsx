@@ -265,7 +265,7 @@ export default function MascotChat() {
                   <button
                     onClick={sendMessage}
                     disabled={!code.trim()}
-                    className="btn-base btn-interact-bg text-[0.55rem] ml-auto disabled:opacity-40 cursor-pointer"
+                    className="btn-base bg-warm-brown text-white text-[0.6rem] py-2 ml-auto disabled:opacity-40 cursor-pointer font-medium"
                   >
                     Send for Review
                   </button>
