@@ -37,6 +37,7 @@ export default function MascotChat() {
   const [sentCode, setSentCode] = useState("")
   const [showCode, setShowCode] = useState<string | false>(false)
   const [currentPrompt, setCurrentPrompt] = useState(0)
+  const [showLabel, setShowLabel] = useState(true)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -46,6 +47,13 @@ export default function MascotChat() {
     const interval = setInterval(() => {
       setCurrentPrompt((prev) => (prev + 1) % prompts.length)
     }, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowLabel((prev) => !prev)
+    }, 4000)
     return () => clearInterval(interval)
   }, [])
 
@@ -421,13 +429,23 @@ export default function MascotChat() {
         </div>
       )}
 
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-12 h-12 rounded-full bg-warm-brown text-white flex items-center justify-center shadow-lg hover:bg-warm-brown/90 transition-colors cursor-pointer"
-        title={open ? "Close" : prompts[currentPrompt]}
-      >
-        <OnigiriIcon className="w-7 h-7" />
-      </button>
+      <div className="flex items-center gap-2">
+        <div
+          className={`transition-opacity duration-500 ease-in-out ${showLabel && !open ? "opacity-100" : "opacity-0"}`}
+        >
+          <div className="bg-warm-brown text-white text-[0.55rem] font-mono px-3 py-1.5 rounded-sm shadow-md relative whitespace-nowrap">
+            Chat with Keizo
+            <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-warm-brown rotate-45" />
+          </div>
+        </div>
+        <button
+          onClick={() => setOpen(!open)}
+          className="w-12 h-12 rounded-full bg-warm-brown text-white flex items-center justify-center shadow-lg hover:bg-warm-brown/90 transition-colors cursor-pointer"
+          title={open ? "Close" : prompts[currentPrompt]}
+        >
+          <OnigiriIcon className="w-7 h-7" />
+        </button>
+      </div>
     </div>
   )
 }
