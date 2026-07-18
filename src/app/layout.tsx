@@ -28,7 +28,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "til.ly",
   description: "Track your coding journey, one log at a time.",
-  icons: { icon: "/mascot-icon.svg" },
+  icons: { icon: "/logo-brand.png" },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

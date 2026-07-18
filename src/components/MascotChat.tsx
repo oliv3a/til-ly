@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import Mascot from "./Mascot"
 
 const prompts = [
   "Ask me anything — coding, debugging, or just chat.",
@@ -195,8 +194,7 @@ export default function MascotChat() {
         <div className="frame-block w-[420px] max-w-[calc(100vw-2rem)] max-h-[80vh] flex flex-col bg-warm-paper shadow-xl">
           <div className="flex items-center justify-between p-3 border-b border-warm-brown/10">
             <div className="flex items-center gap-2">
-              <Mascot size={24} emotion="happy" />
-              <span className="text-[0.65rem] font-mono text-warm-brown font-semibold">Tilly</span>
+              <span className="text-[0.65rem] font-mono text-warm-brown font-semibold">💬 Chat</span>
             </div>
             <button onClick={() => setOpen(false)} className="text-muted-ink/40 hover:text-warm-brown text-[0.7rem] cursor-pointer">✕</button>
           </div>
@@ -242,7 +240,6 @@ export default function MascotChat() {
 
             {!hasMessages && !loading && (
               <div className="flex items-center gap-2 py-3">
-                <Mascot size={20} emotion="happy" className="shrink-0" />
                 <span className="text-[0.6rem] font-mono text-muted-ink/60">{prompts[currentPrompt]}</span>
               </div>
             )}
@@ -309,8 +306,7 @@ export default function MascotChat() {
                 {msg.role === "assistant" && msg.type === "review" && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Mascot size={16} emotion="happy" />
-                      <span className="text-[0.5rem] font-mono text-muted-ink/50">Tilly</span>
+                      <span className="text-[0.5rem] font-mono text-muted-ink/50">Assistant</span>
                     </div>
                     <div className="space-y-2 pl-6">
                       {/* @ts-ignore */}
@@ -370,7 +366,6 @@ export default function MascotChat() {
 
                 {msg.role === "assistant" && msg.type === "chat" && msg.content && (
                   <div className="flex items-start gap-2">
-                    <Mascot size={16} emotion="happy" className="shrink-0 mt-1" />
                     <p className="text-[0.6rem] font-mono text-ink/85 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 )}
@@ -379,8 +374,7 @@ export default function MascotChat() {
 
             {loading && (
               <div className="flex items-center gap-2 py-3">
-                <Mascot size={20} emotion="happy" className="animate-bounce" />
-                <span className="text-[0.6rem] font-mono text-warm-brown/60">Tilly is thinking...</span>
+                <span className="text-[0.6rem] font-mono text-warm-brown/60">Thinking...</span>
               </div>
             )}
 
@@ -435,16 +429,18 @@ export default function MascotChat() {
           className={`transition-opacity duration-500 ease-in-out ${showLabel && !open ? "opacity-100" : "opacity-0"}`}
         >
           <div className="bg-warm-brown text-white text-[0.55rem] font-mono px-3 py-1.5 rounded-sm shadow-md relative whitespace-nowrap">
-            Chat with Tilly
+            Chat with us
             <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-warm-brown rotate-45" />
           </div>
         </div>
         <button
           onClick={() => setOpen(!open)}
-          className="cursor-pointer hover:opacity-80 transition-opacity"
+          className="w-12 h-12 rounded-full bg-warm-brown text-white flex items-center justify-center shadow-lg hover:bg-warm-brown/90 transition-colors cursor-pointer"
           title={open ? "Close" : prompts[currentPrompt]}
         >
-          <Mascot size={56} emotion="happy" accessory="laptop" className="drop-shadow-lg animate-breathe hover:animate-tilly-wiggle" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
         </button>
       </div>
     </div>

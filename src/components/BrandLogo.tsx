@@ -1,25 +1,23 @@
 import Image from "next/image"
-import Mascot from "./Mascot"
+import type { CSSProperties } from "react"
 
 interface Props {
   size?: number
   className?: string
-  variant?: "stamp" | "mascot"
+  style?: CSSProperties
 }
 
-export default function BrandLogo({ size = 32, className = "", variant = "mascot" }: Props) {
-  if (variant === "stamp") {
-    return (
-      <Image
-        src="/logo.svg"
-        alt="til.ly"
-        width={size}
-        height={size}
-        className={`inline-block ${className}`}
-        priority
-      />
-    )
-  }
-
-  return <Mascot size={size} emotion="happy" className={className} />
+export default function BrandLogo({ size = 32, className = "", style }: Props) {
+  const asp = 620 / 330
+  return (
+    <Image
+      src="/logo-brand.png"
+      alt="til.ly"
+      width={Math.round(size * asp)}
+      height={size}
+      className={`inline-block ${className}`}
+      style={style}
+      priority
+    />
+  )
 }

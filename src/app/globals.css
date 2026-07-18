@@ -17,15 +17,15 @@
   --color-turquoise: #7AD8C8;
 
   /* Old names mapped to new pastels for compatibility */
-  --color-soft-coral: #7AD8C8;
-  --color-muted-teal: #B8C8B0;
+  --color-soft-coral: #aac0bc;
+  --color-muted-teal: #8b9b98;
   --color-peach: #F0E0A8;
   --color-muted-blue: #C4D4E0;
   --color-faded-purple: #C8B8D0;
 
-  /* Mascot */
-  --color-mascot-body: #B8E6D8;
-  --color-mascot-ear: #A0D8C8;
+  /* Brand */
+  --color-mascot-body: #aac0bc;
+  --color-mascot-ear: #8b9b98;
 
   --font-serif: "Satoshi", sans-serif;
   --font-sans: "Inter", sans-serif;

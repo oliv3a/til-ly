@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
-import Mascot from "./Mascot"
+import BrandLogo from "./BrandLogo"
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
@@ -36,7 +36,7 @@ export default function NavBar() {
       <div className="nav-bar-inner">
         <div className="flex items-center gap-2 shrink-0">
           <Link href="/dashboard" className="flex items-center gap-2" onClick={closeMenu}>
-            <Mascot size={28} emotion="happy" />
+            <BrandLogo size={28} />
             <span className="font-serif text-sm text-warm-brown hidden sm:inline">til.ly</span>
           </Link>
         </div>

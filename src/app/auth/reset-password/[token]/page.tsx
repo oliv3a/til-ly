@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
-import AnimatedMascot from "@/components/AnimatedMascot"
+import BrandLogo from "@/components/BrandLogo"
 import PageShell from "@/components/PageShell"
 
 export default function ResetPasswordPage() {
@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="w-full max-w-sm animate-fade-in-up">
             <div className="text-center mb-6">
-              <AnimatedMascot size={72} emotion="happy" />
+              <BrandLogo size={72} />
             </div>
             <div className="frame-block">
               <h2 className="font-serif text-xl text-warm-brown text-center mb-4">Password reset</h2>
@@ -83,7 +83,7 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-sm animate-fade-in-up">
           <div className="text-center mb-6">
-            <AnimatedMascot size={72} emotion="neutral" />
+            <BrandLogo size={72} />
           </div>
 
           <div className="frame-block">

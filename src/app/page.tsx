@@ -1,7 +1,7 @@
 import Link from "next/link"
 import dynamic from "next/dynamic"
 import PageShell from "@/components/PageShell"
-import Mascot from "@/components/Mascot"
+import BrandLogo from "@/components/BrandLogo"
 import AnimatedCard from "@/lib/motion/components/AnimatedCard"
 
 const MacMenuBarDemo = dynamic(() => import("@/components/MacMenuBarDemo"))
@@ -14,7 +14,7 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto text-center animate-fade-in-up">
           {/* mascot hero */}
           <div className="mb-6 inline-block group">
-            <Mascot size={140} emotion="happy" accessory="laptop" className="animate-breathe group-hover:animate-tilly-wiggle" />
+            <BrandLogo size={140} className="animate-breathe group-hover:animate-tilly-wiggle" />
           </div>
 
           {/* badge */}
@@ -69,7 +69,7 @@ export default function LandingPage() {
           <div className="frame-block p-4">
             <div className="flex items-start gap-4 mb-4">
               <div className="shrink-0 mt-0.5">
-                <Mascot size={40} emotion="happy" />
+                <BrandLogo size={40} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
@@ -104,7 +104,7 @@ export default function LandingPage() {
 
         {/* bottom mascot */}
         <div className="mt-16 text-center animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-          <Mascot size={48} emotion="sleepy" className="animate-breathe" />
+          <BrandLogo size={48} className="animate-breathe" />
           <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-2">tilly · til.ly</p>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import localFont from "next/font/local"
 import { Inter, IBM_Plex_Mono } from "next/font/google"
-import Mascot from "@/components/Mascot"
+import BrandLogo from "@/components/BrandLogo"
 
 const satoshi = localFont({
   src: "../fonts/Satoshi-Variable.woff2",
@@ -27,7 +27,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
       <body>
         <div className="min-h-screen bg-cream flex items-center justify-center px-6">
           <div className="max-w-md w-full frame-block text-center p-8">
-            <Mascot size={64} emotion="sleepy" className="mx-auto mb-4" />
+            <BrandLogo size={64} className="mx-auto mb-4" />
             <h1 className="poster-heading text-xl mb-2">Something went wrong</h1>
             <p className="text-sm font-mono text-muted-ink/60 mb-6 line-clamp-2">
               {error.message || "A critical error occurred"}

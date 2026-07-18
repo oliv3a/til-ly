@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "motion/react"
-import Mascot from "./Mascot"
+import BrandLogo from "./BrandLogo"
 
 type Stage = "idle" | "menu-in" | "popover-open" | "typing-email" | "typing-pass" | "logging-in" | "logged-in"
 
@@ -140,7 +140,7 @@ export default function MacMenuBarDemo() {
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
           >
-            <Mascot size={16} emotion={stage === "logged-in" ? "happy" : "neutral"} />
+            <BrandLogo size={16} />
             {/* subtle pulse dot when closed */}
             {!showPopover && stage !== "idle" && (
               <motion.span
@@ -172,7 +172,7 @@ export default function MacMenuBarDemo() {
                       animate={stage === "logging-in" ? { scale: 0.85, opacity: 0 } : {}}
                       transition={{ duration: 0.25 }}
                     >
-                      <Mascot size={40} emotion="neutral" />
+                      <BrandLogo size={40} />
                       <motion.h3
                         className="font-serif text-base text-warm-brown mt-2 mb-0.5"
                         animate={stage === "typing-email" || stage === "typing-pass" ? { y: [0, -1, 1, 0] } : {}}
@@ -259,7 +259,7 @@ export default function MacMenuBarDemo() {
                     transition={{ duration: 0.3 }}
                     className="text-center"
                   >
-                    <Mascot size={40} emotion="happy" />
+                    <BrandLogo size={40} />
                     <motion.h3
                       className="font-serif text-base text-warm-brown mt-2 mb-0.5"
                       initial={{ scale: 0.8 }}

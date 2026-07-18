@@ -4,7 +4,7 @@ import { useState } from "react"
 import { signIn, signOut } from "next-auth/react"
 import { motion } from "motion/react"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
-import AnimatedMascot from "@/components/AnimatedMascot"
+import BrandLogo from "@/components/BrandLogo"
 import { fadeIn } from "@/lib/motion/variants"
 
 function greeting(): string {
@@ -51,7 +51,7 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-xs text-center">
-          <AnimatedMascot size={64} emotion="happy" />
+          <BrandLogo size={64} />
 
           <h2 className="font-serif text-lg text-warm-brown mt-3 mb-1">
             {greeting()}, {user.name}!
@@ -91,7 +91,7 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <div className="w-full max-w-xs animate-fade-in-up">
         <div className="text-center mb-4">
-          <AnimatedMascot size={64} emotion="neutral" />
+          <BrandLogo size={64} />
         </div>
 
         <div className="frame-block">

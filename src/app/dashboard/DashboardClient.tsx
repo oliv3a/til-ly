@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "motion/react"
-import Mascot from "@/components/Mascot"
+import BrandLogo from "@/components/BrandLogo"
 import { colorForSkill } from "@/lib/skill-colors"
 import { staggerContainer, staggerItem } from "@/lib/motion/variants"
 import { easings } from "@/lib/motion/tokens"
@@ -454,7 +454,7 @@ function MacSplitCard() {
   return (
     <div className="dash-card p-0 overflow-visible relative flex">
       <div className="w-[40%] flex items-center gap-2.5 p-2.5 shrink-0">
-        <Mascot size={24} emotion="happy" className="shrink-0" />
+        <BrandLogo size={24} className="shrink-0" />
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
             <p className="text-[0.65rem] font-serif font-bold text-warm-brown leading-tight">til.ly: Always There.</p>
@@ -512,7 +512,7 @@ function MacSplitCard() {
                 animate={cursorPhase === "click" ? { scale: [1, 0.8, 1] } : {}}
                 transition={{ duration: 0.25 }}
               >
-                <Mascot size={14} emotion="happy" className="shrink-0 animate-tilly-wiggle-slow" style={{ animationDelay: "4s" }} />
+                <BrandLogo size={14} className="shrink-0 animate-tilly-wiggle-slow" style={{ animationDelay: "4s" }} />
               </motion.div>
               <motion.span
                 className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-soft-coral rounded-full"

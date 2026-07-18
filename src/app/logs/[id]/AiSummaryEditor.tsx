@@ -4,7 +4,7 @@ import { useState } from "react"
 import { motion } from "motion/react"
 import { parseAiSummary, combineAiSummary, summaryToBullets } from "@/lib/ai-summary"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
-import AnimatedMascot from "@/components/AnimatedMascot"
+import BrandLogo from "@/components/BrandLogo"
 import { staggerContainer, staggerItem } from "@/lib/motion/variants"
 
 interface Props {
@@ -64,7 +64,7 @@ export default function AiSummaryEditor({ logId, initialSummary }: Props) {
 
       {generating ? (
         <div className="flex items-center gap-2 text-[0.65rem] font-mono text-muted-ink/50">
-          <AnimatedMascot size={32} emotion="thinking" />
+          <BrandLogo size={32} />
           Generating AI summary...
         </div>
       ) : genError ? (
