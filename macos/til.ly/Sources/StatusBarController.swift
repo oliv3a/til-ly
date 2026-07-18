@@ -108,28 +108,29 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
 
         guard let ctx = NSGraphicsContext.current?.cgContext else { return image }
 
-        // Scale from viewBox (100x100, y-down) to icon (18x18, y-up)
         let s: CGFloat = 18 / 100
         ctx.translateBy(x: 0, y: 18)
         ctx.scaleBy(x: s, y: -s)
 
-        let bodyColor = CGColor(red: 0.72, green: 0.90, blue: 0.85, alpha: 1) // #B8E6D8
-        let earColor = CGColor(red: 0.63, green: 0.85, blue: 0.78, alpha: 1)   // #A0D8C8
-        let outlineColor = CGColor(red: 0.11, green: 0.11, blue: 0.11, alpha: 1) // #1C1C1C
-
-        ctx.setStrokeColor(outlineColor)
+        let bodyColor = CGColor(red: 0.72, green: 0.90, blue: 0.85, alpha: 1)
+        let earColor = CGColor(red: 0.63, green: 0.85, blue: 0.78, alpha: 1)
+        let outlineColor = CGColor(red: 0.11, green: 0.11, blue: 0.11, alpha: 1)
+        let collarColor = CGColor(red: 0.48, green: 0.85, blue: 0.78, alpha: 1)
+        let codeTagColor = CGColor(red: 0.29, green: 0.42, blue: 0.54, alpha: 1)
+        let codeLineColor = CGColor(red: 0.50, green: 0.72, blue: 0.85, alpha: 1)
+        let codeLineColor2 = CGColor(red: 0.91, green: 0.84, blue: 0.77, alpha: 1)
 
         // Shadow
         ctx.setFillColor(CGColor(red: 0, green: 0, blue: 0, alpha: 0.06))
-        ctx.fillEllipse(in: CGRect(x: 20, y: 89, width: 64, height: 6))
+        ctx.fillEllipse(in: CGRect(x: 16, y: 89, width: 68, height: 6))
 
         // Tail
         ctx.setStrokeColor(outlineColor)
         ctx.setLineWidth(2.5)
         ctx.setLineCap(.round)
         let tail = CGMutablePath()
-        tail.move(to: CGPoint(x: 80, y: 54))
-        tail.addCurve(to: CGPoint(x: 92, y: 38), control1: CGPoint(x: 90, y: 50), control2: CGPoint(x: 94, y: 44))
+        tail.move(to: CGPoint(x: 84, y: 56))
+        tail.addQuadCurve(to: CGPoint(x: 94, y: 40), control: CGPoint(x: 94, y: 50))
         ctx.addPath(tail)
         ctx.strokePath()
 
@@ -138,76 +139,69 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
         ctx.setStrokeColor(outlineColor)
         ctx.setLineWidth(1.5)
         let body = CGMutablePath()
-        body.move(to: CGPoint(x: 38, y: 44))
-        body.addCurve(to: CGPoint(x: 82, y: 52), control1: CGPoint(x: 60, y: 40), control2: CGPoint(x: 78, y: 44))
-        body.addCurve(to: CGPoint(x: 80, y: 76), control1: CGPoint(x: 86, y: 60), control2: CGPoint(x: 84, y: 72))
-        body.addCurve(to: CGPoint(x: 38, y: 74), control1: CGPoint(x: 76, y: 80), control2: CGPoint(x: 44, y: 80))
-        body.addCurve(to: CGPoint(x: 38, y: 44), control1: CGPoint(x: 32, y: 68), control2: CGPoint(x: 30, y: 50))
+        body.move(to: CGPoint(x: 30, y: 48))
+        body.addQuadCurve(to: CGPoint(x: 84, y: 48), control: CGPoint(x: 58, y: 44))
+        body.addQuadCurve(to: CGPoint(x: 84, y: 68), control: CGPoint(x: 90, y: 52))
+        body.addQuadCurve(to: CGPoint(x: 30, y: 68), control: CGPoint(x: 58, y: 72))
+        body.addQuadCurve(to: CGPoint(x: 30, y: 48), control: CGPoint(x: 24, y: 64))
         body.closeSubpath()
         ctx.addPath(body)
         ctx.fillPath()
         ctx.addPath(body)
         ctx.strokePath()
 
-        // Back legs
-        ctx.setStrokeColor(outlineColor)
-        ctx.setLineWidth(1.5)
+        // Body highlight
+        ctx.setStrokeColor(CGColor(red: 1, green: 1, blue: 1, alpha: 0.35))
+        ctx.setLineWidth(2)
         ctx.setLineCap(.round)
-        let backLeg1 = CGMutablePath()
-        backLeg1.move(to: CGPoint(x: 72, y: 74))
-        backLeg1.addCurve(to: CGPoint(x: 72, y: 90), control1: CGPoint(x: 68, y: 88), control2: CGPoint(x: 68, y: 90))
-        backLeg1.addCurve(to: CGPoint(x: 76, y: 90), control1: CGPoint(x: 76, y: 92), control2: CGPoint(x: 72, y: 92))
-        backLeg1.addCurve(to: CGPoint(x: 76, y: 74), control1: CGPoint(x: 76, y: 88), control2: CGPoint(x: 76, y: 74))
-        ctx.addPath(backLeg1)
+        let hl = CGMutablePath()
+        hl.move(to: CGPoint(x: 34, y: 54))
+        hl.addQuadCurve(to: CGPoint(x: 80, y: 56), control: CGPoint(x: 58, y: 52))
+        ctx.addPath(hl)
         ctx.strokePath()
 
-        let backLeg2 = CGMutablePath()
-        backLeg2.move(to: CGPoint(x: 76, y: 74))
-        backLeg2.addCurve(to: CGPoint(x: 74, y: 90), control1: CGPoint(x: 74, y: 88), control2: CGPoint(x: 74, y: 90))
-        backLeg2.addCurve(to: CGPoint(x: 78, y: 90), control1: CGPoint(x: 78, y: 92), control2: CGPoint(x: 74, y: 92))
-        backLeg2.addCurve(to: CGPoint(x: 80, y: 74), control1: CGPoint(x: 78, y: 88), control2: CGPoint(x: 80, y: 74))
-        ctx.addPath(backLeg2)
-        ctx.strokePath()
-
-        // Front legs
-        let frontLeg1 = CGMutablePath()
-        frontLeg1.move(to: CGPoint(x: 40, y: 74))
-        frontLeg1.addCurve(to: CGPoint(x: 36, y: 90), control1: CGPoint(x: 36, y: 88), control2: CGPoint(x: 36, y: 90))
-        frontLeg1.addCurve(to: CGPoint(x: 40, y: 90), control1: CGPoint(x: 40, y: 92), control2: CGPoint(x: 36, y: 92))
-        frontLeg1.addCurve(to: CGPoint(x: 44, y: 74), control1: CGPoint(x: 40, y: 88), control2: CGPoint(x: 44, y: 74))
-        ctx.addPath(frontLeg1)
-        ctx.strokePath()
-
-        let frontLeg2 = CGMutablePath()
-        frontLeg2.move(to: CGPoint(x: 44, y: 74))
-        frontLeg2.addCurve(to: CGPoint(x: 40, y: 90), control1: CGPoint(x: 40, y: 88), control2: CGPoint(x: 40, y: 90))
-        frontLeg2.addCurve(to: CGPoint(x: 44, y: 90), control1: CGPoint(x: 44, y: 92), control2: CGPoint(x: 40, y: 92))
-        frontLeg2.addCurve(to: CGPoint(x: 48, y: 74), control1: CGPoint(x: 44, y: 88), control2: CGPoint(x: 48, y: 74))
-        ctx.addPath(frontLeg2)
-        ctx.strokePath()
+        // Legs
+        ctx.setStrokeColor(outlineColor)
+        ctx.setLineWidth(1.2)
+        let drawLeg: (CGFloat, CGFloat, CGFloat, CGFloat) -> Void = { x, y, w, h in
+            let rect = CGRect(x: x, y: y, width: w, height: h)
+            ctx.setFillColor(bodyColor)
+            ctx.fill(rect)
+            ctx.stroke(rect)
+        }
+        drawLeg(34, 68, 6, 16)
+        drawLeg(42, 68, 6, 16)
+        drawLeg(72, 68, 6, 16)
+        drawLeg(80, 68, 6, 16)
 
         // Paws
         ctx.setFillColor(bodyColor)
         ctx.setStrokeColor(outlineColor)
-        ctx.setLineWidth(1.2)
-        ctx.fillEllipse(in: CGRect(x: 34, y: 88.5, width: 8, height: 5))
-        ctx.strokeEllipse(in: CGRect(x: 34, y: 88.5, width: 8, height: 5))
-        ctx.fillEllipse(in: CGRect(x: 42, y: 88.5, width: 8, height: 5))
-        ctx.strokeEllipse(in: CGRect(x: 42, y: 88.5, width: 8, height: 5))
-        ctx.fillEllipse(in: CGRect(x: 66, y: 88.5, width: 8, height: 5))
-        ctx.strokeEllipse(in: CGRect(x: 66, y: 88.5, width: 8, height: 5))
-        ctx.fillEllipse(in: CGRect(x: 74, y: 88.5, width: 8, height: 5))
-        ctx.strokeEllipse(in: CGRect(x: 74, y: 88.5, width: 8, height: 5))
+        ctx.setLineWidth(1)
+        let drawPaw: (CGFloat, CGFloat) -> Void = { cx, cy in
+            let rect = CGRect(x: cx - 3.5, y: cy - 2, width: 7, height: 4)
+            ctx.fillEllipse(in: rect)
+            ctx.strokeEllipse(in: rect)
+        }
+        drawPaw(37, 86)
+        drawPaw(45, 86)
+        drawPaw(75, 86)
+        drawPaw(83, 86)
+
+        // Neck fill
+        ctx.setFillColor(bodyColor)
+        ctx.addRect(CGRect(x: 30, y: 42, width: 6, height: 6))
+        ctx.fillPath()
 
         // Ear
         ctx.setFillColor(earColor)
         ctx.setStrokeColor(outlineColor)
         ctx.setLineWidth(1.5)
         let ear = CGMutablePath()
-        ear.move(to: CGPoint(x: 40, y: 22))
-        ear.addCurve(to: CGPoint(x: 48, y: 48), control1: CGPoint(x: 48, y: 24), control2: CGPoint(x: 50, y: 38))
-        ear.addCurve(to: CGPoint(x: 38, y: 48), control1: CGPoint(x: 46, y: 52), control2: CGPoint(x: 40, y: 52))
-        ear.addCurve(to: CGPoint(x: 40, y: 22), control1: CGPoint(x: 36, y: 44), control2: CGPoint(x: 36, y: 30))
+        ear.move(to: CGPoint(x: 30, y: 12))
+        ear.addQuadCurve(to: CGPoint(x: 46, y: 38), control: CGPoint(x: 46, y: 16))
+        ear.addQuadCurve(to: CGPoint(x: 36, y: 44), control: CGPoint(x: 46, y: 48))
+        ear.addQuadCurve(to: CGPoint(x: 30, y: 12), control: CGPoint(x: 30, y: 34))
         ear.closeSubpath()
         ctx.addPath(ear)
         ctx.fillPath()
@@ -219,12 +213,10 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
         ctx.setStrokeColor(outlineColor)
         ctx.setLineWidth(1.5)
         let head = CGMutablePath()
-        head.move(to: CGPoint(x: 40, y: 22))
-        head.addCurve(to: CGPoint(x: 14, y: 22), control1: CGPoint(x: 36, y: 12), control2: CGPoint(x: 18, y: 16))
-        head.addCurve(to: CGPoint(x: 14, y: 34), control1: CGPoint(x: 12, y: 26), control2: CGPoint(x: 12, y: 32))
-        head.addCurve(to: CGPoint(x: 26, y: 40), control1: CGPoint(x: 16, y: 36), control2: CGPoint(x: 20, y: 40))
-        head.addCurve(to: CGPoint(x: 42, y: 34), control1: CGPoint(x: 32, y: 40), control2: CGPoint(x: 38, y: 38))
-        head.addCurve(to: CGPoint(x: 40, y: 22), control1: CGPoint(x: 44, y: 30), control2: CGPoint(x: 44, y: 26))
+        head.move(to: CGPoint(x: 34, y: 42))
+        head.addCurve(to: CGPoint(x: 6, y: 22), control1: CGPoint(x: 38, y: 26), control2: CGPoint(x: 34, y: 8))
+        head.addCurve(to: CGPoint(x: 16, y: 34), control1: CGPoint(x: 6, y: 28), control2: CGPoint(x: 10, y: 32))
+        head.addCurve(to: CGPoint(x: 34, y: 44), control1: CGPoint(x: 22, y: 36), control2: CGPoint(x: 28, y: 38))
         head.closeSubpath()
         ctx.addPath(head)
         ctx.fillPath()
@@ -233,21 +225,75 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
 
         // Nose
         ctx.setFillColor(outlineColor)
-        ctx.fillEllipse(in: CGRect(x: 11.5, y: 24, width: 5, height: 4))
+        ctx.fillEllipse(in: CGRect(x: 4.5, y: 22, width: 5, height: 4))
 
         // Eye
         ctx.setFillColor(outlineColor)
-        ctx.fillEllipse(in: CGRect(x: 27.5, y: 27.5, width: 5, height: 5))
+        ctx.fillEllipse(in: CGRect(x: 17.5, y: 19.5, width: 5, height: 5))
+
+        // Glasses lens
+        ctx.setStrokeColor(outlineColor)
+        ctx.setLineWidth(1.2)
+        ctx.strokeEllipse(in: CGRect(x: 14, y: 16, width: 12, height: 12))
+
+        // Glasses arm
+        ctx.setLineWidth(1.2)
+        ctx.setLineCap(.round)
+        let arm = CGMutablePath()
+        arm.move(to: CGPoint(x: 26, y: 22))
+        arm.addLine(to: CGPoint(x: 34, y: 19))
+        ctx.addPath(arm)
+        ctx.strokePath()
 
         // Collar
-        ctx.setStrokeColor(CGColor(red: 0.48, green: 0.85, blue: 0.78, alpha: 1)) // #7AD8C8
+        ctx.setStrokeColor(collarColor)
         ctx.setLineWidth(3)
         ctx.setLineCap(.round)
         let collar = CGMutablePath()
-        collar.move(to: CGPoint(x: 28, y: 42))
-        collar.addLine(to: CGPoint(x: 44, y: 42))
+        collar.move(to: CGPoint(x: 22, y: 40))
+        collar.addLine(to: CGPoint(x: 36, y: 42))
         ctx.addPath(collar)
         ctx.strokePath()
+
+        // Code-window tag
+        ctx.setFillColor(codeTagColor)
+        ctx.setStrokeColor(outlineColor)
+        ctx.setLineWidth(1)
+        let tagRect = CGRect(x: 24, y: 38, width: 10, height: 10)
+        ctx.addPath(CGPath(roundedRect: tagRect, cornerWidth: 1.5, cornerHeight: 1.5, transform: nil))
+        ctx.fillPath()
+        ctx.addPath(CGPath(roundedRect: tagRect, cornerWidth: 1.5, cornerHeight: 1.5, transform: nil))
+        ctx.strokePath()
+
+        ctx.setStrokeColor(codeLineColor)
+        ctx.setLineWidth(1.5)
+        ctx.setLineCap(.round)
+        let line1 = CGMutablePath()
+        line1.move(to: CGPoint(x: 26, y: 41.5))
+        line1.addLine(to: CGPoint(x: 32, y: 41.5))
+        ctx.addPath(line1)
+        ctx.strokePath()
+
+        ctx.setStrokeColor(codeLineColor2)
+        let line2 = CGMutablePath()
+        line2.move(to: CGPoint(x: 26, y: 44.5))
+        line2.addLine(to: CGPoint(x: 30, y: 44.5))
+        ctx.addPath(line2)
+        ctx.strokePath()
+
+        // Smile
+        ctx.setStrokeColor(outlineColor)
+        ctx.setLineWidth(1.5)
+        ctx.setLineCap(.round)
+        let smile = CGMutablePath()
+        smile.move(to: CGPoint(x: 10, y: 31))
+        smile.addQuadCurve(to: CGPoint(x: 16, y: 31), control: CGPoint(x: 13, y: 33))
+        ctx.addPath(smile)
+        ctx.strokePath()
+
+        // Blush
+        ctx.setFillColor(CGColor(red: 0.95, green: 0.77, blue: 0.77, alpha: 0.5))
+        ctx.fillEllipse(in: CGRect(x: 14, y: 25.5, width: 6, height: 3))
 
         return image
     }
