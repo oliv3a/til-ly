@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import PageShell from "@/components/PageShell"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — KeizoKode",
+  title: "Privacy Policy — til.ly",
 }
 
 export default function PrivacyPage() {
@@ -11,7 +11,7 @@ export default function PrivacyPage() {
       <div className="max-w-2xl mx-auto py-10 space-y-6 text-muted-ink text-[0.85rem] leading-relaxed">
         <h1 className="text-xl font-bold text-ink">Privacy Policy</h1>
         <p>
-          KeizoKode is a study-log platform for CS students. This policy explains what data we collect and how it is used.
+          til.ly is a study-log platform for CS students. This policy explains what data we collect and how it is used.
         </p>
 
         <h2 className="text-base font-semibold text-ink mt-8">Data We Collect</h2>

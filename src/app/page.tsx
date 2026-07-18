@@ -1,7 +1,7 @@
 import Link from "next/link"
 import dynamic from "next/dynamic"
 import PageShell from "@/components/PageShell"
-import Onigiri from "@/components/Onigiri"
+import Mascot from "@/components/Mascot"
 import AnimatedCard from "@/lib/motion/components/AnimatedCard"
 
 const MacMenuBarDemo = dynamic(() => import("@/components/MacMenuBarDemo"))
@@ -12,9 +12,9 @@ export default function LandingPage() {
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
         {/* hero */}
         <div className="max-w-2xl mx-auto text-center animate-fade-in-up">
-          {/* onigiri hero */}
+          {/* mascot hero */}
           <div className="mb-6 inline-block group">
-            <Onigiri size={140} emotion="happy" accessory="laptop" className="animate-breathe group-hover:animate-keizo-wiggle" />
+            <Mascot size={140} emotion="happy" accessory="laptop" className="animate-breathe group-hover:animate-tilly-wiggle" />
           </div>
 
           {/* badge */}
@@ -34,7 +34,7 @@ export default function LandingPage() {
           <span className="deco-dash deco-dash-wide mx-auto" />
 
           <p className="font-mono text-sm text-muted-ink leading-relaxed max-w-md mx-auto mb-8">
-            Every day you code is a step forward. KeizoKode keeps track, AI summarizes
+            Every day you code is a step forward. til.ly keeps track, AI summarizes
             your work, and your portfolio shows recruiters exactly what you&apos;ve been building.
           </p>
 
@@ -54,7 +54,7 @@ export default function LandingPage() {
           {[
             { title: "📝 Daily Logs", desc: "Write what you learned. AI summarizes and extracts your skills automatically." },
             { title: "🎯 Smart Goals", desc: "Set learning goals. AI builds a roadmap and tracks your progress." },
-            { title: "🤖 Keizo Chat", desc: "Paste code for AI review or chat with a senior dev who gets the student grind." },
+            { title: "🤖 Tilly Chat", desc: "Paste code for AI review or chat with a senior dev who gets the student grind." },
             { title: "📄 AI Resume", desc: "Generate a polished, ATS-optimized resume from your logs and projects. Edit anytime, export as PDF." },
           ].map((card) => (
             <AnimatedCard key={card.title} className="frame-block">
@@ -69,19 +69,19 @@ export default function LandingPage() {
           <div className="frame-block p-4">
             <div className="flex items-start gap-4 mb-4">
               <div className="shrink-0 mt-0.5">
-                <Onigiri size={40} emotion="happy" />
+                <Mascot size={40} emotion="happy" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-serif text-sm text-warm-brown">KeizoKode: Always There.</h3>
+                  <h3 className="font-serif text-sm text-warm-brown">til.ly: Always There.</h3>
                   <span className="tag text-[0.45rem] py-0.5">Mac only</span>
                 </div>
                 <p className="text-[0.65rem] font-mono font-medium text-muted-ink/80">
-                  One-click logging from your menu bar. Keizo stays in your status bar — no browser needed.
+                  One-click logging from your menu bar. Tilly stays in your status bar — no browser needed.
                 </p>
                 <div className="mt-3">
                   <a
-                    href="/downloads/keizokode-macos.zip"
+                    href="/downloads/til-ly-macos.zip"
                     className="btn-base btn-coral btn-interact text-[0.6rem]"
                     download
                   >
@@ -90,7 +90,7 @@ export default function LandingPage() {
                 </div>
                 <div className="text-[0.5rem] font-mono font-bold text-muted-ink/50 mt-2 space-y-0.5">
                   <p>1. Download &amp; unzip</p>
-                  <p>2. Run <code className="text-muted-ink/60">xattr -c ~/Downloads/KeizoKode.app</code> in Terminal</p>
+                  <p>2. Run <code className="text-muted-ink/60">xattr -c ~/Downloads/til.ly.app</code> in Terminal</p>
                   <p>3. Right‑click → Open (first launch)</p>
                 </div>
               </div>
@@ -104,8 +104,8 @@ export default function LandingPage() {
 
         {/* bottom mascot */}
         <div className="mt-16 text-center animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-          <Onigiri size={48} emotion="sleepy" className="animate-breathe" />
-          <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-2">keizo the onigiri · keizokode</p>
+          <Mascot size={48} emotion="sleepy" className="animate-breathe" />
+          <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-2">tilly · til.ly</p>
         </div>
       </div>
     </PageShell>

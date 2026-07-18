@@ -2,7 +2,7 @@ import Cocoa
 import WebKit
 
 @main
-struct KeizoKodeApp {
+struct til.lyApp {
     static func main() {
         let app = NSApplication.shared
         let delegate = AppDelegate()

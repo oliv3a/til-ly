@@ -37,11 +37,11 @@ export async function POST(req: Request) {
       await resend.emails.send({
         from: RESEND_FROM,
         to: email,
-        subject: "Reset your KeizoKode password",
+        subject: "Reset your til.ly password",
         html: `
           <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
             <h2>Reset your password</h2>
-            <p>Click the link below to reset your KeizoKode password. This link expires in 1 hour.</p>
+            <p>Click the link below to reset your til.ly password. This link expires in 1 hour.</p>
             <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#E07060;color:#fff;text-decoration:none;border-radius:4px;">
               Reset password
             </a>

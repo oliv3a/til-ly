@@ -242,7 +242,7 @@ export default function ResumeClient() {
             <textarea
               value={pastedResumeText}
               onChange={(e) => setPastedResumeText(e.target.value)}
-              placeholder="Copy and paste your current resume, work experience, or any other relevant content here. The AI will merge it with your KeizoKode data."
+              placeholder="Copy and paste your current resume, work experience, or any other relevant content here. The AI will merge it with your til.ly data."
               className="field-coral text-[0.75rem] resize-y"
               rows={8}
               disabled={loading}

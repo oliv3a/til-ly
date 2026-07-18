@@ -34,7 +34,7 @@ export async function GET() {
           keys: { p256dh: sub.p256dh, auth: sub.auth },
         },
         JSON.stringify({
-          title: "KeizoKode",
+          title: "til.ly",
           body: "Test notification — push is working! 🎉",
           url: "/dashboard",
         }),

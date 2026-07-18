@@ -23,9 +23,9 @@
   --color-muted-blue: #C4D4E0;
   --color-faded-purple: #C8B8D0;
 
-  /* Onigiri */
-  --color-onigiri-body: #FFF5E6;
-  --color-onigiri-nori: #2D4A3E;
+  /* Mascot */
+  --color-mascot-body: #B8E6D8;
+  --color-mascot-ear: #A0D8C8;
 
   --font-serif: "Satoshi", sans-serif;
   --font-sans: "Inter", sans-serif;
@@ -224,7 +224,7 @@ body {
 }
 
 /* ── Keyframes ── */
-@keyframes keizo-wiggle {
+@keyframes tilly-wiggle {
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(-3deg); }
   75% { transform: rotate(3deg); }
@@ -240,7 +240,7 @@ body {
   50% { transform: translateY(-4px); }
 }
 
-@keyframes keizo-breathe {
+@keyframes tilly-breathe {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-3px) scale(1.015); }
 }
@@ -254,15 +254,15 @@ body {
 }
 
 .animate-breathe {
-  animation: keizo-breathe 4s ease-in-out infinite;
+  animation: tilly-breathe 4s ease-in-out infinite;
 }
 
-.animate-keizo-wiggle {
-  animation: keizo-wiggle 0.4s ease-in-out;
+.animate-tilly-wiggle {
+  animation: tilly-wiggle 0.4s ease-in-out;
 }
 
-.animate-keizo-wiggle-slow {
-  animation: keizo-wiggle 2s ease-in-out infinite;
+.animate-tilly-wiggle-slow {
+  animation: tilly-wiggle 2s ease-in-out infinite;
 }
 
 /* ── Hover lift for cards ── */

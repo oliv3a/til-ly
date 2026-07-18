@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "motion/react"
-import Onigiri from "@/components/Onigiri"
+import Mascot from "@/components/Mascot"
 import { staggerContainer, staggerItem } from "@/lib/motion/variants"
 import { parseAiSummary } from "@/lib/ai-summary"
 import { colorForSkill } from "@/lib/skill-colors"
@@ -150,7 +150,7 @@ export default function LogsPage() {
         <p className="text-[0.5rem] font-mono text-muted-ink/50">Loading…</p>
       ) : logs.length === 0 ? (
         <div className="text-center py-8">
-          <Onigiri size={40} emotion="thinking" className="mx-auto mb-2" />
+          <Mascot size={40} emotion="thinking" className="mx-auto mb-2" />
           <p className="text-[0.55rem] font-mono text-muted-ink/50">No logs found</p>
           <Link
             href="/logs/new"

@@ -1,5 +1,5 @@
 self.addEventListener("push", (event) => {
-  let data = { title: "KeizoKode", body: "", icon: "/onigiri-icon.svg" }
+  let data = { title: "til.ly", body: "", icon: "/mascot-icon.svg" }
 
   if (event.data) {
     try {
@@ -13,7 +13,7 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: data.icon,
-      badge: "/onigiri-icon.svg",
+      badge: "/mascot-icon.svg",
       data: { url: data.url || "/" },
     })
   )

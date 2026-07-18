@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import Onigiri from "./Onigiri"
+import Mascot from "./Mascot"
 
 const prompts = [
   "Ask me anything — coding, debugging, or just chat.",
@@ -195,8 +195,8 @@ export default function MascotChat() {
         <div className="frame-block w-[420px] max-w-[calc(100vw-2rem)] max-h-[80vh] flex flex-col bg-warm-paper shadow-xl">
           <div className="flex items-center justify-between p-3 border-b border-warm-brown/10">
             <div className="flex items-center gap-2">
-              <Onigiri size={24} emotion="happy" />
-              <span className="text-[0.65rem] font-mono text-warm-brown font-semibold">Keizo</span>
+              <Mascot size={24} emotion="happy" />
+              <span className="text-[0.65rem] font-mono text-warm-brown font-semibold">Tilly</span>
             </div>
             <button onClick={() => setOpen(false)} className="text-muted-ink/40 hover:text-warm-brown text-[0.7rem] cursor-pointer">✕</button>
           </div>
@@ -242,7 +242,7 @@ export default function MascotChat() {
 
             {!hasMessages && !loading && (
               <div className="flex items-center gap-2 py-3">
-                <Onigiri size={20} emotion="happy" className="shrink-0" />
+                <Mascot size={20} emotion="happy" className="shrink-0" />
                 <span className="text-[0.6rem] font-mono text-muted-ink/60">{prompts[currentPrompt]}</span>
               </div>
             )}
@@ -309,8 +309,8 @@ export default function MascotChat() {
                 {msg.role === "assistant" && msg.type === "review" && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Onigiri size={16} emotion="happy" />
-                      <span className="text-[0.5rem] font-mono text-muted-ink/50">Keizo</span>
+                      <Mascot size={16} emotion="happy" />
+                      <span className="text-[0.5rem] font-mono text-muted-ink/50">Tilly</span>
                     </div>
                     <div className="space-y-2 pl-6">
                       {/* @ts-ignore */}
@@ -370,7 +370,7 @@ export default function MascotChat() {
 
                 {msg.role === "assistant" && msg.type === "chat" && msg.content && (
                   <div className="flex items-start gap-2">
-                    <Onigiri size={16} emotion="happy" className="shrink-0 mt-1" />
+                    <Mascot size={16} emotion="happy" className="shrink-0 mt-1" />
                     <p className="text-[0.6rem] font-mono text-ink/85 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 )}
@@ -379,8 +379,8 @@ export default function MascotChat() {
 
             {loading && (
               <div className="flex items-center gap-2 py-3">
-                <Onigiri size={20} emotion="happy" className="animate-bounce" />
-                <span className="text-[0.6rem] font-mono text-warm-brown/60">Keizo is thinking...</span>
+                <Mascot size={20} emotion="happy" className="animate-bounce" />
+                <span className="text-[0.6rem] font-mono text-warm-brown/60">Tilly is thinking...</span>
               </div>
             )}
 
@@ -435,7 +435,7 @@ export default function MascotChat() {
           className={`transition-opacity duration-500 ease-in-out ${showLabel && !open ? "opacity-100" : "opacity-0"}`}
         >
           <div className="bg-warm-brown text-white text-[0.55rem] font-mono px-3 py-1.5 rounded-sm shadow-md relative whitespace-nowrap">
-            Chat with Keizo
+            Chat with Tilly
             <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-warm-brown rotate-45" />
           </div>
         </div>
@@ -444,7 +444,7 @@ export default function MascotChat() {
           className="cursor-pointer hover:opacity-80 transition-opacity"
           title={open ? "Close" : prompts[currentPrompt]}
         >
-          <Onigiri size={56} emotion="happy" accessory="laptop" className="drop-shadow-lg animate-breathe hover:animate-keizo-wiggle" />
+          <Mascot size={56} emotion="happy" accessory="laptop" className="drop-shadow-lg animate-breathe hover:animate-tilly-wiggle" />
         </button>
       </div>
     </div>

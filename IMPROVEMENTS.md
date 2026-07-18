@@ -1,4 +1,4 @@
-# KeizoKode Improvement Plan
+# til.ly Improvement Plan
 
 ## Phase 1: Quick Wins (~30 min)
 

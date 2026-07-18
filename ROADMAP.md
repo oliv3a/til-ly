@@ -1,4 +1,4 @@
-# KeizoKode Roadmap
+# til.ly Roadmap
 
 ## Vision
 Build the daily-learning habit. Log progress, get AI summaries, track skills and streaks, and generate a resume from your real work.

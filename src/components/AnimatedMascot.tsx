@@ -1,10 +1,10 @@
 "use client"
 
 import { motion, useReducedMotion } from "motion/react"
-import Onigiri from "./Onigiri"
-import type { Emotion } from "./Onigiri"
+import Mascot from "./Mascot"
+import type { Emotion } from "./Mascot"
 
-interface AnimatedOnigiriProps {
+interface AnimatedMascotProps {
   size?: number
   emotion?: Emotion
   accessory?: "laptop" | "pencil" | null
@@ -20,12 +20,12 @@ const emotionTransitions: Record<Emotion, { scale: number; rotate: number }> = {
   encouraging: { scale: 1.02, rotate: 0 },
 }
 
-export default function AnimatedOnigiri({
+export default function AnimatedMascot({
   size = 80,
   emotion = "neutral",
   accessory = null,
   className = "",
-}: AnimatedOnigiriProps) {
+}: AnimatedMascotProps) {
   const shouldReduce = useReducedMotion()
 
   return (
@@ -63,7 +63,7 @@ export default function AnimatedOnigiri({
             }
       }
     >
-      <Onigiri size={size} emotion={emotion} accessory={accessory} />
+      <Mascot size={size} emotion={emotion} accessory={accessory} />
     </motion.div>
   )
 }

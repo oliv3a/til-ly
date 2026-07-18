@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "motion/react"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
-import AnimatedOnigiri from "@/components/AnimatedOnigiri"
+import AnimatedMascot from "@/components/AnimatedMascot"
 import PageShell from "@/components/PageShell"
 import { fadeIn } from "@/lib/motion/variants"
 import { signIn } from "next-auth/react"
@@ -65,7 +65,7 @@ export default function SignupPage() {
         <div className="w-full max-w-sm animate-fade-in-up">
           <div className="text-center mb-6">
             <Link href="/" className="inline-block group">
-              <AnimatedOnigiri size={72} emotion={loading ? "thinking" : "happy"} />
+              <AnimatedMascot size={72} emotion={loading ? "thinking" : "happy"} />
             </Link>
           </div>
 

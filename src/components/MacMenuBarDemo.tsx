@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "motion/react"
-import Onigiri from "./Onigiri"
+import Mascot from "./Mascot"
 
 type Stage = "idle" | "menu-in" | "popover-open" | "typing-email" | "typing-pass" | "logging-in" | "logged-in"
 
@@ -121,14 +121,14 @@ export default function MacMenuBarDemo() {
         {/* Left — menu items */}
         <div className="flex items-center gap-3 text-[0.45rem] font-mono text-white/70">
           <span className="text-sm leading-none"></span>
-          <span className="font-semibold text-white/90">KeizoKode</span>
+          <span className="font-semibold text-white/90">til.ly</span>
           <span className="hidden sm:inline">File</span>
           <span className="hidden sm:inline">Edit</span>
           <span className="hidden sm:inline">View</span>
           <span className="hidden sm:inline">Window</span>
         </div>
 
-        {/* Right — status + onigiri */}
+        {/* Right — status + mascot */}
         <div className="ml-auto flex items-center gap-2.5 text-[0.4rem] font-mono text-white/60">
           <span className="hidden sm:inline">📶</span>
           <span className="hidden sm:inline">🔋</span>
@@ -136,11 +136,11 @@ export default function MacMenuBarDemo() {
           <motion.button
             onClick={handleToggle}
             className="relative focus:outline-none"
-            aria-label="Toggle KeizoKode popover"
+            aria-label="Toggle til.ly popover"
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
           >
-            <Onigiri size={16} emotion={stage === "logged-in" ? "happy" : "neutral"} />
+            <Mascot size={16} emotion={stage === "logged-in" ? "happy" : "neutral"} />
             {/* subtle pulse dot when closed */}
             {!showPopover && stage !== "idle" && (
               <motion.span
@@ -172,7 +172,7 @@ export default function MacMenuBarDemo() {
                       animate={stage === "logging-in" ? { scale: 0.85, opacity: 0 } : {}}
                       transition={{ duration: 0.25 }}
                     >
-                      <Onigiri size={40} emotion="neutral" />
+                      <Mascot size={40} emotion="neutral" />
                       <motion.h3
                         className="font-serif text-base text-warm-brown mt-2 mb-0.5"
                         animate={stage === "typing-email" || stage === "typing-pass" ? { y: [0, -1, 1, 0] } : {}}
@@ -259,7 +259,7 @@ export default function MacMenuBarDemo() {
                     transition={{ duration: 0.3 }}
                     className="text-center"
                   >
-                    <Onigiri size={40} emotion="happy" />
+                    <Mascot size={40} emotion="happy" />
                     <motion.h3
                       className="font-serif text-base text-warm-brown mt-2 mb-0.5"
                       initial={{ scale: 0.8 }}
@@ -310,7 +310,7 @@ export default function MacMenuBarDemo() {
           transition={{ delay: 1.5 }}
           className="text-[0.4rem] font-mono text-muted-ink/25 text-center mt-1.5"
         >
-          Click the onigiri to replay
+          Click the mascot to replay
         </motion.p>
       )}
     </div>

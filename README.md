@@ -1,6 +1,6 @@
-# KeizoKode
+# til.ly
 
-A daily study-log platform for CS students. In tech you have to consistently learn, stay up to date, and be adaptable. KeizoKode helps you build that habit — log what you study each day, AI summarizes your work, tracks skills and streaks, and generates a resume from your actual learning journey.
+A daily study-log platform for CS students. In tech you have to consistently learn, stay up to date, and be adaptable. til.ly helps you build that habit — log what you study each day, AI summarizes your work, tracks skills and streaks, and generates a resume from your actual learning journey.
 
 ## Tech Stack
 
@@ -25,7 +25,7 @@ A daily study-log platform for CS students. In tech you have to consistently lea
 
 ## Live App
 
-Visit [keizokode.vercel.app](https://keizokode.vercel.app) — just sign up.
+Visit [til-ly.vercel.app](https://til-ly.vercel.app) — just sign up.
 
 ## Running Locally
 
@@ -60,5 +60,5 @@ npm run dev
 ## macOS Menu Bar App
 
 ```
-cd macos/KeizoKode && swift build -c release && open .build/release/KeizoKode
+cd macos/til.ly && swift build -c release && open .build/release/tilly
 ```

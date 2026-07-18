@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "motion/react"
-import Onigiri from "@/components/Onigiri"
+import Mascot from "@/components/Mascot"
 import { colorForSkill } from "@/lib/skill-colors"
 import { staggerContainer, staggerItem } from "@/lib/motion/variants"
 import { easings } from "@/lib/motion/tokens"
@@ -454,17 +454,17 @@ function MacSplitCard() {
   return (
     <div className="dash-card p-0 overflow-visible relative flex">
       <div className="w-[40%] flex items-center gap-2.5 p-2.5 shrink-0">
-        <Onigiri size={24} emotion="happy" className="shrink-0" />
+        <Mascot size={24} emotion="happy" className="shrink-0" />
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
-            <p className="text-[0.65rem] font-serif font-bold text-warm-brown leading-tight">KeizoKode: Always There.</p>
+            <p className="text-[0.65rem] font-serif font-bold text-warm-brown leading-tight">til.ly: Always There.</p>
             <span className="tag text-[0.4rem] py-[1px]">Mac only</span>
           </div>
           <p className="text-[0.5rem] font-mono font-bold text-muted-ink/70 leading-snug mb-1.5">
             One-click logging. No browser needed.
           </p>
           <a
-            href="/downloads/keizokode-macos.zip"
+            href="/downloads/til-ly-macos.zip"
             className="inline-block font-mono font-bold text-[0.45rem] text-warm-paper bg-soft-coral py-[4px] px-2.5 border border-warm-brown hover:opacity-90 transition-opacity"
             download
           >
@@ -472,7 +472,7 @@ function MacSplitCard() {
           </a>
           <div className="text-[0.5rem] font-mono font-bold text-muted-ink/70 mt-1.5 space-y-[2px] leading-snug">
             <p>1. Download &amp; unzip</p>
-            <p>2. Run <code className="text-muted-ink/50">xattr -c ~/Downloads/KeizoKode.app</code></p>
+            <p>2. Run <code className="text-muted-ink/50">xattr -c ~/Downloads/til.ly.app</code></p>
             <p>3. Right‑click → Open (first launch)</p>
           </div>
         </div>
@@ -482,7 +482,7 @@ function MacSplitCard() {
         <div className="h-[22px] bg-[#2b2b2b] rounded-tr flex items-center px-2 select-none">
           <div className="flex items-center gap-1.5 text-[0.4rem] font-mono text-white/70">
             <span className="text-xs leading-none"></span>
-            <span className="font-semibold text-white/90 text-[0.45rem]">Keizo</span>
+            <span className="font-semibold text-white/90 text-[0.45rem]">Tilly</span>
           </div>
           <div className="ml-auto flex items-center gap-2 text-[0.35rem] font-mono text-white/50">
             <span className="hidden sm:inline">📶</span>
@@ -512,7 +512,7 @@ function MacSplitCard() {
                 animate={cursorPhase === "click" ? { scale: [1, 0.8, 1] } : {}}
                 transition={{ duration: 0.25 }}
               >
-                <Onigiri size={14} emotion="happy" className="shrink-0 animate-keizo-wiggle-slow" style={{ animationDelay: "4s" }} />
+                <Mascot size={14} emotion="happy" className="shrink-0 animate-tilly-wiggle-slow" style={{ animationDelay: "4s" }} />
               </motion.div>
               <motion.span
                 className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-soft-coral rounded-full"

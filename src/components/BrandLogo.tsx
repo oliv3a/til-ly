@@ -1,18 +1,18 @@
 import Image from "next/image"
-import Onigiri from "./Onigiri"
+import Mascot from "./Mascot"
 
 interface Props {
   size?: number
   className?: string
-  variant?: "stamp" | "onigiri"
+  variant?: "stamp" | "mascot"
 }
 
-export default function BrandLogo({ size = 32, className = "", variant = "onigiri" }: Props) {
+export default function BrandLogo({ size = 32, className = "", variant = "mascot" }: Props) {
   if (variant === "stamp") {
     return (
       <Image
         src="/logo.svg"
-        alt="KeizoKode"
+        alt="til.ly"
         width={size}
         height={size}
         className={`inline-block ${className}`}
@@ -21,5 +21,5 @@ export default function BrandLogo({ size = 32, className = "", variant = "onigir
     )
   }
 
-  return <Onigiri size={size} emotion="happy" className={className} />
+  return <Mascot size={size} emotion="happy" className={className} />
 }

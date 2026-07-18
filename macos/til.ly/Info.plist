@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleExecutable</key>
-  <string>KeizoKode</string>
+  <string>tilly</string>
   <key>CFBundleIdentifier</key>
-  <string>app.keizokode.macos</string>
+  <string>app.til-ly.macos</string>
   <key>CFBundleName</key>
-  <string>KeizoKode</string>
+  <string>Tilly</string>
   <key>CFBundleDisplayName</key>
-  <string>KeizoKode</string>
+  <string>Tilly</string>
   <key>CFBundleVersion</key>
   <string>1.0.0</string>
   <key>CFBundleShortVersionString</key>
