@@ -102,42 +102,16 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
     private func mascotIcon() -> NSImage {
         let size = NSSize(width: 18, height: 18)
         let image = NSImage(size: size)
-
-        image.lockFocus()
-        defer { image.unlockFocus() }
-
-        guard let ctx = NSGraphicsContext.current?.cgContext else { return image }
-
-        let bgColor = CGColor(red: 0.67, green: 0.75, blue: 0.74, alpha: 1)
-        let fgColor = CGColor(red: 0.22, green: 0.22, blue: 0.22, alpha: 1)
-
-        // Rounded square background
-        let path = CGPath(roundedRect: CGRect(x: 1, y: 1, width: 16, height: 16),
-                          cornerWidth: 3, cornerHeight: 3, transform: nil)
-        ctx.setFillColor(bgColor)
-        ctx.addPath(path)
-        ctx.fillPath()
-
-        // "t" letter
-        ctx.setFillColor(fgColor)
-        ctx.setStrokeColor(fgColor)
-        ctx.setLineWidth(1.2)
-        ctx.setLineCap(.round)
-
-        // vertical stroke
-        let v = CGMutablePath()
-        v.move(to: CGPoint(x: 9, y: 4))
-        v.addLine(to: CGPoint(x: 9, y: 13))
-        ctx.addPath(v)
-        ctx.strokePath()
-
-        // horizontal stroke
-        let h = CGMutablePath()
-        h.move(to: CGPoint(x: 6, y: 7))
-        h.addLine(to: CGPoint(x: 13, y: 7))
-        ctx.addPath(h)
-        ctx.strokePath()
-
+        if let url = Bundle.module.url(forResource: "logo-brand", withExtension: "png", subdirectory: "Resources"),
+           let source = NSImage(contentsOf: url)
+        {
+            image.lockFocus()
+            source.draw(in: NSRect(origin: .zero, size: size),
+                        from: NSRect(origin: .zero, size: source.size),
+                        operation: .copy,
+                        fraction: 1)
+            image.unlockFocus()
+        }
         return image
     }
 
