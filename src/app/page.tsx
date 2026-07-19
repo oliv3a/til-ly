@@ -81,7 +81,7 @@ export default function LandingPage() {
                 </p>
                 <div className="mt-3">
                   <a
-                    href="/downloads/til-ly-macos.zip"
+                    href="/api/downloads/macos"
                     className="btn-base btn-coral btn-interact text-[0.6rem]"
                     download
                   >

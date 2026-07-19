@@ -464,9 +464,9 @@ function MacSplitCard() {
             One-click logging. No browser needed.
           </p>
           <a
-            href="/downloads/til-ly-macos.zip"
+            href="/api/downloads/macos"
             className="inline-block font-mono font-bold text-[0.45rem] text-warm-paper bg-soft-coral py-[4px] px-2.5 border border-warm-brown hover:opacity-90 transition-opacity"
-            download
+            download="til-ly-macos.zip"
           >
             ⬇ Download
           </a>

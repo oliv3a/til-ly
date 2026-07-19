@@ -17,7 +17,7 @@ export async function proxy(req: Request) {
     session = await auth()
   } catch {}
 
-  const publicPaths = ["/auth/login", "/auth/signup", "/", "/api/auth", "/menu-bar", "/downloads"]
+  const publicPaths = ["/auth/login", "/auth/signup", "/", "/api/auth", "/api/downloads", "/menu-bar", "/downloads"]
   const isPublic = publicPaths.some((p) => pathname.startsWith(p))
 
   if (!session && !isPublic) {
