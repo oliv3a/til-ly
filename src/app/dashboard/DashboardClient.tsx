@@ -228,6 +228,11 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
 
   return (
     <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
+      {/* TIL tagline */}
+      <motion.p variants={staggerItem} className="text-[0.45rem] font-mono text-muted-ink/30 mb-3 tracking-wide">
+        TIL &mdash; Today I Learned
+      </motion.p>
+
       {/* 1. Continue Learning — what should I do now? */}
       <motion.div variants={staggerItem} className="dash-section">
         <p className="dash-section-title mb-2">
