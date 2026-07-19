@@ -43,5 +43,3 @@ macos/**/.build
 *.tsbuildinfo
 next-env.d.ts
 
-# Build artifacts
-public/downloads/*.zip
