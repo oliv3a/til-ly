@@ -8,7 +8,7 @@ let package = Package(
         .executableTarget(
             name: "tilly",
             path: "Sources",
-            resources: [.copy("../Resources")]
+            resources: [.process("Resources")]
         ),
     ]
 )

@@ -102,13 +102,13 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
     private func mascotIcon() -> NSImage {
         let size = NSSize(width: 18, height: 18)
         let image = NSImage(size: size)
-        if let url = Bundle.module.url(forResource: "logo-brand", withExtension: "png", subdirectory: "Resources"),
+        if let url = Bundle.module.url(forResource: "logo-brand", withExtension: "png"),
            let source = NSImage(contentsOf: url)
         {
             image.lockFocus()
             source.draw(in: NSRect(origin: .zero, size: size),
                         from: NSRect(origin: .zero, size: source.size),
-                        operation: .copy,
+                        operation: NSCompositingOperation.copy,
                         fraction: 1)
             image.unlockFocus()
         }
