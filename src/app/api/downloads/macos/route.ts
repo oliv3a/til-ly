@@ -1,6 +1,6 @@
-import { readFile } from "fs/promises"
-import { join } from "path"
 import { NextResponse } from "next/server"
+import { readFile } from "node:fs/promises"
+import { join } from "node:path"
 
 export async function GET() {
   try {
@@ -11,10 +11,9 @@ export async function GET() {
       headers: {
         "Content-Type": "application/zip",
         "Content-Disposition": 'attachment; filename="til-ly-macos.zip"',
-        "Cache-Control": "public, max-age=0",
       },
     })
   } catch {
-    return NextResponse.json({ error: "File not found" }, { status: 404 })
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 }
