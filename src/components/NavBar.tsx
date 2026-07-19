@@ -37,7 +37,6 @@ export default function NavBar() {
         <div className="flex items-center gap-2 shrink-0">
           <Link href="/dashboard" className="flex items-center gap-2" onClick={closeMenu}>
             <BrandLogo size={28} />
-            <span className="font-serif text-sm text-warm-brown hidden sm:inline">til.ly</span>
           </Link>
         </div>
 
