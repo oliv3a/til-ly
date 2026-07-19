@@ -95,7 +95,7 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
     }
 
     private func loadURL() {
-        guard let url = URL(string: "http://localhost:3000/menu-bar") else { return }
+        guard let url = URL(string: "https://keizokode.vercel.app/menu-bar") else { return }
         webView.load(URLRequest(url: url))
     }
 
