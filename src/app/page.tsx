@@ -13,17 +13,17 @@ export default function LandingPage() {
         {/* hero */}
         <div className="max-w-2xl mx-auto text-center animate-fade-in-up">
           {/* mascot hero */}
-          <div className="mb-6 inline-block group">
-            <BrandLogo size={140} className="animate-breathe group-hover:animate-tilly-wiggle" />
+          <div className="mb-3">
+            <BrandLogo size={200} className="animate-breathe group-hover:animate-tilly-wiggle mx-auto" />
           </div>
 
           {/* badge */}
           <div className="inline-block px-3 py-1 bg-warm-paper border-2 border-warm-brown text-[0.55rem] font-mono text-muted-ink tracking-widest uppercase mb-5">
-            your coding journal · reimagined
+            Today I Learned &middot; your coding journal
           </div>
 
           {/* poster heading */}
-          <h1 className="poster-heading mb-2">
+          <h1 className="poster-heading mb-2 text-base">
             Track your coding
             <br />
             journey, one log
@@ -105,7 +105,7 @@ export default function LandingPage() {
         {/* bottom mascot */}
         <div className="mt-16 text-center animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
           <BrandLogo size={48} className="animate-breathe" />
-          <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-2">tilly · til.ly</p>
+          <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-2">Today I Learned</p>
         </div>
       </div>
     </PageShell>
