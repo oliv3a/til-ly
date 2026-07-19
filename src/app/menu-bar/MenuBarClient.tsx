@@ -17,7 +17,7 @@ function greeting(): string {
 }
 
 function openInBrowser(path: string) {
-  window.open(`https://keizokode.vercel.app${path}`, "_blank")
+  window.open(`https://til-ly.vercel.app${path}`, "_blank")
 }
 
 export default function MenuBarClient({ user }: { user: { name: string } | null }) {
