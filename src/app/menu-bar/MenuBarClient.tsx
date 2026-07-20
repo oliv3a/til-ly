@@ -67,14 +67,6 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
             ✏️  Create a new log
           </button>
 
-          <a
-            href="/api/downloads/macos"
-            download="til-ly-macos.zip"
-            className="block w-full font-mono text-[0.7rem] text-warm-paper bg-soft-coral py-3 border-2 border-warm-brown text-center hover:opacity-90 transition-opacity mb-2"
-          >
-            ⬇️ Download the app
-          </a>
-
           <button
             onClick={() => openInBrowser("/logs")}
             className="block w-full text-[0.6rem] font-mono text-muted-ink underline hover:text-soft-coral transition-colors text-center"
