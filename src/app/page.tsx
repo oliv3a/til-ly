@@ -88,8 +88,9 @@ export default function LandingPage() {
                     ⬇ Download
                   </a>
                 </div>
-                <div className="text-[0.5rem] font-mono font-bold text-muted-ink/50 mt-2">
-                  <p>Download &amp; unzip to run</p>
+                <div className="text-[0.5rem] font-mono font-bold text-muted-ink/50 mt-2 space-y-0.5">
+                  <p>1. Download &amp; unzip</p>
+                  <p>2. Double‑click to open</p>
                 </div>
               </div>
             </div>

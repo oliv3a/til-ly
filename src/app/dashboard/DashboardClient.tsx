@@ -474,8 +474,9 @@ function MacSplitCard() {
           >
             ⬇ Download
           </a>
-          <div className="text-[0.5rem] font-mono font-bold text-muted-ink/70 mt-1.5 leading-snug">
-            <p>Download &amp; unzip to run</p>
+          <div className="text-[0.5rem] font-mono font-bold text-muted-ink/70 mt-1.5 space-y-[2px] leading-snug">
+            <p>1. Download &amp; unzip</p>
+            <p>2. Double‑click to open</p>
           </div>
         </div>
       </div>
