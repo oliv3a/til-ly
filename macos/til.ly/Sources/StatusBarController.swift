@@ -7,6 +7,8 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
     private var webView: WKWebView!
     private let popoverWidth: CGFloat = 520
     private let popoverHeight: CGFloat = 660
+    private var retryCount = 0
+    private let maxRetries = 3
 
     override init() {
         super.init()
@@ -95,8 +97,54 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
     }
 
     private func loadURL() {
-        guard let url = URL(string: "https://til-ly.vercel.app/menu-bar") else { return }
+        retryCount = 0
+        let urlString = "https://til-ly.vercel.app/menu-bar?v=\(Int(Date().timeIntervalSince1970))"
+        let url = URL(string: urlString)!
+        WKWebsiteDataStore.default().removeData(
+            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            modifiedSince: Date(timeIntervalSince1970: 0)
+        ) { print("[tilly] cache cleared") }
+        print("[tilly] loading \(url.absoluteString)")
         webView.load(URLRequest(url: url))
+    }
+
+    private func retryLoad() {
+        retryCount += 1
+        if retryCount <= maxRetries {
+            print("[tilly] retry \(retryCount)/\(maxRetries)")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                guard let self else { return }
+                let url = URL(string: "https://til-ly.vercel.app/menu-bar?v=\(Int(Date().timeIntervalSince1970))")!
+                self.webView.load(URLRequest(url: url))
+            }
+        } else {
+            print("[tilly] all retries exhausted")
+            showOfflinePage()
+        }
+    }
+
+    private func showOfflinePage() {
+        let html = """
+        <html><head><meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, sans-serif; display: flex; align-items: center;
+                 justify-content: center; height: 100vh; margin: 0; background: #faf8f5;
+                 color: #5c4a3a; }
+          div { text-align: center; }
+          p { font-size: 14px; margin: 8px 0; }
+          .small { font-size: 11px; color: #a09080; }
+          button { font-family: -apple-system, sans-serif; font-size: 12px; color: #faf8f5;
+                   background: #e8856c; border: 2px solid #5c4a3a; padding: 8px 20px;
+                   cursor: pointer; margin-top: 12px; }
+          button:hover { opacity: 0.85; }
+        </style></head><body>
+        <div>
+          <p style="font-weight:600">til.ly</p>
+          <p class="small">Can't reach til.ly — check your internet connection</p>
+          <button onclick="window.location.href='https://til-ly.vercel.app/menu-bar'">Retry</button>
+        </div></body></html>
+        """
+        webView.loadHTMLString(html, baseURL: nil)
     }
 
     private func mascotIcon() -> NSImage {
@@ -136,26 +184,16 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        // Keep the page as-is on failure
+        print("[tilly] navigation failed: \(error.localizedDescription)")
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        print("[tilly] page loaded successfully")
+        retryCount = 0
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        // Show a friendly offline state instead of the system error page
-        let html = """
-        <html><head><meta charset="utf-8">
-        <style>
-          body { font-family: -apple-system, sans-serif; display: flex; align-items: center;
-                 justify-content: center; height: 100vh; margin: 0; background: #faf8f5;
-                 color: #5c4a3a; }
-          div { text-align: center; }
-          p { font-size: 14px; margin: 8px 0; }
-          .small { font-size: 11px; color: #a09080; }
-        </style></head><body>
-        <div>
-          <p>til.ly</p>
-          <p class="small">Start the dev server on port 3000 to connect</p>
-        </div></body></html>
-        """
-        webView.loadHTMLString(html, baseURL: nil)
+        print("[tilly] provisional navigation failed: \(error.localizedDescription)")
+        retryLoad()
     }
 }

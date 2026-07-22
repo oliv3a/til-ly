@@ -50,7 +50,7 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
 
   if (user) {
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
+      <div className="h-full bg-cream flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-xs text-center">
           <BrandLogo size={64} />
 
@@ -89,7 +89,7 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
   }
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4">
+    <div className="h-full bg-cream flex items-center justify-center px-4">
       <div className="w-full max-w-xs animate-fade-in-up">
         <div className="text-center mb-4">
           <BrandLogo size={64} />
