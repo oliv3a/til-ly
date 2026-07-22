@@ -25,6 +25,7 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [greet] = useState(() => (typeof window !== "undefined" ? greeting() : "Hey there"))
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -54,7 +55,7 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
           <BrandLogo size={64} />
 
           <h2 className="font-serif text-lg text-warm-brown mt-3 mb-1">
-            {greeting()}, {user.name}!
+            {greet}, {user.name}!
           </h2>
           <p className="text-[0.6rem] font-mono text-muted-ink/50 mb-6">
             What do you want to do?
@@ -95,7 +96,7 @@ export default function MenuBarClient({ user }: { user: { name: string } | null 
         </div>
 
         <div className="frame-block">
-          <h2 className="font-serif text-lg text-warm-brown text-center mb-1">{greeting()}!</h2>
+          <h2 className="font-serif text-lg text-warm-brown text-center mb-1">{greet}!</h2>
           <p className="text-[0.6rem] font-mono text-muted-ink/50 text-center mb-4">Log in to continue</p>
 
           <form id="menu-bar-login" onSubmit={handleSubmit} className="space-y-2">
