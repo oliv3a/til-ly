@@ -214,6 +214,55 @@ Generate 5-13 items. Order from beginner to advanced. Each estimatedLogs is how 
   return getFallbackRoadmap(goalTitle, goalDescription)
 }
 
+export async function regenerateRoadmap(
+  goalTitle: string,
+  goalDescription: string,
+  existingItems: { topic: string; description?: string | null }[],
+  instruction: string
+): Promise<{ topic: string; description: string; estimatedLogs: number }[]> {
+  const client = getClient()
+  if (client) {
+    try {
+      const itemList = existingItems.length > 0
+        ? existingItems.map((i) => `  - ${i.topic}${i.description ? `: ${i.description}` : ""}`).join("\n")
+        : "  (none yet)"
+
+      const prompt = `You are a learning roadmap planner. The user wants to adjust their roadmap.
+
+Goal: "${goalTitle}"
+${goalDescription ? `Description: "${goalDescription}"` : ""}
+
+Current roadmap steps:
+${itemList}
+
+User instruction: "${instruction}"
+
+Regenerate the roadmap based on the user's instruction. Return a JSON object with a "roadmap" key containing an array:
+{
+  "roadmap": [
+    { "topic": "specific topic", "description": "what to learn or do", "estimatedLogs": 2 }
+  ]
+}
+
+Generate 5-13 items. Order from beginner to advanced. Each estimatedLogs is how many study sessions needed (1-10).`
+
+      const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+      })
+      const result = JSON.parse(response.choices[0]?.message?.content || "{}")
+      if (result.roadmap && Array.isArray(result.roadmap) && result.roadmap.length > 0) {
+        return result.roadmap
+      }
+    } catch (err) {
+      console.error("regenerateRoadmap failed:", err)
+    }
+  }
+
+  return getFallbackRoadmap(goalTitle, goalDescription)
+}
+
 export async function getRecommendation(
   goals: { id: string; title: string }[],
   recentSkills: string[],
