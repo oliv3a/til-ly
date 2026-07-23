@@ -45,6 +45,7 @@ export default function GoalsClient({ initialGoals }: Props) {
   const [chatGptResponse, setChatGptResponse] = useState("")
   const [applyingGpt, setApplyingGpt] = useState(false)
   const [createGptResponse, setCreateGptResponse] = useState("")
+  const [confirmAction, setConfirmAction] = useState<{ message: string; onConfirm: () => void } | null>(null)
 
   function updateGoalInState(goal: GoalWithRoadmap) {
     setGoals((prev) => prev.map((g) => (g.id === goal.id ? goal : g)))
@@ -121,12 +122,16 @@ export default function GoalsClient({ initialGoals }: Props) {
   }
 
   async function deleteItem(goalId: string, itemId: string) {
-    if (!confirm("Delete this roadmap step?")) return
-    const res = await fetch(`/api/goals/${goalId}/roadmap-items/${itemId}`, { method: "DELETE" })
-    if (res.ok) {
-      const data = await res.json()
-      updateGoalInState(data.goal)
-    }
+    setConfirmAction({
+      message: "Delete this roadmap step?",
+      onConfirm: async () => {
+        const res = await fetch(`/api/goals/${goalId}/roadmap-items/${itemId}`, { method: "DELETE" })
+        if (res.ok) {
+          const data = await res.json()
+          updateGoalInState(data.goal)
+        }
+      },
+    })
   }
 
   async function commitReorder(goalId: string, items: RoadmapItemType[]) {
@@ -232,9 +237,13 @@ export default function GoalsClient({ initialGoals }: Props) {
   }
 
   async function deleteGoal(id: string) {
-    if (!confirm("Delete this goal? This cannot be undone.")) return
-    const res = await fetch(`/api/goals/${id}`, { method: "DELETE" })
-    if (res.ok) setGoals((prev) => prev.filter((g) => g.id !== id))
+    setConfirmAction({
+      message: "Delete this goal? This cannot be undone.",
+      onConfirm: async () => {
+        const res = await fetch(`/api/goals/${id}`, { method: "DELETE" })
+        if (res.ok) setGoals((prev) => prev.filter((g) => g.id !== id))
+      },
+    })
   }
 
   function openChatGpt(goal: GoalWithRoadmap) {
@@ -484,6 +493,29 @@ export default function GoalsClient({ initialGoals }: Props) {
           </AnimatedCard>
         ))}
       </div>
+
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-cream border-2 border-warm-brown p-5 max-w-xs w-full mx-4">
+            <p className="text-sm font-mono text-warm-brown mb-4">{confirmAction.message}</p>
+            <div className="flex gap-2">
+              <AnimatedButton
+                onClick={() => {
+                  confirmAction.onConfirm()
+                  setConfirmAction(null)
+                }}
+                variant="coral"
+                className="flex-1 justify-center"
+              >
+                Confirm
+              </AnimatedButton>
+              <AnimatedButton onClick={() => setConfirmAction(null)} variant="sm" className="flex-1 justify-center">
+                Cancel
+              </AnimatedButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
