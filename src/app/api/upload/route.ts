@@ -18,43 +18,59 @@ function isCodeFile(fileName: string, fileType: string): boolean {
   return false
 }
 
+async function processFile(file: File, filePath: string | null) {
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const base64 = buffer.toString("base64")
+  const dataUri = `data:${file.type};base64,${base64}`
+
+  let extractedText: string | null = null
+  if (isCodeFile(file.name, file.type)) {
+    try {
+      const decoded = buffer.toString("utf-8")
+      const notebook = parseNotebook(decoded)
+      if (notebook) {
+        extractedText = notebook.formattedContent
+      } else {
+        extractedText = decoded
+      }
+    } catch {
+      extractedText = null
+    }
+  }
+
+  return {
+    url: dataUri,
+    type: file.type,
+    name: file.name,
+    extractedText,
+    filePath: filePath || null,
+  }
+}
+
 export async function POST(req: Request) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   try {
     const formData = await req.formData()
+
+    // Batch mode: multiple files under "files" key
+    const batchFiles = formData.getAll("files") as File[]
+    if (batchFiles.length > 0) {
+      const filePaths = formData.getAll("filePaths") as string[]
+      const results = await Promise.all(
+        batchFiles.map((file, i) => processFile(file, filePaths[i] || null))
+      )
+      return NextResponse.json(results)
+    }
+
+    // Single file mode (backward compat)
     const file = formData.get("file") as File | null
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 })
 
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const base64 = buffer.toString("base64")
-    const dataUri = `data:${file.type};base64,${base64}`
-
-    let extractedText: string | null = null
-    if (isCodeFile(file.name, file.type)) {
-      try {
-        const decoded = buffer.toString("utf-8")
-        const notebook = parseNotebook(decoded)
-        if (notebook) {
-          extractedText = notebook.formattedContent
-        } else {
-          extractedText = decoded
-        }
-      } catch {
-        extractedText = null
-      }
-    }
-
     const filePath = formData.get("filePath") as string | null
-
-    return NextResponse.json({
-      url: dataUri,
-      type: file.type,
-      name: file.name,
-      extractedText,
-      filePath: filePath || null,
-    })
+    const result = await processFile(file, filePath)
+    return NextResponse.json(result)
   } catch {
     return NextResponse.json({ error: "Upload failed" }, { status: 500 })
   }

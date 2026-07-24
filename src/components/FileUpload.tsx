@@ -31,21 +31,17 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
 
   const uploadFiles = useCallback(async (accepted: File[]) => {
     setUploadProgress({ current: 0, total: accepted.length })
-    const uploaded: UploadedFile[] = []
-    for (let i = 0; i < accepted.length; i++) {
-      const file = accepted[i]
-      const formData = new FormData()
-      formData.append("file", file)
+    const formData = new FormData()
+    for (const file of accepted) {
+      formData.append("files", file)
       const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || null
-      if (path) formData.append("filePath", path)
-      const res = await fetch("/api/upload", { method: "POST", body: formData })
-      if (res.ok) {
-        const data = await res.json()
-        uploaded.push({ url: data.url, type: data.type, name: data.name, extractedText: data.extractedText, filePath: data.filePath })
-      }
-      setUploadProgress({ current: i + 1, total: accepted.length })
+      formData.append("filePaths", path || "")
     }
-    onFilesChange([...filesRef.current, ...uploaded])
+    const res = await fetch("/api/upload", { method: "POST", body: formData })
+    if (res.ok) {
+      const results: UploadedFile[] = await res.json()
+      onFilesChange([...filesRef.current, ...results])
+    }
     setUploadProgress(null)
   }, [onFilesChange])
 
@@ -83,13 +79,10 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
         {uploadProgress ? (
           <div className="space-y-2">
             <p className="text-[0.65rem] font-mono text-muted-ink/50">
-              Uploading {uploadProgress.current} / {uploadProgress.total}...
+              Uploading {uploadProgress.total} file{uploadProgress.total !== 1 ? "s" : ""}...
             </p>
             <div className="w-full bg-warm-paper rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-soft-coral h-full rounded-full transition-all duration-300"
-                style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
-              />
+              <div className="bg-soft-coral h-full rounded-full animate-pulse w-full" />
             </div>
           </div>
         ) : (
