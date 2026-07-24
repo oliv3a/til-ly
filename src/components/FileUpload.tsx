@@ -19,6 +19,8 @@ interface FileUploadProps {
 export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null)
   const folderInputRef = useRef<HTMLInputElement>(null)
+  const filesRef = useRef(files)
+  filesRef.current = files
 
   useEffect(() => {
     if (folderInputRef.current) {
@@ -27,7 +29,7 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
     }
   }, [])
 
-  async function uploadFiles(accepted: File[]) {
+  const uploadFiles = useCallback(async (accepted: File[]) => {
     setUploadProgress({ current: 0, total: accepted.length })
     const uploaded: UploadedFile[] = []
     for (let i = 0; i < accepted.length; i++) {
@@ -43,13 +45,16 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
       }
       setUploadProgress({ current: i + 1, total: accepted.length })
     }
-    onFilesChange([...files, ...uploaded])
+    onFilesChange([...filesRef.current, ...uploaded])
     setUploadProgress(null)
-  }
+  }, [onFilesChange])
 
-  const onDrop = useCallback(async (accepted: File[]) => {
-    await uploadFiles(accepted)
-  }, [files, onFilesChange])
+  const onDrop = useCallback(
+    (accepted: File[]) => {
+      uploadFiles(accepted)
+    },
+    [uploadFiles]
+  )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
 
