@@ -423,6 +423,47 @@ Respond with JSON:
   }
 }
 
+export async function extractChecklist(
+  rawText: string,
+  projectTitle: string,
+): Promise<string[]> {
+  const client = getClient()
+  if (!client) return []
+
+  try {
+    const prompt = `Extract actionable checklist steps from the text below. These are for a project checklist.
+
+Project: "${projectTitle}"
+
+Text:
+"${rawText.slice(0, 8000)}"
+
+Rules:
+- Each step should be SHORT and crisp — 2 to 6 words, like a concise todo item
+- Order them logically from first to last
+- Remove duplicates
+- Skip vague/philosophical items — only include concrete actionable tasks
+- Aim for 5-15 steps
+
+Respond with JSON:
+{
+  "steps": ["Step 1", "Step 2", "Step 3"]
+}`
+
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+    })
+    const result = JSON.parse(response.choices[0]?.message?.content || "{}")
+    if (Array.isArray(result.steps)) return result.steps.filter((s: unknown) => typeof s === "string" && s.trim())
+    return []
+  } catch (err) {
+    console.error("extractChecklist failed:", err)
+    return []
+  }
+}
+
 export async function matchLogToRoadmap(
   content: string,
   roadmapItems: { goalId: string; goalTitle: string; itemId: string; topic: string }[]

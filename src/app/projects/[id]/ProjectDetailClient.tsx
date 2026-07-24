@@ -220,47 +220,10 @@ export default function ProjectDetailClient({ initialProject }: Props) {
     if (!chatGptResponse.trim()) return
     setApplyingGpt(true)
     try {
-      let items: { topic: string }[] = []
-      let cleaned = chatGptResponse.trim()
-
-      // Strip markdown code fences
-      cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "")
-
-      // Strip leading bullet/number markers per line
-      cleaned = cleaned.split("\n").map((line) => {
-        return line.replace(/^\s*[-*•]\s+/, "").replace(/^\s*\d+[.)]\s+/, "")
-      }).join("\n")
-
-      // Strip emoji prefixes
-      cleaned = cleaned.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\u200d\uFE0F]+\s*/gmu, "")
-
-      // Strip bold/italic markdown
-      cleaned = cleaned.replace(/\*\*(.+?)\*\*/g, "$1")
-      cleaned = cleaned.replace(/__(.+?)__/g, "$1")
-      cleaned = cleaned.replace(/\*(.+?)\*/g, "$1")
-      cleaned = cleaned.replace(/_(.+?)_/g, "$1")
-
-      // Extract JSON array
-      const jsonStart = cleaned.indexOf("[")
-      const jsonEnd = cleaned.lastIndexOf("]")
-      if (jsonStart !== -1 && jsonEnd > jsonStart) {
-        items = JSON.parse(cleaned.slice(jsonStart, jsonEnd + 1))
-      } else {
-        items = JSON.parse(cleaned)
-      }
-
-      // Normalize: accept both { topic: "..." } and plain strings
-      items = items.map((item: unknown) => {
-        if (typeof item === "string") return { topic: item }
-        if (item && typeof item === "object" && "topic" in item && typeof (item as Record<string, unknown>).topic === "string") return item as { topic: string }
-        throw new Error("Each item needs a \"topic\" field")
-      })
-
-      if (!Array.isArray(items) || items.length === 0) throw new Error("No items found")
-      const res = await fetch(`/api/projects/${project.id}/steps/bulk`, {
+      const res = await fetch(`/api/projects/${project.id}/steps/apply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
+        body: JSON.stringify({ text: chatGptResponse.trim() }),
       })
       if (res.ok) {
         const data = await res.json()
@@ -273,7 +236,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
         toast.error(err.error || "Failed to apply steps")
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't parse response — paste the raw JSON array from ChatGPT")
+      toast.error(e instanceof Error ? e.message : "Something went wrong")
     } finally {
       setApplyingGpt(false)
     }
