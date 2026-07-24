@@ -253,9 +253,13 @@ Do not wrap the JSON in markdown or code fences — return only the raw JSON arr
         setProject((prev) => ({ ...prev, steps: data.steps, progressPct: data.progressPct }))
         setChatGptOpen(false)
         setChatGptResponse("")
+        toast.success("Checklist updated!")
+      } else {
+        const err = await res.json().catch(() => ({ error: "Failed" }))
+        toast.error(err.error || "Failed to apply steps")
       }
-    } catch {
-      // silent
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Invalid JSON — paste the raw array from ChatGPT")
     } finally {
       setApplyingGpt(false)
     }
