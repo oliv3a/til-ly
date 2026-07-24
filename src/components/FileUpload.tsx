@@ -17,7 +17,7 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
-  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null)
   const folderInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -27,10 +27,11 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
     }
   }, [])
 
-  const onDrop = useCallback(async (accepted: File[]) => {
-    setUploading(true)
+  async function uploadFiles(accepted: File[]) {
+    setUploadProgress({ current: 0, total: accepted.length })
     const uploaded: UploadedFile[] = []
-    for (const file of accepted) {
+    for (let i = 0; i < accepted.length; i++) {
+      const file = accepted[i]
       const formData = new FormData()
       formData.append("file", file)
       const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || null
@@ -40,9 +41,14 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
         const data = await res.json()
         uploaded.push({ url: data.url, type: data.type, name: data.name, extractedText: data.extractedText, filePath: data.filePath })
       }
+      setUploadProgress({ current: i + 1, total: accepted.length })
     }
     onFilesChange([...files, ...uploaded])
-    setUploading(false)
+    setUploadProgress(null)
+  }
+
+  const onDrop = useCallback(async (accepted: File[]) => {
+    await uploadFiles(accepted)
   }, [files, onFilesChange])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
@@ -50,21 +56,7 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
   async function handleFolderSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files
     if (!selected || selected.length === 0) return
-    setUploading(true)
-    const uploaded: UploadedFile[] = []
-    for (const file of Array.from(selected)) {
-      const formData = new FormData()
-      formData.append("file", file)
-      const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || null
-      if (path) formData.append("filePath", path)
-      const res = await fetch("/api/upload", { method: "POST", body: formData })
-      if (res.ok) {
-        const data = await res.json()
-        uploaded.push({ url: data.url, type: data.type, name: data.name, extractedText: data.extractedText, filePath: data.filePath })
-      }
-    }
-    onFilesChange([...files, ...uploaded])
-    setUploading(false)
+    await uploadFiles(Array.from(selected))
     e.target.value = ""
   }
 
@@ -83,8 +75,18 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
         }`}
       >
         <input {...getInputProps()} />
-        {uploading ? (
-          <p className="text-[0.65rem] font-mono text-muted-ink/50">Uploading...</p>
+        {uploadProgress ? (
+          <div className="space-y-2">
+            <p className="text-[0.65rem] font-mono text-muted-ink/50">
+              Uploading {uploadProgress.current} / {uploadProgress.total}...
+            </p>
+            <div className="w-full bg-warm-paper rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-soft-coral h-full rounded-full transition-all duration-300"
+                style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+              />
+            </div>
+          </div>
         ) : (
           <div className="space-y-2">
             <p className="text-[0.65rem] font-mono text-muted-ink/60">
