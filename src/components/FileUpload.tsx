@@ -99,11 +99,10 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
       <input
         ref={folderInputRef}
         type="file"
-        // @ts-expect-error webkitdirectory is a non-standard attribute
-        webkitdirectory=""
         multiple
-        className="hidden"
+        style={{ display: "none" }}
         onChange={handleFolderSelect}
+        {...{ webkitdirectory: "" } as React.InputHTMLAttributes<HTMLInputElement>}
       />
       {files.length > 0 && (
         <div className="mt-2 space-y-0.5">
