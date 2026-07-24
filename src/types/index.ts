@@ -35,7 +35,7 @@ export interface StudyLogWithRelations {
   type: string
   aiSummary: string | null
   createdAt: Date
-  files: { id: string; fileUrl: string; fileType: string; fileName: string }[]
+  files: { id: string; fileUrl: string; fileType: string; fileName: string; filePath: string | null }[]
   skillTags: { skill: { id: string; name: string; category: string | null } }[]
   goalLinks: { goal: { id: string; title: string } }[]
   roadmapLinks: { id: string; roadmapItem: { id: string; topic: string; goal: { id: string; title: string } } }[]
@@ -83,6 +83,7 @@ export interface ProjectFileType {
   fileUrl: string
   fileType: string
   fileName: string
+  filePath: string | null
   extractedText: string | null
 }
 

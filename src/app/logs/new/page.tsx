@@ -1,17 +1,16 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
-import { useDropzone } from "react-dropzone"
+import FileUpload, { type UploadedFile } from "@/components/FileUpload"
 
 
 export default function NewLogPage() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
-  const [files, setFiles] = useState<{ url: string; type: string; name: string; extractedText?: string | null }[]>([])
-  const [uploading, setUploading] = useState(false)
+  const [files, setFiles] = useState<UploadedFile[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState("")
@@ -40,24 +39,6 @@ export default function NewLogPage() {
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     )
   }
-
-  const onDrop = useCallback(async (accepted: File[]) => {
-    setUploading(true)
-    const uploaded: { url: string; type: string; name: string; extractedText?: string | null }[] = []
-    for (const file of accepted) {
-      const formData = new FormData()
-      formData.append("file", file)
-      const res = await fetch("/api/upload", { method: "POST", body: formData })
-      if (res.ok) {
-        const data = await res.json()
-        uploaded.push({ url: data.url, type: data.type, name: data.name, extractedText: data.extractedText })
-      }
-    }
-    setFiles((prev) => [...prev, ...uploaded])
-    setUploading(false)
-  }, [])
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -135,37 +116,7 @@ export default function NewLogPage() {
           <label className="block text-[0.65rem] font-mono text-warm-brown mb-1">
             Screenshots / Code / Files {files.length > 0 && `(${files.length})`}
           </label>
-          <div
-            {...getRootProps()}
-            className={`frame-block p-6 text-center cursor-pointer border-dashed ${
-              isDragActive ? "bg-muted-blue/10" : ""
-            }`}
-          >
-            <input {...getInputProps()} />
-            {uploading ? (
-              <p className="text-[0.65rem] font-mono text-muted-ink/50">Uploading...</p>
-            ) : (
-              <p className="text-[0.65rem] font-mono text-muted-ink/60">
-                {isDragActive ? "Drop files here" : "Click or drag files here"}
-              </p>
-            )}
-          </div>
-          {files.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {files.map((f, i) => (
-                <span key={i} className="tag flex items-center gap-1">
-                  📎 {f.name}
-                  <button
-                    type="button"
-                    onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-                    className="text-muted-ink/50 hover:text-warm-brown"
-                  >
-                    ✕
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
+          <FileUpload files={files} onFilesChange={setFiles} />
         </div>
 
         {roadmapGoals.length > 0 && (

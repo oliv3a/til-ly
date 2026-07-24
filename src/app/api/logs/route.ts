@@ -81,10 +81,11 @@ export async function POST(req: Request) {
         type: fileUrls?.length ? "both" : "text",
         files: fileUrls?.length
           ? {
-              create: fileUrls.map((f: { url: string; type: string; name: string; extractedText?: string | null }) => ({
+              create: fileUrls.map((f: { url: string; type: string; name: string; extractedText?: string | null; filePath?: string | null }) => ({
                 fileUrl: f.url,
                 fileType: f.type,
                 fileName: f.name,
+                filePath: f.filePath || null,
                 extractedText: f.extractedText || null,
               })),
             }

@@ -118,6 +118,7 @@ model StudyLogFile {
   fileUrl        String
   fileType       String
   fileName       String
+  filePath       String?
   extractedText  String?
 
   studyLog StudyLog @relation(fields: [studyLogId], references: [id], onDelete: Cascade)
@@ -214,6 +215,7 @@ model ProjectFile {
   fileUrl       String
   fileType      String
   fileName      String
+  filePath      String?
   extractedText String?
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)

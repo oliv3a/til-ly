@@ -1,39 +1,20 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
-import { useDropzone } from "react-dropzone"
+import FileUpload, { type UploadedFile } from "@/components/FileUpload"
+
 export default function NewProjectPage() {
   const router = useRouter()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [techStack, setTechStack] = useState("")
   const [repoUrl, setRepoUrl] = useState("")
-  const [files, setFiles] = useState<{ url: string; type: string; name: string; extractedText?: string | null }[]>([])
-  const [uploading, setUploading] = useState(false)
+  const [files, setFiles] = useState<UploadedFile[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [chatGptResponse, setChatGptResponse] = useState("")
-
-  const onDrop = useCallback(async (accepted: File[]) => {
-    setUploading(true)
-    const uploaded: typeof files = []
-    for (const file of accepted) {
-      const formData = new FormData()
-      formData.append("file", file)
-      const res = await fetch("/api/upload", { method: "POST", body: formData })
-      if (res.ok) {
-        const data = await res.json()
-        uploaded.push({ url: data.url, type: data.type, name: data.name, extractedText: data.extractedText })
-      }
-    }
-    setFiles((prev) => [...prev, ...uploaded])
-    setUploading(false)
-  }, [])
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -56,25 +37,6 @@ export default function NewProjectPage() {
 
       if (res.ok) {
         const project = await res.json()
-        if (chatGptResponse.trim()) {
-          try {
-            const trimmed = chatGptResponse.trim()
-            const jsonStart = trimmed.indexOf("[")
-            const jsonEnd = trimmed.lastIndexOf("]")
-            const items = jsonStart !== -1 && jsonEnd > jsonStart
-              ? JSON.parse(trimmed.slice(jsonStart, jsonEnd + 1))
-              : JSON.parse(trimmed)
-            if (Array.isArray(items) && items.length > 0) {
-              await fetch(`/api/projects/${project.id}/steps/bulk`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ items }),
-              })
-            }
-          } catch {
-            // silent
-          }
-        }
         router.push(`/projects/${project.id}`)
       } else {
         const err = await res.json()
@@ -151,46 +113,8 @@ export default function NewProjectPage() {
             <label className="text-[0.65rem] font-mono text-warm-brown block mb-0.5">
               Files {files.length > 0 && `(${files.length})`}
             </label>
-            <div
-              {...getRootProps()}
-              className={`frame-block p-6 text-center cursor-pointer border-dashed ${
-                isDragActive ? "bg-muted-blue/10" : ""
-              }`}
-            >
-              <input {...getInputProps()} />
-              {uploading ? (
-                <p className="text-[0.65rem] font-mono text-muted-ink/50">Uploading...</p>
-              ) : (
-                <p className="text-[0.65rem] font-mono text-muted-ink/60">
-                  {isDragActive ? "Drop files here" : "Click or drag files here"}
-                </p>
-              )}
-            </div>
-            {files.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {files.map((f, i) => (
-                  <span key={i} className="tag flex items-center gap-1">
-                    📎 {f.name}
-                    <button
-                      type="button"
-                      onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-                      className="text-muted-ink/50 hover:text-warm-brown"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
+            <FileUpload files={files} onFilesChange={setFiles} />
           </div>
-
-          <textarea
-            value={chatGptResponse}
-            onChange={(e) => setChatGptResponse(e.target.value)}
-            placeholder="Have a ChatGPT prompt for a detailed checklist? Paste ChatGPT response here..."
-            rows={3}
-            className="field-coral w-full resize-y text-[0.55rem]"
-          />
 
           <AnimatedButton
             type="submit"

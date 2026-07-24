@@ -46,11 +46,14 @@ export async function POST(req: Request) {
       }
     }
 
+    const filePath = formData.get("filePath") as string | null
+
     return NextResponse.json({
       url: dataUri,
       type: file.type,
       name: file.name,
       extractedText,
+      filePath: filePath || null,
     })
   } catch {
     return NextResponse.json({ error: "Upload failed" }, { status: 500 })
