@@ -216,20 +216,6 @@ export default function ProjectDetailClient({ initialProject }: Props) {
     setNotesSaving(false)
   }
 
-  function buildStepsPrompt(): string {
-    const items = project.steps.map((s) => `  - ${s.topic}`).join("\n")
-    return `I'm working on a project: "${project.title}"${project.description ? ` (${project.description})` : ""}.
-
-I currently have these checklist items:
-${items || "  (none yet)"}
-
-Please help me create a better, more detailed checklist. Return a JSON array of objects with:
-- "topic": short actionable step name (e.g. "Set up database schema")
-
-Aim for 5-15 steps ordered from first to last.
-Do not wrap the JSON in markdown or code fences — return only the raw JSON array.`
-  }
-
   async function applyChatGptSteps() {
     if (!chatGptResponse.trim()) return
     setApplyingGpt(true)
@@ -505,18 +491,10 @@ Do not wrap the JSON in markdown or code fences — return only the raw JSON arr
 
           {chatGptOpen && (
             <div className="frame-block p-2 mb-2 space-y-1.5 bg-warm-paper/50">
-              <p className="text-[0.5rem] font-mono text-warm-brown font-medium">✨ ChatGPT Prompt</p>
-              <pre className="text-[0.5rem] font-mono text-muted-ink/70 bg-white p-2 rounded whitespace-pre-wrap max-h-24 overflow-y-auto">{buildStepsPrompt()}</pre>
-              <button
-                onClick={() => navigator.clipboard.writeText(buildStepsPrompt())}
-                className="btn-base btn-outline btn-interact text-[0.5rem]"
-              >
-                Copy Prompt
-              </button>
               <textarea
                 value={chatGptResponse}
                 onChange={(e) => setChatGptResponse(e.target.value)}
-                placeholder="Paste ChatGPT response here..."
+                placeholder="Paste AI-generated checklist here..."
                 rows={3}
                 className="field-coral w-full resize-y text-[0.5rem]"
               />
