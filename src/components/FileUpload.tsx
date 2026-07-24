@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 
 export interface UploadedFile {
@@ -19,6 +19,13 @@ interface FileUploadProps {
 export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
   const [uploading, setUploading] = useState(false)
   const folderInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (folderInputRef.current) {
+      folderInputRef.current.setAttribute("webkitdirectory", "")
+      folderInputRef.current.setAttribute("directory", "")
+    }
+  }, [])
 
   const onDrop = useCallback(async (accepted: File[]) => {
     setUploading(true)
@@ -102,7 +109,6 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
         multiple
         style={{ display: "none" }}
         onChange={handleFolderSelect}
-        {...{ webkitdirectory: "" } as React.InputHTMLAttributes<HTMLInputElement>}
       />
       {files.length > 0 && (
         <div className="mt-2 space-y-0.5">
