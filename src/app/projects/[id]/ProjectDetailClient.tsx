@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { toast } from "sonner"
 import type { ProjectType } from "@/types"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
@@ -293,6 +294,9 @@ Do not wrap the JSON in markdown or code fences — return only the raw JSON arr
   return (
     <div>
       {/* Header */}
+      <div className="mb-4">
+        <Link href="/projects" className="btn-base btn-sm btn-interact-bg mb-3 inline-block">← Projects</Link>
+      </div>
       <div className={`flex items-start justify-between gap-3 mb-4 p-3 ${editing ? "frame-block-accent" : ""}`}>
         <div className="flex-1 min-w-0">
           {editing ? (
