@@ -108,15 +108,18 @@ export default function NewLogPage() {
             onChange={(e) => setContent(e.target.value)}
             rows={6}
             className="field-coral w-full resize-y font-mono"
-            placeholder="What did you learn? What was challenging?&#10;&#10;AI will summarize this and extract skills..."
+            placeholder="Optional — add context about what you learned, what was challenging, or key takeaways..."
           />
         </div>
 
         <div>
           <label className="block text-[0.65rem] font-mono text-warm-brown mb-1">
-            Screenshots / Code / Files {files.length > 0 && `(${files.length})`}
+            📎 Upload anything {files.length > 0 && `(${files.length})`}
           </label>
           <FileUpload files={files} onFilesChange={setFiles} />
+          <p className="text-[0.5rem] font-mono text-muted-ink/40 mt-1">
+            Handwritten notes, PDFs, code, screenshots — AI reads and summarizes automatically
+          </p>
         </div>
 
         {roadmapGoals.length > 0 && (
