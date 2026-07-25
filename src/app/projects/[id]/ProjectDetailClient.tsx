@@ -412,32 +412,34 @@ export default function ProjectDetailClient({ initialProject }: Props) {
         <AnimatedCard className="frame-block p-3">
           <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
             <h2 className="font-serif text-sm text-warm-brown">Checklist</h2>
-            <div className="flex items-center gap-1">
-              <select
-                value={level}
-                onChange={(e) => setLevel(e.target.value as "beginner" | "intermediate" | "advanced")}
-                className="field-coral text-[0.5rem] py-0.5 w-20"
-              >
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-              <AnimatedButton
-                onClick={generateSteps}
-                disabled={generating}
-                variant="sm"
-                className="!px-2 !py-0.5 text-[0.5rem]"
-              >
-                {generating ? "⏳ Generating..." : "Generate Steps"}
-              </AnimatedButton>
-              <AnimatedButton onClick={() => setAddingStep(!addingStep)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">
-                {addingStep ? "Cancel" : "+ Step"}
-              </AnimatedButton>
-              <AnimatedButton onClick={() => setChatGptOpen(!chatGptOpen)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">✨ AI</AnimatedButton>
-            </div>
+            {editing && (
+              <div className="flex items-center gap-1">
+                <select
+                  value={level}
+                  onChange={(e) => setLevel(e.target.value as "beginner" | "intermediate" | "advanced")}
+                  className="field-coral text-[0.5rem] py-0.5 w-20"
+                >
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+                <AnimatedButton
+                  onClick={generateSteps}
+                  disabled={generating}
+                  variant="sm"
+                  className="!px-2 !py-0.5 text-[0.5rem]"
+                >
+                  {generating ? "⏳ Generating..." : "Generate Steps"}
+                </AnimatedButton>
+                <AnimatedButton onClick={() => setAddingStep(!addingStep)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">
+                  {addingStep ? "Cancel" : "+ Step"}
+                </AnimatedButton>
+                <AnimatedButton onClick={() => setChatGptOpen(!chatGptOpen)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">✨ AI</AnimatedButton>
+              </div>
+            )}
           </div>
 
-          {addingStep && (
+          {editing && addingStep && (
             <div className="flex gap-1 mb-2">
               <input
                 type="text"
@@ -452,7 +454,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
             </div>
           )}
 
-          {chatGptOpen && (
+          {editing && chatGptOpen && (
             <div className="frame-block p-2 mb-2 space-y-1.5 bg-warm-paper/50">
               <textarea
                 value={chatGptResponse}
@@ -476,18 +478,18 @@ export default function ProjectDetailClient({ initialProject }: Props) {
           )}
 
           {project.steps.length === 0 && (
-            <p className="text-[0.6rem] font-mono text-muted-ink/40">No steps yet. Add one or click &ldquo;Gen AI&rdquo; to generate from your updates.</p>
+            <p className="text-[0.6rem] font-mono text-muted-ink/40">{editing ? "No steps yet. Add one or use AI to generate." : "No steps yet."}</p>
           )}
 
           <div className="space-y-0.5">
             {project.steps.map((step, idx) => (
               <div
                 key={step.id}
-                draggable
-                onDragStart={() => handleDragStart(idx)}
+                draggable={editing}
+                onDragStart={() => editing && handleDragStart(idx)}
                 onDragOver={handleDragOver}
                 onDrop={() => handleDrop(idx)}
-                className={`flex items-center gap-2 group cursor-grab active:cursor-grabbing ${
+                className={`flex items-center gap-2 ${editing ? "group cursor-grab active:cursor-grabbing" : ""} ${
                   dragIndex === idx ? "opacity-50" : ""
                 }`}
               >
@@ -500,7 +502,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
                   {step.isComplete ? "✓" : ""}
                 </button>
 
-                {editingStepId === step.id ? (
+                {editing && editingStepId === step.id ? (
                   <input
                     type="text"
                     value={editingStepTopic}
@@ -514,8 +516,8 @@ export default function ProjectDetailClient({ initialProject }: Props) {
                   />
                 ) : (
                   <span
-                    onClick={() => startEditing(step)}
-                    className={`flex-1 text-[0.6rem] font-mono break-words cursor-text ${
+                    onClick={() => editing && startEditing(step)}
+                    className={`flex-1 text-[0.6rem] font-mono break-words ${editing ? "cursor-text" : ""} ${
                       step.isComplete ? "text-muted-ink/40 line-through" : "text-warm-brown"
                     }`}
                   >
@@ -523,13 +525,15 @@ export default function ProjectDetailClient({ initialProject }: Props) {
                   </span>
                 )}
 
-                <AnimatedButton
-                  onClick={() => deleteStep(step.id)}
-                  variant="sm"
-                  className="!px-1 !py-0 text-[0.45rem]"
-                >
-                  ✕
-                </AnimatedButton>
+                {editing && (
+                  <AnimatedButton
+                    onClick={() => deleteStep(step.id)}
+                    variant="sm"
+                    className="!px-1 !py-0 text-[0.45rem]"
+                  >
+                    ✕
+                  </AnimatedButton>
+                )}
               </div>
             ))}
           </div>
