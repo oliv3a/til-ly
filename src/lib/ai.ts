@@ -10,6 +10,7 @@ function getClient(): OpenAI | null {
 export interface AiExtractResult {
   summary: string
   motivation?: string
+  realWorldConnection?: string
   skills: { name: string; category: string; depth: "surface" | "moderate" | "deep" }[]
   mappedGoalIds?: string[]
   nextRecommendation?: string
@@ -83,14 +84,16 @@ export async function summarizeStudyLog(
 
 Content: "${content}"${goalsContext}${skillsContext}
 
-Respond with JSON with two text fields:
+Respond with JSON with these fields:
 1. "summary" — A clear 2-3 sentence recap of what they learned and did. Factual, specific, concise. This is for the student to review their own learning.
 2. "motivation" — A brief, encouraging insight (1-2 sentences) connecting this log to their broader learning journey. Why this matters, what it unlocks, or how it builds on previous work. This is a side note for extra clarity and motivation.
+3. "realWorldConnection" — A Gen Z casual explanation (2-3 sentences max) of how this concept is used in real apps they use daily. Reference a specific popular app (Instagram, Spotify, Uber, Amazon, TikTok, Netflix, Discord, Venmo, Google Maps, etc.). Connect the concept to something tangible they've experienced. End with why this matters for their career. Tone: like a hype friend, not a textbook. Never repeat the same app reference across different logs. Be specific to what they actually studied — generic connections feel hollow.
 
 Example:
 {
   "summary": "You built a REST API with Express and PostgreSQL — defined routes, connected to a database, and tested endpoints with curl.",
   "motivation": "You've now built a full CRUD backend from scratch. This skill transfers directly to any web framework and is the foundation for your goal of building a full-stack app.",
+  "realWorldConnection": "not you building the same thing that powers every app on your phone — when you Venmo someone and it shows up on their phone instantly, that's a REST API. you're literally learning how the internet works under the hood. this is the skill that gets you hired fr 🚀",
   "skills": [
     { "name": "Express", "category": "Backend", "depth": "moderate" },
     { "name": "PostgreSQL", "category": "Databases", "depth": "moderate" }

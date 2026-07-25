@@ -5,6 +5,7 @@ import { notFound } from "next/navigation"
 import ContentEditor from "./ContentEditor"
 import RoadmapLinkEditor from "./RoadmapLinkEditor"
 import AiSummaryEditor from "./AiSummaryEditor"
+import RealWorldConnection from "./RealWorldConnection"
 import SkillsEditor from "./SkillsEditor"
 
 export default async function LogDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -44,6 +45,8 @@ export default async function LogDetailPage({ params }: { params: Promise<{ id: 
         <ContentEditor logId={id} initialContent={log.content} />
 
         <AiSummaryEditor logId={id} initialSummary={log.aiSummary} />
+
+        <RealWorldConnection logId={id} initialConnection={log.realWorldConnection} />
 
         {log.files.length > 0 && (
           <div className="mb-4">

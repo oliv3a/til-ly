@@ -30,6 +30,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (log.userId !== userId) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
     let aiSummary = ""
+    let realWorldConnection: string | null = null
     let aiSkills: AiExtractResult["skills"] = []
     let recommendation: string | undefined
 
@@ -71,6 +72,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             }
           }
           if (textResult.nextRecommendation) recommendation = textResult.nextRecommendation
+          if (textResult.realWorldConnection) realWorldConnection = textResult.realWorldConnection
         }
       } catch (err) {
         console.error("Text AI analysis failed:", err)
@@ -79,7 +81,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     await prisma.studyLog.update({
       where: { id: log.id },
-      data: { aiSummary: aiSummary || null },
+      data: { aiSummary: aiSummary || null, realWorldConnection },
     })
 
     if (aiSkills?.length) {

@@ -50,6 +50,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (body.title !== undefined) updateData.title = body.title
     if (body.content !== undefined) updateData.content = body.content
     if (body.aiSummary !== undefined) updateData.aiSummary = body.aiSummary
+    if (body.realWorldConnection !== undefined) updateData.realWorldConnection = body.realWorldConnection
 
     if (body.roadmapItemIds !== undefined) {
       await prisma.studyLogRoadmapItem.deleteMany({ where: { studyLogId: id } })
