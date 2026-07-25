@@ -117,8 +117,8 @@ export default function NewLogPage() {
             📎 Upload anything {files.length > 0 && `(${files.length})`}
           </label>
           <FileUpload files={files} onFilesChange={setFiles} />
-          <p className="text-[0.5rem] font-mono text-muted-ink/40 mt-1">
-            Handwritten notes, PDFs, code, screenshots — AI reads and summarizes automatically
+          <p className="text-[0.55rem] font-mono font-medium text-muted-ink/60 mt-1">
+            📸 notes · 📄 pdfs · 💻 code · 🖼️ screenshots → ✨ AI reads it all
           </p>
         </div>
 
