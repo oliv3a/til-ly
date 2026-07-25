@@ -53,7 +53,7 @@ export default function NewProjectPage() {
     <div className="max-w-xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="poster-heading text-2xl">New Project</h1>
-          <Link href="/projects" className="btn-base btn-sm btn-interact-bg">← Projects</Link>
+          <Link href="/projects" className="btn-base btn-sm btn-interact-bg">← Building</Link>
         </div>
 
         {error && (

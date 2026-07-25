@@ -271,7 +271,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
     <div>
       {/* Header */}
       <div className="mb-4">
-        <Link href="/projects" className="btn-base btn-sm btn-interact-bg mb-3 inline-block">← Projects</Link>
+        <Link href="/projects" className="btn-base btn-sm btn-interact-bg mb-3 inline-block">← Building</Link>
       </div>
       <div className={`flex items-start justify-between gap-3 mb-4 p-3 ${editing ? "frame-block-accent" : ""}`}>
         <div className="flex-1 min-w-0">

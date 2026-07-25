@@ -20,7 +20,7 @@ export default async function ProjectsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="poster-heading text-2xl">📦 Projects</h1>
+        <h1 className="poster-heading text-2xl">📦 Building</h1>
         <Link href="/projects/new" className="btn-base btn-coral btn-interact text-[0.65rem]">+ New Project</Link>
       </div>
       <ProjectsClient initialProjects={JSON.parse(JSON.stringify(projects))} />

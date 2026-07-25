@@ -21,7 +21,7 @@ export default async function GoalsPage() {
 
   return (
     <div>
-      <h1 className="poster-heading text-2xl mb-6">🎯 Learning Goals</h1>
+      <h1 className="poster-heading text-2xl mb-6">🎯 Learning</h1>
       <GoalsClient initialGoals={JSON.parse(JSON.stringify(goals))} />
     </div>
   )

@@ -9,8 +9,8 @@ import BrandLogo from "./BrandLogo"
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/logs", label: "Logs" },
-  { href: "/projects", label: "Projects" },
-  { href: "/goals", label: "Goals" },
+  { href: "/projects", label: "Building" },
+  { href: "/goals", label: "Learning" },
   { href: "/resume", label: "Resume" },
 ]
 
