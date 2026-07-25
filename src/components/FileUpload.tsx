@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
+import { compressImage, isImageFile } from "@/lib/compress-image"
 
 export interface UploadedFile {
   url: string
@@ -33,7 +34,8 @@ export default function FileUpload({ files, onFilesChange }: FileUploadProps) {
     setUploadProgress({ current: 0, total: accepted.length })
     const formData = new FormData()
     for (const file of accepted) {
-      formData.append("files", file)
+      const toUpload = isImageFile(file) ? await compressImage(file) : file
+      formData.append("files", toUpload)
       const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || null
       formData.append("filePaths", path || "")
     }
