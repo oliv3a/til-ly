@@ -1,0 +1,44 @@
+name: Build macOS App
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release
+        working-directory: macos/til.ly
+        run: |
+          swift build -c release
+
+      - name: Bundle .app
+        working-directory: macos/til.ly
+        run: |
+          APP="Tilly.app"
+          rm -rf "$APP"
+          mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+
+          cp Info.plist "$APP/Contents/"
+          cp .build/release/tilly "$APP/Contents/MacOS/"
+          cp Sources/Resources/logo-brand.png "$APP/Contents/Resources/AppIcon.png"
+
+          codesign --sign - --force --entitlements tilly.entitlements "$APP/Contents/MacOS/tilly"
+
+      - name: Zip .app
+        working-directory: macos/til.ly
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent Tilly.app til-ly-macos.zip
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: macos/til.ly/til-ly-macos.zip
+          generate_release_notes: true

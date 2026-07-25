@@ -38,6 +38,8 @@ yarn-error.log*
 
 # macOS menu bar app
 macos/**/.build
+macos/**/Tilly.app
+macos/**/til-ly-macos.zip
 
 # typescript
 *.tsbuildinfo

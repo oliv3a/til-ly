@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { processCheckin } from "@/lib/checkin"
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; stepId: string }> }) {
   try {
@@ -14,7 +15,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
-    const { topic, isComplete, order } = await req.json()
+    const { topic, isComplete, order, timezoneOffset } = await req.json()
 
     const { step, progressPct } = await prisma.$transaction(async (tx) => {
       const step = await tx.projectStep.update({
@@ -40,6 +41,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
       return { step, progressPct }
     })
+
+    if (isComplete) {
+      processCheckin(userId, timezoneOffset).catch(() => {})
+    }
 
     return NextResponse.json({ step, progressPct })
   } catch (err) {

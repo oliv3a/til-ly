@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { processCheckin } from "@/lib/checkin"
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; rid: string }> }) {
   try {
@@ -16,6 +17,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const data: Record<string, unknown> = {}
     if (body.isComplete !== undefined) data.isComplete = body.isComplete
+    const { timezoneOffset } = body
     if (body.topic !== undefined) data.topic = body.topic
     if (body.description !== undefined) data.description = body.description
     if (body.estimatedLogs !== undefined) data.estimatedLogs = body.estimatedLogs
@@ -23,6 +25,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "No fields to update" }, { status: 400 })
 
     await prisma.roadmapItem.update({ where: { id: rid }, data })
+
+    if (body.isComplete === true) {
+      processCheckin(session.user.id, timezoneOffset).catch(() => {})
+    }
 
     const goalWithRoadmap = await prisma.goal.findUnique({
       where: { id: gid },

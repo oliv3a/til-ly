@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { reviewProjectUpdate } from "@/lib/ai"
+import { processCheckin } from "@/lib/checkin"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -17,7 +18,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
-    const { content, fileUrls } = await req.json()
+    const { content, fileUrls, timezoneOffset } = await req.json()
     if (!content?.trim()) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 })
     }
@@ -36,6 +37,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       content,
       project.aiOverallFeedback || undefined,
     )
+
+    processCheckin(session.user.id, timezoneOffset).catch(() => {})
 
     // Create the update
     const update = await prisma.projectUpdate.create({

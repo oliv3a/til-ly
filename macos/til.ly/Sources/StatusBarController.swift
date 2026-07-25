@@ -30,10 +30,16 @@ final class StatusBarController: NSObject, WKNavigationDelegate, WKUIDelegate {
     private func setupPopover() {
         let config = WKWebViewConfiguration()
         config.applicationNameForUserAgent = "til.ly"
-        // Disable auto-play and other noisy features
         config.defaultWebpagePreferences.allowsContentJavaScript = true
 
-        webView = WKWebView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight), configuration: config)
+        let selectionScript = WKUserScript(
+            source: "document.documentElement.style.userSelect = 'auto';",
+            injectionTime: .atDocumentEnd,
+            forMainFrameOnly: true
+        )
+        config.userContentController.addUserScript(selectionScript)
+
+        webView = SelectableWebView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight), configuration: config)
         webView.navigationDelegate = self
         webView.uiDelegate = self
 

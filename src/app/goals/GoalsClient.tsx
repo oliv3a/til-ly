@@ -51,7 +51,7 @@ export default function GoalsClient({ initialGoals }: Props) {
     const res = await fetch(`/api/goals/${goalId}/roadmap-items/${item.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isComplete: newComplete }),
+      body: JSON.stringify({ isComplete: newComplete, timezoneOffset: new Date().getTimezoneOffset() }),
     })
     if (res.ok) {
       const data = await res.json()
@@ -183,7 +183,7 @@ export default function GoalsClient({ initialGoals }: Props) {
     const res = await fetch("/api/goals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, targetDate, category }),
+      body: JSON.stringify({ title, description, targetDate, category, timezoneOffset: new Date().getTimezoneOffset() }),
     })
 
     if (res.ok) {

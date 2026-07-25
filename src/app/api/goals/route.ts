@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateRoadmap } from "@/lib/ai"
+import { processCheckin } from "@/lib/checkin"
 
 export async function GET() {
   try {
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const userId = session.user.id
-    const { title, description, targetDate, category } = await req.json()
+    const { title, description, targetDate, category, timezoneOffset } = await req.json()
 
     if (!title || (typeof title === "string" && title.trim().length < 1)) return NextResponse.json({ error: "Title required" }, { status: 400 })
     if (typeof title === "string" && title.length > 200) return NextResponse.json({ error: "Title must be 200 characters or less" }, { status: 400 })
@@ -36,6 +37,8 @@ export async function POST(req: Request) {
     const goal = await prisma.goal.create({
       data: { userId, title, description, targetDate: targetDate ? new Date(targetDate) : null, category },
     })
+
+    processCheckin(userId, timezoneOffset).catch(() => {})
 
     let roadmapItems: { topic: string; description: string; estimatedLogs: number }[] = []
     try {

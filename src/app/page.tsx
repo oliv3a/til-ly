@@ -90,7 +90,8 @@ export default function LandingPage() {
                 </div>
                 <div className="text-[0.5rem] font-mono font-bold text-muted-ink/50 mt-2 space-y-0.5">
                   <p>1. Download &amp; unzip</p>
-                  <p>2. Double‑click to open</p>
+                  <p>2. Drag Tilly.app to Applications</p>
+                  <p>3. Open from Spotlight or Finder</p>
                 </div>
               </div>
             </div>

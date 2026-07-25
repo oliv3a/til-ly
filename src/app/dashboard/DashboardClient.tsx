@@ -476,7 +476,8 @@ function MacSplitCard() {
           </a>
           <div className="text-[0.5rem] font-mono font-bold text-muted-ink/70 mt-1.5 space-y-[2px] leading-snug">
             <p>1. Download &amp; unzip</p>
-            <p>2. Double‑click to open</p>
+            <p>2. Drag Tilly.app to Applications</p>
+            <p>3. Open from Spotlight or Finder</p>
           </div>
         </div>
       </div>

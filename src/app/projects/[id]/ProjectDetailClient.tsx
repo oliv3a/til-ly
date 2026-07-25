@@ -57,7 +57,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
     const res = await fetch(`/api/projects/${project.id}/steps/${stepId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isComplete: newComplete }),
+      body: JSON.stringify({ isComplete: newComplete, timezoneOffset: new Date().getTimezoneOffset() }),
     })
     if (res.ok) {
       const data = await res.json()
@@ -119,7 +119,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
     const res = await fetch(`/api/projects/${project.id}/updates`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, timezoneOffset: new Date().getTimezoneOffset() }),
     })
     if (res.ok) {
       const data = await res.json()

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { codeChat } from "@/lib/ai"
+import { processCheckin } from "@/lib/checkin"
 
 const MAX_MESSAGES = 20
 
@@ -9,7 +10,7 @@ export async function POST(req: Request) {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { mode, code, fileName, messages } = await req.json()
+    const { mode, code, fileName, messages, timezoneOffset } = await req.json()
 
     if (mode !== "review" && mode !== "chat") {
       return NextResponse.json({ error: "Mode must be 'review' or 'chat'" }, { status: 400 })
@@ -35,6 +36,10 @@ export async function POST(req: Request) {
     const isFirstReview = mode === "review" && messages.length === 0
 
     const result = await codeChat({ mode, code, fileName, messages, isFirstReview })
+
+    if (mode === "review") {
+      processCheckin(session.user.id, timezoneOffset).catch(() => {})
+    }
 
     return NextResponse.json({
       ...result,

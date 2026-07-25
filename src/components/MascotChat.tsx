@@ -91,7 +91,7 @@ export default function MascotChat() {
         const res = await fetch("/api/code-review", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: "review", code, fileName: fileName || undefined, messages: [] }),
+          body: JSON.stringify({ mode: "review", code, fileName: fileName || undefined, messages: [], timezoneOffset: new Date().getTimezoneOffset() }),
         })
         const data = await res.json()
         if (data.type === "limit") {
@@ -135,6 +135,7 @@ export default function MascotChat() {
           code: mode === "review" ? sentCode : undefined,
           fileName: mode === "review" ? fileName : undefined,
           messages: updated.map((m) => ({ role: m.role, content: m.type === "review" ? "I shared my code for review earlier." : m.content })),
+          timezoneOffset: new Date().getTimezoneOffset(),
         }),
       })
       const data = await res.json()

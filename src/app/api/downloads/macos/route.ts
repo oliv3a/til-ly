@@ -1,19 +1,7 @@
-import { readFile } from "node:fs/promises"
-import { join } from "node:path"
 import { type NextRequest } from "next/server"
 
-export async function GET(_req: NextRequest) {
-  try {
-    const filePath = join(process.cwd(), "public", "downloads", "til-ly-macos.zip")
-    const data = await readFile(filePath)
+const RELEASE_URL = "https://github.com/oliv3a/keizokode/releases/latest/download/til-ly-macos.zip"
 
-    return new Response(data, {
-      headers: {
-        "Content-Type": "application/zip",
-        "Content-Disposition": 'attachment; filename="til-ly-macos.zip"',
-      },
-    })
-  } catch {
-    return Response.json({ error: "Not found" }, { status: 404 })
-  }
+export async function GET(_req: NextRequest) {
+  return Response.redirect(RELEASE_URL, 302)
 }

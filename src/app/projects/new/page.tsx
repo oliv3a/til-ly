@@ -32,6 +32,7 @@ export default function NewProjectPage() {
           techStack: techStack.trim() || undefined,
           repoUrl: repoUrl.trim() || undefined,
           fileUrls: files.length > 0 ? files : undefined,
+          timezoneOffset: new Date().getTimezoneOffset(),
         }),
       })
 

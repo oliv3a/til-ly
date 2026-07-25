@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { processCheckin } from "@/lib/checkin"
 
 export async function GET() {
   try {
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const userId = session.user.id
-    const { title, description, techStack, repoUrl, fileUrls } = await req.json()
+    const { title, description, techStack, repoUrl, fileUrls, timezoneOffset } = await req.json()
 
     if (!title || !title.trim()) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 })
@@ -59,6 +60,8 @@ export async function POST(req: Request) {
       },
       include: { files: true, steps: true, updates: true },
     })
+
+    processCheckin(userId, timezoneOffset).catch(() => {})
 
     return NextResponse.json(project)
   } catch (err) {
