@@ -34,7 +34,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     let aiSkills: AiExtractResult["skills"] = []
     let recommendation: string | undefined
 
-    const codeFiles = log.files.filter((f) => f.extractedText)
+    const codeFiles = log.files.filter((f) => f.extractedText && (f.fileType.startsWith("text/") || f.fileName.endsWith(".ipynb")))
     if (codeFiles.length > 0) {
       const codeResult = await withRetry(() => analyzeCode(
         codeFiles.map((f) => ({ name: f.fileName, content: f.extractedText! })),
@@ -46,9 +46,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       }
     }
 
-    if (log.content || !aiSummary) {
+    // Collect extracted text from image files
+    const imageText = log.files
+      .filter((f) => f.extractedText && f.fileType.startsWith("image/"))
+      .map((f) => f.extractedText)
+      .join("\n\n")
+
+    const hasContent = log.content || imageText
+    if (hasContent || !aiSummary) {
       try {
-        const textToAnalyze = log.content || log.title
+        const textToAnalyze = [log.content, imageText].filter(Boolean).join("\n\n") || log.title
         const textResult: AiExtractResult | null = await withRetry(async () => {
           const existingSkillNames = (await prisma.skill.findMany({
             select: { name: true },
