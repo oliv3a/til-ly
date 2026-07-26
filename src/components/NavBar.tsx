@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
@@ -52,11 +52,25 @@ export default function NavBar() {
   const { data: session } = useSession()
   const userId = session?.user?.id
   const [menuOpen, setMenuOpen] = useState(false)
+  const [hoveredGroup, setHoveredGroup] = useState<number | null>(null)
+  const [mobileExpanded, setMobileExpanded] = useState<number | null>(null)
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const navRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    }
+  }, [])
 
   function isActive(href: string) {
     if (href === "/dashboard") return pathname === "/dashboard"
     if (href === "/portfolio") return pathname.startsWith("/portfolio")
     return pathname.startsWith(href)
+  }
+
+  function isGroupActive(group: NavGroup) {
+    return group.items.some((item) => isActive(getHref(item)))
   }
 
   function getHref(item: NavItem) {
@@ -66,7 +80,44 @@ export default function NavBar() {
 
   function closeMenu() {
     setMenuOpen(false)
+    setHoveredGroup(null)
   }
+
+  function handleGroupEnter(index: number) {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    const group = navGroups[index]
+    if (group.items.length > 1 && group.label) {
+      setHoveredGroup(index)
+    }
+  }
+
+  function handleGroupLeave() {
+    closeTimeoutRef.current = setTimeout(() => setHoveredGroup(null), 150)
+  }
+
+  function handleGroupClick(index: number) {
+    const group = navGroups[index]
+    if (group.items.length === 1) {
+      closeMenu()
+      return
+    }
+    setHoveredGroup(hoveredGroup === index ? null : index)
+  }
+
+  function handleMobileToggle(index: number) {
+    setMobileExpanded(mobileExpanded === index ? null : index)
+  }
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setHoveredGroup(null)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   return (
     <nav className="nav-bar">
@@ -78,24 +129,63 @@ export default function NavBar() {
         </div>
 
         {/* Desktop nav links */}
-        <div className="nav-links hidden sm:flex items-center">
-          {navGroups.map((group, gi) => (
-            <div key={gi} className="flex items-center">
-              {gi > 0 && <span className="nav-group-divider" />}
-              {group.label && (
-                <span className="nav-group-label">{group.emoji} {group.label}</span>
-              )}
-              {group.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={getHref(item)}
-                  className={`nav-link ${isActive(item.href) ? "nav-link--active" : ""}`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          ))}
+        <div className="nav-links hidden sm:flex items-center" ref={navRef}>
+          {navGroups.map((group, gi) => {
+            const isDropdown = group.items.length > 1 && group.label
+            const singleItem = group.items.length === 1 ? group.items[0] : null
+            const groupActive = isGroupActive(group)
+            const isOpen = hoveredGroup === gi
+
+            return (
+              <div key={gi} className="relative">
+                {gi > 0 && <span className="nav-group-divider" />}
+
+                {isDropdown ? (
+                  <div
+                    className="nav-dropdown-trigger"
+                    onMouseEnter={() => handleGroupEnter(gi)}
+                    onMouseLeave={handleGroupLeave}
+                  >
+                    <button
+                      onClick={() => handleGroupClick(gi)}
+                      className={`nav-group-btn ${groupActive ? "nav-group-btn--active" : ""} ${isOpen ? "nav-group-btn--open" : ""}`}
+                    >
+                      {group.emoji} {group.label}
+                      <svg className={`nav-chevron ${isOpen ? "nav-chevron--open" : ""}`} width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2.5 3.75L5 6.25L7.5 3.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    {isOpen && (
+                      <div
+                        className="nav-dropdown"
+                        onMouseEnter={() => handleGroupEnter(gi)}
+                        onMouseLeave={handleGroupLeave}
+                      >
+                        {group.items.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={getHref(item)}
+                            className={`nav-dropdown-item ${isActive(getHref(item)) ? "nav-dropdown-item--active" : ""}`}
+                            onClick={closeMenu}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : singleItem ? (
+                  <Link
+                    href={getHref(singleItem)}
+                    className={`nav-link ${isActive(getHref(singleItem)) ? "nav-link--active" : ""}`}
+                    onClick={closeMenu}
+                  >
+                    {group.emoji ? `${group.emoji} ` : ""}{singleItem.label}
+                  </Link>
+                ) : null}
+              </div>
+            )
+          })}
         </div>
 
         <div className="hidden sm:flex items-center gap-1 shrink-0">
@@ -126,28 +216,60 @@ export default function NavBar() {
       {/* Mobile dropdown menu */}
       {menuOpen && (
         <div className="sm:hidden frame-block border-t-0 p-2 space-y-1">
-          {navGroups.map((group, gi) => (
-            <div key={gi}>
-              {gi > 0 && <hr className="border-t border-warm-brown/10 my-1" />}
-              {group.label && (
-                <p className="text-[0.5rem] font-mono text-muted-ink/40 uppercase tracking-wider px-2 pt-1 pb-0.5">
-                  {group.emoji} {group.label}
-                </p>
-              )}
-              {group.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={getHref(item)}
-                  onClick={closeMenu}
-                  className={`block font-mono text-[0.6rem] py-1.5 px-2 ${
-                    isActive(item.href) ? "text-warm-brown font-bold" : "text-muted-ink/70"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          ))}
+          {navGroups.map((group, gi) => {
+            const isDropdown = group.items.length > 1 && group.label
+            const singleItem = group.items.length === 1 ? group.items[0] : null
+            const groupActive = isGroupActive(group)
+            const isExpanded = mobileExpanded === gi || (isDropdown && groupActive)
+
+            return (
+              <div key={gi}>
+                {gi > 0 && <hr className="border-t border-warm-brown/10 my-1" />}
+
+                {isDropdown ? (
+                  <>
+                    <button
+                      onClick={() => handleMobileToggle(gi)}
+                      className={`flex items-center justify-between w-full font-mono text-[0.6rem] py-1.5 px-2 rounded-sm transition-colors cursor-pointer ${
+                        groupActive ? "text-warm-brown font-bold" : "text-muted-ink/70"
+                      }`}
+                    >
+                      <span>{group.emoji} {group.label}</span>
+                      <svg className={`nav-chevron ${isExpanded ? "nav-chevron--open" : ""}`} width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2.5 3.75L5 6.25L7.5 3.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    {isExpanded && (
+                      <div className="ml-4 space-y-0.5">
+                        {group.items.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={getHref(item)}
+                            onClick={closeMenu}
+                            className={`block font-mono text-[0.6rem] py-1.5 px-2 rounded-sm ${
+                              isActive(getHref(item)) ? "text-warm-brown font-bold" : "text-muted-ink/60"
+                            }`}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : singleItem ? (
+                  <Link
+                    href={getHref(singleItem)}
+                    onClick={closeMenu}
+                    className={`block font-mono text-[0.6rem] py-1.5 px-2 ${
+                      isActive(getHref(singleItem)) ? "text-warm-brown font-bold" : "text-muted-ink/70"
+                    }`}
+                  >
+                    {group.emoji ? `${group.emoji} ` : ""}{singleItem.label}
+                  </Link>
+                ) : null}
+              </div>
+            )
+          })}
           <hr className="border-t border-warm-brown/20 my-1" />
           <Link
             href="/profile"

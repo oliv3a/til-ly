@@ -191,17 +191,6 @@ body {
   background: var(--color-warm-brown);
   color: var(--color-warm-paper);
 }
-.nav-group-label {
-  font-family: var(--font-mono);
-  font-size: 0.5rem;
-  color: var(--color-muted-ink);
-  opacity: 0.45;
-  padding: 0 0.375rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  user-select: none;
-}
 .nav-group-divider {
   width: 1px;
   height: 1rem;
@@ -209,6 +198,74 @@ body {
   opacity: 0.15;
   margin: 0 0.25rem;
   flex-shrink: 0;
+}
+.nav-dropdown-trigger {
+  position: relative;
+}
+.nav-group-btn {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-muted-ink);
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+.nav-group-btn:hover {
+  background: color-mix(in srgb, var(--color-warm-brown) 6%, transparent);
+  color: var(--color-warm-brown);
+}
+.nav-group-btn--active {
+  color: var(--color-warm-brown);
+}
+.nav-group-btn--open {
+  background: color-mix(in srgb, var(--color-warm-brown) 6%, transparent);
+  color: var(--color-warm-brown);
+}
+.nav-chevron {
+  transition: transform 0.2s;
+  opacity: 0.5;
+}
+.nav-chevron--open {
+  transform: rotate(180deg);
+}
+.nav-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0.25rem;
+  background: var(--color-warm-paper);
+  border: 2px solid var(--color-warm-brown);
+  box-shadow: 4px 4px 0 var(--color-warm-brown);
+  min-width: 10rem;
+  z-index: 100;
+  padding: 0.25rem 0;
+}
+.nav-dropdown-item {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 0.375rem 0.75rem;
+  color: var(--color-muted-ink);
+  text-decoration: none;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+}
+.nav-dropdown-item:hover {
+  background: color-mix(in srgb, var(--color-warm-brown) 8%, transparent);
+  color: var(--color-warm-brown);
+}
+.nav-dropdown-item--active {
+  background: var(--color-warm-brown);
+  color: var(--color-warm-paper);
 }
 .nav-btn {
   font-family: var(--font-mono);
@@ -665,13 +722,20 @@ body {
     font-size: 0.55rem;
     padding: 0.25rem 0.375rem;
   }
-  .nav-group-label {
-    font-size: 0.45rem;
-    padding: 0 0.25rem;
+  .nav-group-btn {
+    font-size: 0.55rem;
+    padding: 0.25rem 0.375rem;
   }
   .nav-group-divider {
     height: 0.75rem;
     margin: 0 0.125rem;
+  }
+  .nav-dropdown {
+    min-width: 8rem;
+  }
+  .nav-dropdown-item {
+    font-size: 0.55rem;
+    padding: 0.3rem 0.5rem;
   }
   .nav-btn {
     font-size: 0.55rem;
