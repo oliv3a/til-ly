@@ -95,7 +95,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       {/* 2. Today's Goal */}
       <motion.div variants={staggerItem} className="dash-section">
         <p className="dash-section-title mb-3">
-          <span className="text-muted-ink/25">01</span> Today&apos;s Goal
+          <span className="text-muted-ink/25">01 </span>Today&apos;s Goal
         </p>
         {data.goals && data.goals.length > 0 ? (
           <div className="space-y-2">
@@ -133,7 +133,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       {/* 3. Recent Learning */}
       <motion.div variants={staggerItem} className="dash-section">
         <p className="dash-section-title mb-3">
-          <span className="text-muted-ink/25">02</span> Recent Learning
+          <span className="text-muted-ink/25">02 </span>Recent Learning
         </p>
         {data.skills && data.skills.length > 0 ? (
           <div className="flex flex-wrap gap-2">
@@ -166,7 +166,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       {/* 4. Current Project */}
       <motion.div variants={staggerItem} className="dash-section">
         <p className="dash-section-title mb-3">
-          <span className="text-muted-ink/25">03</span> Building
+          <span className="text-muted-ink/25">03 </span>Building
         </p>
         {data.currentProject ? (
           <Link href={`/projects/${data.currentProject.id}`} className="dash-card block p-3 hover:bg-warm-brown/[0.03] transition-colors group">
@@ -197,7 +197,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       {/* 5. You're improving */}
       <motion.div variants={staggerItem} className="dash-section">
         <p className="dash-section-title mb-3">
-          <span className="text-muted-ink/25">04</span> You&apos;re improving
+          <span className="text-muted-ink/25">04 </span>You&apos;re improving
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {/* Stats */}
