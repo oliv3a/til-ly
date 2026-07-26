@@ -15,6 +15,7 @@ Build til.ly, a study-log platform where CS students upload daily progress, AI s
 - Auth: email/password + JWT, no email verification for MVP
 - Prisma 7 requires driver adapter (@prisma/adapter-pg + pg), prisma.config.ts at root, datasource `url` removed from schema
 - Next.js 16 uses proxy.ts instead of middleware.ts; route handler params must be awaited; Turbopack
+- GitHub repo: `oliv3a/til-ly`
 
 ## Status (as of Jul 18, 2026 — evening)
 - Core features complete: auth, study log CRUD, AI summarization, goals, portfolio, recruiter search, profile settings
