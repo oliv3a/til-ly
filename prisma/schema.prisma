@@ -101,6 +101,7 @@ model StudyLog {
   type      String   @default("text") // text | files | both
   aiSummary String?
   realWorldConnection String?
+  nextStep   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

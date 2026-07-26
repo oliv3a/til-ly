@@ -16,6 +16,7 @@ interface Log {
   createdAt: string
   type: string
   aiSummary: string | null
+  nextStep: string | null
   skillTags: { skill: { id: string; name: string } }[]
   goalLinks: { goal: { id: string; title: string } }[]
 }
@@ -177,6 +178,11 @@ export default function LogsPage() {
                 {log.aiSummary && (
                   <p className="text-[0.5rem] font-mono text-muted-ink/60 line-clamp-3 leading-relaxed mb-auto">
                     {parseAiSummary(log.aiSummary).summary}
+                  </p>
+                )}
+                {log.nextStep && (
+                  <p className="text-[0.45rem] font-mono text-turquoise/70 line-clamp-2 leading-relaxed mt-1">
+                    → {log.nextStep}
                   </p>
                 )}
                 {log.skillTags.length > 0 && (

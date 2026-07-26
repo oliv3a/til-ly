@@ -8,13 +8,13 @@ import { staggerContainer, staggerItem } from "@/lib/motion/variants"
 
 interface Props {
   logId: string
-  initialConnection: string | null
+  initialNextStep: string | null
 }
 
-export default function RealWorldConnection({ logId, initialConnection }: Props) {
-  const [connection, setConnection] = useState(initialConnection)
+export default function NextRecommendation({ logId, initialNextStep }: Props) {
+  const [nextStep, setNextStep] = useState(initialNextStep)
   const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState(initialConnection ?? "")
+  const [draft, setDraft] = useState(initialNextStep ?? "")
   const [saving, setSaving] = useState(false)
   const [generating, setGenerating] = useState(false)
 
@@ -24,9 +24,9 @@ export default function RealWorldConnection({ logId, initialConnection }: Props)
       const res = await fetch(`/api/logs/${logId}/analyze`, { method: "POST" })
       if (res.ok) {
         const data = await res.json()
-        if (data.realWorldConnection) {
-          setConnection(data.realWorldConnection)
-          setDraft(data.realWorldConnection)
+        if (data.recommendation) {
+          setNextStep(data.recommendation)
+          setDraft(data.recommendation)
         }
       }
     } catch {
@@ -41,10 +41,10 @@ export default function RealWorldConnection({ logId, initialConnection }: Props)
     const res = await fetch(`/api/logs/${logId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ realWorldConnection: draft || null }),
+      body: JSON.stringify({ nextStep: draft || null }),
     })
     if (res.ok) {
-      setConnection(draft || null)
+      setNextStep(draft || null)
       setEditing(false)
     }
     setSaving(false)
@@ -53,26 +53,26 @@ export default function RealWorldConnection({ logId, initialConnection }: Props)
   if (generating) {
     return (
       <div className="frame-block p-4 mb-4">
-        <div className="section-header mb-2">🌍 In Real Software</div>
+        <div className="section-header mb-2">What to Learn Next</div>
         <div className="flex items-center gap-2 text-[0.65rem] font-mono text-muted-ink/50">
           <BrandLogo size={32} />
-          Connecting to real software...
+          Figuring out your next step...
         </div>
       </div>
     )
   }
 
-  if (!connection && !editing) {
+  if (!nextStep && !editing) {
     return (
       <div className="frame-block p-4 mb-4">
         <div className="flex items-center justify-between mb-2">
-          <div className="section-header">🌍 In Real Software</div>
+          <div className="section-header">What to Learn Next</div>
           <AnimatedButton onClick={handleGenerate} variant="sm" className="text-[0.55rem]">
             Generate
           </AnimatedButton>
         </div>
         <p className="text-[0.65rem] font-mono text-muted-ink/50">
-          See where these concepts show up in real apps.
+          Get a personalized suggestion for what to study next.
         </p>
       </div>
     )
@@ -81,9 +81,9 @@ export default function RealWorldConnection({ logId, initialConnection }: Props)
   return (
     <div className="frame-block p-4 mb-4">
       <div className="flex items-center justify-between mb-2">
-        <div className="section-header">🌍 In Real Software</div>
+        <div className="section-header">What to Learn Next</div>
         {!editing && (
-          <AnimatedButton onClick={() => { setDraft(connection ?? ""); setEditing(true) }} variant="sm" className="text-[0.55rem]">
+          <AnimatedButton onClick={() => { setDraft(nextStep ?? ""); setEditing(true) }} variant="sm" className="text-[0.55rem]">
             Edit
           </AnimatedButton>
         )}
@@ -110,7 +110,7 @@ export default function RealWorldConnection({ logId, initialConnection }: Props)
             variants={staggerItem}
             className="font-serif text-sm text-turquoise leading-relaxed"
           >
-            {connection}
+            {nextStep}
           </motion.p>
         </motion.div>
       )}

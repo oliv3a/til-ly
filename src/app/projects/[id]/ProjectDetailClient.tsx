@@ -369,7 +369,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
       {/* AI Overall Feedback */}
       {project.aiOverallFeedback && (
         <AnimatedCard className="frame-block-accent mb-4">
-          <p className="text-[0.6rem] font-mono text-muted-blue mb-1">🤖 AI Mentor</p>
+          <p className="text-[0.6rem] font-mono text-muted-blue mb-1">💬 Mentor Feedback</p>
           <p className="text-[0.65rem] font-mono text-warm-brown whitespace-pre-wrap">{project.aiOverallFeedback}</p>
         </AnimatedCard>
       )}
@@ -434,7 +434,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
                 <AnimatedButton onClick={() => setAddingStep(!addingStep)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">
                   {addingStep ? "Cancel" : "+ Step"}
                 </AnimatedButton>
-                <AnimatedButton onClick={() => setChatGptOpen(!chatGptOpen)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">✨ AI</AnimatedButton>
+                <AnimatedButton onClick={() => setChatGptOpen(!chatGptOpen)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">✨ Import</AnimatedButton>
               </div>
             )}
           </div>
@@ -459,7 +459,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
               <textarea
                 value={chatGptResponse}
                 onChange={(e) => setChatGptResponse(e.target.value)}
-                placeholder="Paste AI-generated checklist here..."
+                placeholder="Paste a checklist here..."
                 rows={3}
                 className="field-coral w-full resize-y text-[0.5rem]"
               />
@@ -478,7 +478,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
           )}
 
           {project.steps.length === 0 && (
-            <p className="text-[0.6rem] font-mono text-muted-ink/40">{editing ? "No steps yet. Add one or use AI to generate." : "No steps yet."}</p>
+            <p className="text-[0.6rem] font-mono text-muted-ink/40">{editing ? "No steps yet. Add one or generate from a checklist." : "No steps yet."}</p>
           )}
 
           <div className="space-y-0.5">
@@ -563,7 +563,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
               variant="sm-primary"
               className="w-full text-[0.6rem]"
             >
-              {postingUpdate ? "Analyzing..." : "Post & Analyze"}
+              {postingUpdate ? "Posting..." : "Post Update"}
             </AnimatedButton>
           </form>
         </AnimatedCard>
@@ -587,7 +587,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
                   month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
                 })}
               </span>
-              <span className="text-[0.5rem] font-mono text-muted-blue">Analyzing...</span>
+              <span className="text-[0.5rem] font-mono text-muted-blue">Reviewing...</span>
             </div>
             <p className="text-[0.65rem] font-mono text-warm-brown whitespace-pre-wrap">{pendingUpdate.content}</p>
           </div>
@@ -624,7 +624,7 @@ export default function ProjectDetailClient({ initialProject }: Props) {
 
             {update.aiComment && (
               <div className="mt-2 border-l-2 border-muted-blue pl-2">
-                <p className="text-[0.55rem] font-mono text-muted-blue">🤖 AI comment</p>
+                <p className="text-[0.55rem] font-mono text-muted-blue">💬 Feedback</p>
                 <p className="text-[0.6rem] font-mono text-muted-ink/80 whitespace-pre-wrap mt-0.5">{update.aiComment}</p>
               </div>
             )}

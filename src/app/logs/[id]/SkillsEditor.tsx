@@ -84,7 +84,7 @@ export default function SkillsEditor({ logId, initialSkillTags }: Props) {
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-1">
-        <div className="section-header inline-block">Skills</div>
+        <div className="section-header inline-block">Skills You Practiced</div>
         {!editing && (
           <AnimatedButton onClick={() => setEditing(true)} variant="sm">
             Manage

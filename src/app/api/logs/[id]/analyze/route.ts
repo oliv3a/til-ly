@@ -88,7 +88,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     await prisma.studyLog.update({
       where: { id: log.id },
-      data: { aiSummary: aiSummary || null, realWorldConnection },
+      data: { aiSummary: aiSummary || null, realWorldConnection, nextStep: recommendation || null },
     })
 
     if (aiSkills?.length) {

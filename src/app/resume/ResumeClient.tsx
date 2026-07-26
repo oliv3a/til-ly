@@ -242,7 +242,7 @@ export default function ResumeClient() {
             <textarea
               value={pastedResumeText}
               onChange={(e) => setPastedResumeText(e.target.value)}
-              placeholder="Copy and paste your current resume, work experience, or any other relevant content here. The AI will merge it with your til.ly data."
+              placeholder="Copy and paste your current resume, work experience, or any other relevant content here. We'll merge it with your til.ly data."
               className="field-coral text-[0.75rem] resize-y"
               rows={8}
               disabled={loading}
@@ -257,7 +257,7 @@ export default function ResumeClient() {
             <textarea
               value={extraNotes}
               onChange={(e) => setExtraNotes(e.target.value)}
-              placeholder="Anything else you want the AI to know — e.g. 'I led a team of 3 on a hackathon project' or 'I contributed to open source'"
+              placeholder="Anything else you want us to know — e.g. 'I led a team of 3 on a hackathon project' or 'I contributed to open source'"
               className="field-coral text-[0.75rem] resize-none"
               rows={2}
               disabled={loading}
@@ -275,7 +275,7 @@ export default function ResumeClient() {
           </button>
           {loading && (
             <span className="text-[0.55rem] font-mono text-muted-ink/40">
-              Analyzing your profile, logs, and projects...
+              Building your resume...
             </span>
           )}
         </div>
@@ -288,7 +288,7 @@ export default function ResumeClient() {
           <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-2">
             Loaded from cache.{" "}
             <button onClick={handleRegenerate} className="underline text-muted-teal cursor-pointer">
-              Regenerate with AI
+              Regenerate
             </button>
           </p>
         )}
@@ -388,7 +388,7 @@ export default function ResumeClient() {
           <p className="font-serif text-sm text-warm-brown">Ready to build your resume</p>
           <p className="text-[0.65rem] font-mono text-muted-ink/50 mt-1">
             Fill in the questionnaire above and click Generate Resume.
-            <br />The AI will analyze your logs, skills, projects, and pasted resume to craft an ATS-optimized resume.
+            <br />We&apos;ll use your logs, skills, projects, and pasted resume to craft an ATS-optimized resume.
           </p>
         </div>
       )}

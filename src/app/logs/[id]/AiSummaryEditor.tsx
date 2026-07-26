@@ -54,7 +54,7 @@ export default function AiSummaryEditor({ logId, initialSummary }: Props) {
   return (
     <div className="frame-block p-4 mb-4">
       <div className="flex items-center justify-between mb-1">
-        <div className="section-header inline-block">AI Summary</div>
+        <div className="section-header inline-block">Summary</div>
         {!editing && summary.summary && (
           <AnimatedButton onClick={() => setEditing(true)} variant="sm">
             Edit
@@ -65,7 +65,7 @@ export default function AiSummaryEditor({ logId, initialSummary }: Props) {
       {generating ? (
         <div className="flex items-center gap-2 text-[0.65rem] font-mono text-muted-ink/50">
           <BrandLogo size={32} />
-          Generating AI summary...
+          Summarizing your learning...
         </div>
       ) : genError ? (
         <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="space-y-2">
@@ -129,7 +129,7 @@ export default function AiSummaryEditor({ logId, initialSummary }: Props) {
       ) : (
         <div>
           <p className="text-[0.65rem] font-mono text-muted-ink/50 mb-2">
-            No AI summary yet
+            No summary yet
           </p>
           <AnimatedButton onClick={handleGenerate} disabled={generating} variant="sm">
             Generate

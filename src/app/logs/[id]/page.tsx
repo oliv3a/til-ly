@@ -7,6 +7,7 @@ import RoadmapLinkEditor from "./RoadmapLinkEditor"
 import AiSummaryEditor from "./AiSummaryEditor"
 import RealWorldConnection from "./RealWorldConnection"
 import SkillsEditor from "./SkillsEditor"
+import NextRecommendation from "./NextRecommendation"
 
 export default async function LogDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -98,6 +99,8 @@ export default async function LogDetailPage({ params }: { params: Promise<{ id: 
           logId={id}
           initialRoadmapLinks={log.roadmapLinks}
         />
+
+        <NextRecommendation logId={id} initialNextStep={log.nextStep} />
 
         <div className="mt-8 text-center">
           <a href="/dashboard" className="btn-base btn-coral btn-interact text-sm !px-6 !py-2">

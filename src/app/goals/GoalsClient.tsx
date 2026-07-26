@@ -258,7 +258,7 @@ export default function GoalsClient({ initialGoals }: Props) {
       {goals.length === 0 && !showForm && (
         <div className="frame-block p-6 text-center">
           <p className="font-serif text-base text-muted-ink/50">No goals yet</p>
-          <p className="text-[0.65rem] font-mono text-muted-ink/40 mt-1">Set your first learning goal and AI will build a roadmap</p>
+          <p className="text-[0.65rem] font-mono text-muted-ink/40 mt-1">Set your first learning goal and we&apos;ll build a roadmap</p>
         </div>
       )}
 
@@ -406,8 +406,8 @@ export default function GoalsClient({ initialGoals }: Props) {
 
             {aiGoalId === goal.id && (
               <div className="mt-3 frame-block p-3 space-y-2 bg-warm-paper/50">
-                <p className="text-[0.55rem] font-mono text-warm-brown font-medium">✨ Regenerate Roadmap with AI</p>
-                <p className="text-[0.5rem] font-mono text-muted-ink/50">Tell AI how to adjust the roadmap. It will replace all current steps.</p>
+                <p className="text-[0.55rem] font-mono text-warm-brown font-medium">✨ Regenerate Roadmap</p>
+                <p className="text-[0.5rem] font-mono text-muted-ink/50">Tell us how to adjust the roadmap. It will replace all current steps.</p>
                 <textarea
                   value={aiInstruction}
                   onChange={(e) => setAiInstruction(e.target.value)}
@@ -436,7 +436,7 @@ export default function GoalsClient({ initialGoals }: Props) {
                   variant="coral"
                   className="w-full justify-center text-[0.6rem]"
                 >
-                  ✨ Regenerate Roadmap with AI
+                  ✨ Regenerate Roadmap
                 </AnimatedButton>
               </div>
             )}

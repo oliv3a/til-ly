@@ -40,7 +40,7 @@ export default function ContentEditor({ logId, initialContent }: Props) {
   return (
     <div className="frame-block p-4 mb-4">
       <div className="flex items-center justify-between mb-1">
-        <div className="section-header inline-block">Description</div>
+        <div className="section-header inline-block">Today&apos;s Learning</div>
         {!editing && (
           <AnimatedButton onClick={handleEdit} variant="sm">
             {content ? "Edit" : "Add"}

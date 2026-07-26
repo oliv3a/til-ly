@@ -71,9 +71,9 @@ export default function NewLogPage() {
         <div className="w-full bg-warm-paper rounded-full h-2 mb-6 overflow-hidden">
           <div className="bg-turquoise h-full rounded-full animate-pulse" style={{ width: "60%" }} />
         </div>
-        <h2 className="poster-heading text-xl mb-2">Analyzing your study log...</h2>
+        <h2 className="poster-heading text-xl mb-2">Processing your learning...</h2>
         <p className="text-[0.65rem] font-mono text-muted-ink/60">
-          AI is reading your notes and extracting skills
+          Reading your notes and identifying skills
         </p>
       </div>
     )
@@ -118,7 +118,7 @@ export default function NewLogPage() {
           </label>
           <FileUpload files={files} onFilesChange={setFiles} />
           <p className="text-[0.55rem] font-mono font-medium text-muted-ink/60 mt-1">
-            📸 notes · 📄 pdfs · 💻 code · 🖼️ screenshots → ✨ AI reads it all
+            📸 notes · 📄 pdfs · 💻 code · 🖼️ screenshots → we read it all
           </p>
         </div>
 
@@ -185,7 +185,7 @@ export default function NewLogPage() {
             disabled={submitting || !title.trim()}
             variant="sm-primary"
           >
-            {submitting ? "Processing..." : "Save & Analyze"}
+            {submitting ? "Processing..." : "Save & Process"}
           </AnimatedButton>
           <Link href="/dashboard" className="btn-base btn-sm btn-interact-bg">
             Cancel

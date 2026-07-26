@@ -29,7 +29,7 @@ export async function GET() {
   const skillsSummary = userSkills.map((us) => ({ name: us.skill.name, logCount: us.logCount }))
 
   if (goals.length === 0) {
-    return NextResponse.json({ topic: "Set a goal", reason: "Set a learning goal and AI will recommend what to study next.", estimatedTime: "", goalProgressAfter: "" })
+    return NextResponse.json({ topic: "Set a goal", reason: "Set a learning goal and we'll recommend what to study next.", estimatedTime: "", goalProgressAfter: "" })
   }
 
   let recommendation

@@ -24,18 +24,18 @@ export default function LandingPage() {
 
           {/* poster heading */}
           <h1 className="poster-heading mb-2 text-base">
-            Track your coding
+            Become a better
             <br />
-            journey, one log
+            software engineer,
             <br />
-            at a time.
+            one log at a time.
           </h1>
 
           <span className="deco-dash deco-dash-wide mx-auto" />
 
           <p className="font-mono text-sm text-muted-ink leading-relaxed max-w-md mx-auto mb-8">
-            Every day you code is a step forward. til.ly keeps track, AI summarizes
-            your work, and your portfolio shows recruiters exactly what you&apos;ve been building.
+            Every day you code is a step forward. til.ly tracks your progress,
+            turns your learning into skills, and shows recruiters exactly what you&apos;ve been building.
           </p>
 
           {/* cta */}
@@ -52,10 +52,10 @@ export default function LandingPage() {
         {/* features */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mt-20 w-full animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           {[
-            { title: "📝 Daily Logs", desc: "Write what you learned. AI summarizes and extracts your skills automatically." },
-            { title: "🎯 Smart Goals", desc: "Set learning goals. AI builds a roadmap and tracks your progress." },
-            { title: "🤖 Tilly Chat", desc: "Paste code for AI review or chat with a senior dev who gets the student grind." },
-            { title: "📄 AI Resume", desc: "Generate a polished, ATS-optimized resume from your logs and projects. Edit anytime, export as PDF." },
+            { title: "📝 Daily Logs", desc: "Write what you learned. Get a clear summary and see the skills you're building." },
+            { title: "🎯 Smart Goals", desc: "Set learning goals. Get a roadmap and watch your progress unfold." },
+            { title: "💬 Tilly Chat", desc: "Get code reviewed by a senior dev mentor who gets the student grind." },
+            { title: "📄 Resume Builder", desc: "Build a polished, ATS-optimized resume as you learn. Edit anytime, export as PDF." },
           ].map((card) => (
             <AnimatedCard key={card.title} className="frame-block">
               <h3 className="font-serif text-base text-warm-brown mb-1">{card.title}</h3>
