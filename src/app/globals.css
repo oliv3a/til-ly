@@ -632,7 +632,7 @@ body {
 }
 .dash-section-title {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   color: var(--color-warm-brown);
   font-weight: 500;
   margin-bottom: 0.75rem;
@@ -645,7 +645,7 @@ body {
 }
 .dash-section {
   border-left: 1px solid color-mix(in srgb, var(--color-warm-brown) 14%, transparent);
-  padding-left: 1.25rem;
+  padding-left: 1.5rem;
 }
 .section-divider {
   height: 1px;
