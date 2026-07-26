@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
@@ -7,6 +6,9 @@ import PortfolioClient from "./PortfolioClient"
 
 export default async function PortfolioPage({ params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params
+
+  const session = await auth()
+  if (!session?.user || session.user.id !== userId) notFound()
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -54,9 +56,6 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
     skillTags: l.skillTags,
   }))
 
-  const session = await auth()
-  const isOwner = session?.user !== undefined && session.user.id === userId
-
   const userStreak = await prisma.user.findUnique({
     where: { id: userId },
     select: { streakCount: true },
@@ -72,11 +71,6 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
             {[user.school, user.year].filter(Boolean).join(" · ")}
           </p>
         )}
-        {isOwner && (
-          <Link href="/resume" className="btn-base btn-coral btn-interact text-[0.65rem] mt-3 inline-flex">
-            Generate Resume
-          </Link>
-        )}
       </div>
 
       <PortfolioClient
@@ -84,7 +78,7 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
         goals={JSON.parse(JSON.stringify(goals))}
         skills={JSON.parse(JSON.stringify(skills))}
         initialProjects={JSON.parse(JSON.stringify(projects))}
-        isOwner={isOwner}
+        isOwner={true}
         streakCount={userStreak?.streakCount ?? 0}
         logCount={logCount}
         projectCount={projectCount}

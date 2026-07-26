@@ -15,7 +15,6 @@ export default function SignupPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [role, setRole] = useState("student")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -34,7 +33,7 @@ export default function SignupPage() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password, role: "student" }),
     })
 
     if (!res.ok) {
@@ -118,30 +117,6 @@ export default function SignupPage() {
                   placeholder="Re-enter your password"
                 />
               </div>
-              <div>
-                <label className="block text-[0.65rem] font-mono text-muted-ink mb-1">I am a...</label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRole("student")}
-                    className={`flex-1 font-mono text-[0.65rem] py-2 border-2 border-warm-brown cursor-pointer transition-all ${
-                      role === "student" ? "bg-soft-coral text-warm-brown" : "bg-transparent text-muted-ink"
-                    }`}
-                  >
-                    Student
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRole("recruiter")}
-                    className={`flex-1 font-mono text-[0.65rem] py-2 border-2 border-warm-brown cursor-pointer transition-all ${
-                      role === "recruiter" ? "bg-soft-coral text-warm-brown" : "bg-transparent text-muted-ink"
-                    }`}
-                  >
-                    Recruiter
-                  </button>
-                </div>
-              </div>
-
               {error && (
                 <motion.p
                   initial="hidden"

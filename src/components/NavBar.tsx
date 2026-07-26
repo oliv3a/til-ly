@@ -6,12 +6,45 @@ import { usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import BrandLogo from "./BrandLogo"
 
-const navLinks = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/logs", label: "Logs" },
-  { href: "/projects", label: "Building" },
-  { href: "/goals", label: "Learning" },
-  { href: "/resume", label: "Resume" },
+interface NavItem {
+  href: string
+  label: string
+}
+
+interface NavGroup {
+  label?: string
+  emoji?: string
+  items: NavItem[]
+}
+
+const navGroups: NavGroup[] = [
+  {
+    items: [{ href: "/dashboard", label: "Home" }],
+  },
+  {
+    label: "Learn",
+    emoji: "📚",
+    items: [
+      { href: "/goals", label: "Learning Paths" },
+      { href: "/logs", label: "Study Logs" },
+    ],
+  },
+  {
+    label: "Build",
+    emoji: "🚀",
+    items: [{ href: "/projects", label: "Projects" }],
+  },
+  {
+    label: "Career",
+    emoji: "💼",
+    items: [
+      { href: "/portfolio", label: "Portfolio" },
+      { href: "/resume", label: "Resume" },
+    ],
+  },
+  {
+    items: [{ href: "/mentor", label: "Mentor" }],
+  },
 ]
 
 export default function NavBar() {
@@ -22,10 +55,14 @@ export default function NavBar() {
 
   function isActive(href: string) {
     if (href === "/dashboard") return pathname === "/dashboard"
+    if (href === "/portfolio") return pathname.startsWith("/portfolio")
     return pathname.startsWith(href)
   }
 
-  const portfolioHref = userId ? `/portfolio/${userId}` : "/portfolio"
+  function getHref(item: NavItem) {
+    if (item.href === "/portfolio" && userId) return `/portfolio/${userId}`
+    return item.href
+  }
 
   function closeMenu() {
     setMenuOpen(false)
@@ -41,22 +78,24 @@ export default function NavBar() {
         </div>
 
         {/* Desktop nav links */}
-        <div className="nav-links hidden sm:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`nav-link ${isActive(link.href) ? "nav-link--active" : ""}`}
-            >
-              {link.label}
-            </Link>
+        <div className="nav-links hidden sm:flex items-center">
+          {navGroups.map((group, gi) => (
+            <div key={gi} className="flex items-center">
+              {gi > 0 && <span className="nav-group-divider" />}
+              {group.label && (
+                <span className="nav-group-label">{group.emoji} {group.label}</span>
+              )}
+              {group.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={getHref(item)}
+                  className={`nav-link ${isActive(item.href) ? "nav-link--active" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           ))}
-          <Link
-            href={portfolioHref}
-            className={`nav-link ${pathname.startsWith("/portfolio") ? "nav-link--active" : ""}`}
-          >
-            Portfolio
-          </Link>
         </div>
 
         <div className="hidden sm:flex items-center gap-1 shrink-0">
@@ -87,27 +126,28 @@ export default function NavBar() {
       {/* Mobile dropdown menu */}
       {menuOpen && (
         <div className="sm:hidden frame-block border-t-0 p-2 space-y-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={closeMenu}
-              className={`block font-mono text-[0.6rem] py-1.5 px-2 ${
-                isActive(link.href) ? "text-warm-brown font-bold" : "text-muted-ink/70"
-              }`}
-            >
-              {link.label}
-            </Link>
+          {navGroups.map((group, gi) => (
+            <div key={gi}>
+              {gi > 0 && <hr className="border-t border-warm-brown/10 my-1" />}
+              {group.label && (
+                <p className="text-[0.5rem] font-mono text-muted-ink/40 uppercase tracking-wider px-2 pt-1 pb-0.5">
+                  {group.emoji} {group.label}
+                </p>
+              )}
+              {group.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={getHref(item)}
+                  onClick={closeMenu}
+                  className={`block font-mono text-[0.6rem] py-1.5 px-2 ${
+                    isActive(item.href) ? "text-warm-brown font-bold" : "text-muted-ink/70"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           ))}
-          <Link
-            href={portfolioHref}
-            onClick={closeMenu}
-            className={`block font-mono text-[0.6rem] py-1.5 px-2 ${
-              pathname.startsWith("/portfolio") ? "text-warm-brown font-bold" : "text-muted-ink/70"
-            }`}
-          >
-            Portfolio
-          </Link>
           <hr className="border-t border-warm-brown/20 my-1" />
           <Link
             href="/profile"

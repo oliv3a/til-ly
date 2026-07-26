@@ -35,7 +35,7 @@ export default function LandingPage() {
 
           <p className="font-mono text-sm text-muted-ink leading-relaxed max-w-md mx-auto mb-8">
             Every day you code is a step forward. til.ly tracks your progress,
-            turns your learning into skills, and shows recruiters exactly what you&apos;ve been building.
+            turns your learning into skills, and shows your growth over time.
           </p>
 
           {/* cta */}

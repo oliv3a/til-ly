@@ -11,7 +11,7 @@ model User {
   email         String   @unique
   passwordHash  String?
   name          String?
-  role          String   @default("student") // student | recruiter
+  role          String   @default("student")
   avatarUrl     String?
   bio           String?
   school        String?
@@ -30,6 +30,7 @@ model User {
   checkins         DailyCheckin[]
   pushSubscriptions PushSubscription[]
   resume           Resume?
+  mentorConversations MentorConversation[]
 }
 
 model Account {
@@ -289,4 +290,27 @@ model DailyCheckin {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
+}
+
+model MentorConversation {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages MentorMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model MentorMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String
+  content        String
+  createdAt      DateTime @default(now())
+
+  conversation MentorConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }

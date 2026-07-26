@@ -650,3 +650,145 @@ Remember: return valid JSON only, no markdown wrapping.`
     return { type: "chat" as const, text: "Sorry, I got distracted. Can you say that again?" }
   }
 }
+
+export interface MentorContext {
+  name: string
+  goals: { title: string; progressPct: number | null }[]
+  recentLogs: { title: string; createdAt: Date; skills: string[] }[]
+  projects: { title: string; status: string; progressPct: number | null }[]
+  skills: { name: string; level: string }[]
+  streakCount: number
+  hasResume: boolean
+}
+
+export async function mentorChat(options: {
+  messages: { role: "user" | "assistant"; content: string }[]
+  context: MentorContext
+}) {
+  const client = getClient()
+  if (!client) {
+    return { text: "AI is not configured. Please set OPENAI_API_KEY." }
+  }
+
+  const { messages, context } = options
+
+  const goalsText = context.goals.length > 0
+    ? context.goals.map((g) => `- "${g.title}" (${g.progressPct ?? 0}% complete)`).join("\n")
+    : "No active goals"
+
+  const logsText = context.recentLogs.length > 0
+    ? context.recentLogs.map((l) => `- "${l.title}" (${new Date(l.createdAt).toLocaleDateString()}) — skills: ${l.skills.join(", ") || "none"}`).join("\n")
+    : "No study logs yet"
+
+  const projectsText = context.projects.length > 0
+    ? context.projects.map((p) => `- "${p.title}" [${p.status}] (${p.progressPct ?? 0}%)`).join("\n")
+    : "No active projects"
+
+  const skillsText = context.skills.length > 0
+    ? context.skills.map((s) => `- ${s.name} (${s.level})`).join("\n")
+    : "No skills tracked yet"
+
+  const systemPrompt = `You are Tilly, a senior software engineer mentoring ${context.name}. You're warm, relatable, and remember what it was like to be a student.
+
+Student context:
+- Streak: ${context.streakCount} days
+- Active goals:
+${goalsText}
+- Recent logs (last 5):
+${logsText}
+- Projects:
+${projectsText}
+- Skills:
+${skillsText}
+- Resume: ${context.hasResume ? "Created" : "Not yet created"}
+
+Instructions:
+- Reference their actual work when giving advice — mention specific log titles, project names, skill areas
+- Be specific to their goals and projects, not generic
+- Suggest next steps based on their progress and gaps
+- If they haven't worked on something in a while, gently nudge them
+- If they just completed something, celebrate it and suggest what's next
+- Be warm, concise, like a senior dev grabbing coffee with a junior
+- Never use markdown or structured formatting — just natural conversation
+- Keep responses short (2-4 sentences usually) unless they ask for detail`
+
+  try {
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages.slice(-20),
+      ],
+    })
+    const text = response.choices[0]?.message?.content || ""
+    return { text }
+  } catch (err) {
+    console.error("mentorChat failed:", err)
+    return { text: "Sorry, I got distracted. Can you say that again?" }
+  }
+}
+
+export async function generateMentorOverview(context: MentorContext) {
+  const client = getClient()
+  if (!client) {
+    return { greeting: `Hey ${context.name}! 👋`, focus: null, suggestions: [] }
+  }
+
+  const goalsText = context.goals.length > 0
+    ? context.goals.map((g) => `- "${g.title}" (${g.progressPct ?? 0}%)`).join("\n")
+    : "No active goals"
+
+  const logsText = context.recentLogs.length > 0
+    ? context.recentLogs.map((l) => `- "${l.title}" (${new Date(l.createdAt).toLocaleDateString()}) — ${l.skills.join(", ") || "no skills"}`).join("\n")
+    : "No logs yet"
+
+  const projectsText = context.projects.length > 0
+    ? context.projects.map((p) => `- "${p.title}" [${p.status}] (${p.progressPct ?? 0}%)`).join("\n")
+    : "No projects"
+
+  const now = new Date()
+  const hour = now.getHours()
+  const timeOfDay = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"
+
+  const prompt = `You are Tilly, a senior software engineer mentoring ${context.name}.
+
+Student context:
+- Streak: ${context.streakCount} days
+- Active goals:
+${goalsText}
+- Recent logs:
+${logsText}
+- Projects:
+${projectsText}
+
+Generate a JSON response with:
+1. "greeting": A short, warm greeting with the time of day (e.g., "Good ${timeOfDay} 👋"). Keep it personal but brief.
+2. "focus": A 1-sentence summary of what they should focus on right now based on their goals and recent activity. If no goals, suggest setting one.
+3. "suggestions": Array of 2-3 specific, actionable suggestions based on their actual activity. Each should be tied to something they've done or haven't done. Examples:
+   - If they studied a topic recently: "You covered {topic} yesterday — want to build a small project using it?"
+   - If a project is stale: "Your {project} hasn't been updated in a while. Want to pick it back up?"
+   - If goals are behind: "You're at {X}% on {goal}. A couple more logs could get you to {Y}%."
+
+Return valid JSON only, no markdown wrapping.`
+
+  try {
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+    })
+    const result = JSON.parse(response.choices[0]?.message?.content || "{}")
+    return {
+      greeting: result.greeting || `Hey ${context.name}! 👋`,
+      focus: result.focus || null,
+      suggestions: Array.isArray(result.suggestions) ? result.suggestions : [],
+    }
+  } catch (err) {
+    console.error("generateMentorOverview failed:", err)
+    return {
+      greeting: `Hey ${context.name}! 👋`,
+      focus: context.goals.length > 0 ? `Working on: ${context.goals[0].title}` : "Set a learning goal to get started",
+      suggestions: [],
+    }
+  }
+}

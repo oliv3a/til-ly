@@ -191,6 +191,25 @@ body {
   background: var(--color-warm-brown);
   color: var(--color-warm-paper);
 }
+.nav-group-label {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--color-muted-ink);
+  opacity: 0.45;
+  padding: 0 0.375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  user-select: none;
+}
+.nav-group-divider {
+  width: 1px;
+  height: 1rem;
+  background: var(--color-warm-brown);
+  opacity: 0.15;
+  margin: 0 0.25rem;
+  flex-shrink: 0;
+}
 .nav-btn {
   font-family: var(--font-mono);
   font-size: 0.6rem;
@@ -645,6 +664,14 @@ body {
   .nav-link {
     font-size: 0.55rem;
     padding: 0.25rem 0.375rem;
+  }
+  .nav-group-label {
+    font-size: 0.45rem;
+    padding: 0 0.25rem;
+  }
+  .nav-group-divider {
+    height: 0.75rem;
+    margin: 0 0.125rem;
   }
   .nav-btn {
     font-size: 0.55rem;

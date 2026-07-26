@@ -27,12 +27,11 @@ export default function PrivacyPage() {
         <ul className="list-disc pl-5 space-y-1">
           <li>To provide the service — display your logs, skills, goals, and portfolio.</li>
           <li>To generate summaries and skill extraction from your logs.</li>
-          <li>To optionally display your portfolio publicly for recruiter discovery.</li>
         </ul>
 
         <h2 className="text-base font-semibold text-ink mt-8">Data Sharing</h2>
         <p>
-          We do not sell your data. Your portfolio is visible to anyone with the link if you opt into public sharing. We use OpenAI for processing; they do not train on your data via API usage.
+          We do not sell your data. Your data is private to your account. We use OpenAI for processing; they do not train on your data via API usage.
         </p>
 
         <h2 className="text-base font-semibold text-ink mt-8">Data Retention & Deletion</h2>
