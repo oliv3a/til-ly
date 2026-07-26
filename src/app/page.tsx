@@ -18,24 +18,23 @@ export default function LandingPage() {
           </div>
 
           {/* badge */}
-          <div className="inline-block px-3 py-1 bg-warm-paper border-2 border-warm-brown text-[0.55rem] font-mono text-muted-ink tracking-widest uppercase mb-5">
+          <div className="inline-block px-3 py-1 bg-warm-paper border-2 border-warm-brown text-xs font-mono text-muted-ink tracking-widest uppercase mb-6">
             Today I Learned &middot; your coding journal
           </div>
 
           {/* poster heading */}
-          <h1 className="poster-heading mb-2 text-base">
-            Become a better
+          <h1 className="poster-heading mb-2 text-lg sm:text-xl">
+            Your grind deserves
             <br />
-            software engineer,
+            a portfolio,
             <br />
-            one log at a time.
+            not just a GitHub.
           </h1>
 
           <span className="deco-dash deco-dash-wide mx-auto" />
 
-          <p className="font-mono text-sm text-muted-ink leading-relaxed max-w-md mx-auto mb-8">
-            Every day you code is a step forward. til.ly tracks your progress,
-            turns your learning into skills, and shows your growth over time.
+          <p className="font-mono text-sm text-muted-ink leading-relaxed max-w-md mx-auto mb-10">
+            til.ly turns your daily coding into a living portfolio — skills, projects, and progress that actually get you hired.
           </p>
 
           {/* cta */}
@@ -52,14 +51,14 @@ export default function LandingPage() {
         {/* features */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mt-20 w-full animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           {[
-            { title: "📝 Daily Logs", desc: "Write what you learned. Get a clear summary and see the skills you're building." },
-            { title: "🎯 Smart Goals", desc: "Set learning goals. Get a roadmap and watch your progress unfold." },
-            { title: "💬 Tilly Chat", desc: "Get code reviewed by a senior dev mentor who gets the student grind." },
-            { title: "📄 Resume Builder", desc: "Build a polished, ATS-optimized resume as you learn. Edit anytime, export as PDF." },
+            { title: "📚 Learn", desc: "Stop forgetting everything. Keep your notes, understand what you learned, and always know what's next." },
+            { title: "🚀 Build", desc: "No more abandoned side projects. Turn ideas into finished projects with clear next steps." },
+            { title: "💼 Career", desc: "Internship season? You're already preparing. Your skills, projects, and resume grow while you learn." },
+            { title: "💬 Mentor", desc: "When you're stuck, don't spiral. Get guidance from a mentor that actually knows what you've been working on." },
           ].map((card) => (
             <AnimatedCard key={card.title} className="frame-block">
               <h3 className="font-serif text-base text-warm-brown mb-1">{card.title}</h3>
-              <p className="text-[0.7rem] font-mono text-muted-ink leading-relaxed">{card.desc}</p>
+              <p className="text-sm font-mono text-muted-ink leading-relaxed">{card.desc}</p>
             </AnimatedCard>
           ))}
         </div>
@@ -74,21 +73,21 @@ export default function LandingPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-serif text-sm text-warm-brown">til.ly: Always There.</h3>
-                  <span className="tag text-[0.45rem] py-0.5">Mac only</span>
+                  <span className="tag text-xs py-0.5">Mac only</span>
                 </div>
-                <p className="text-[0.65rem] font-mono font-medium text-muted-ink/80">
+                <p className="text-xs font-mono font-medium text-muted-ink/80">
                   One-click logging from your menu bar. Tilly stays in your status bar — no browser needed.
                 </p>
                 <div className="mt-3">
                   <a
                     href="/api/downloads/macos"
-                    className="btn-base btn-coral btn-interact text-[0.6rem]"
+                    className="btn-base btn-coral btn-interact text-xs"
                     download
                   >
                     ⬇ Download
                   </a>
                 </div>
-                <div className="text-[0.5rem] font-mono font-bold text-muted-ink/50 mt-2 space-y-0.5">
+                <div className="text-xs font-mono font-bold text-muted-ink/50 mt-2 space-y-0.5">
                   <p>1. Download &amp; unzip</p>
                   <p>2. Drag Tilly.app to Applications</p>
                   <p>3. Open from Spotlight or Finder</p>
@@ -105,7 +104,7 @@ export default function LandingPage() {
         {/* bottom mascot */}
         <div className="mt-16 text-center animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
           <BrandLogo size={48} className="animate-breathe" />
-          <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-2">Today I Learned</p>
+          <p className="text-xs font-mono text-muted-ink/40 mt-2">Today I Learned</p>
         </div>
       </div>
     </PageShell>
