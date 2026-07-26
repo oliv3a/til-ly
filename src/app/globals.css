@@ -181,11 +181,13 @@ body {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   color: var(--color-muted-ink);
-  padding: 0.375rem 0.625rem;
+  padding: 0.375rem 0.5rem;
   border-radius: 0.25rem;
   transition: background 0.15s, color 0.15s;
   text-decoration: none;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 .nav-link:hover {
   background: color-mix(in srgb, var(--color-warm-brown) 6%, transparent);
