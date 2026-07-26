@@ -76,7 +76,7 @@ export default function LandingPage() {
                   <span className="tag text-xs py-0.5">Mac only</span>
                 </div>
                 <p className="text-xs font-mono font-medium text-muted-ink/80">
-                  One-click logging from your menu bar. Tilly stays in your status bar — no browser needed.
+                  One-click logging from your menu bar. No browser needed. Tilly&apos;s always there.
                 </p>
                 <div className="mt-3">
                   <a

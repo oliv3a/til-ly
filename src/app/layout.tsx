@@ -26,8 +26,21 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "til.ly",
-  description: "Track your coding journey, one log at a time.",
+  description: "Stop feeling behind. Start seeing your progress. Your grind deserves a portfolio, not just a GitHub.",
   icons: { icon: "/logo-brand.png" },
+  metadataBase: new URL("https://til-ly.vercel.app"),
+  openGraph: {
+    title: "til.ly — Your grind deserves a portfolio, not just a GitHub.",
+    description: "Stop feeling behind. Start seeing your progress. til.ly turns your daily coding into a living portfolio.",
+    url: "https://til-ly.vercel.app",
+    siteName: "til.ly",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "til.ly — Your grind deserves a portfolio, not just a GitHub.",
+    description: "Stop feeling behind. Start seeing your progress. til.ly turns your daily coding into a living portfolio.",
+  },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

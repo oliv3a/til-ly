@@ -333,7 +333,7 @@ function MacSplitCard() {
             <span className="tag text-xs py-[1px]">Mac only</span>
           </div>
           <p className="text-xs font-mono font-bold text-muted-ink/70 leading-snug mb-2">
-            One-click logging. No browser needed.
+            One-click logging. No browser needed. Tilly&apos;s always there.
           </p>
           <a
             href="/api/downloads/macos"

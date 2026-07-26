@@ -1,6 +1,7 @@
 {
   "name": "til-ly",
   "version": "0.1.0",
+  "description": "Stop feeling behind. Start seeing your progress. A daily study-log platform for CS students.",
   "private": true,
   "scripts": {
     "dev": "next dev",

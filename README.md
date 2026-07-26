@@ -1,6 +1,6 @@
 # til.ly
 
-A daily study-log platform for CS students. In tech you have to consistently learn, stay up to date, and be adaptable. til.ly helps you build that habit — log what you study each day, AI summarizes your work, tracks skills and streaks, and generates a resume from your actual learning journey.
+A daily study-log platform for CS students. In tech you have to consistently learn, stay up to date, and be adaptable. til.ly helps you build that habit — log what you study each day, AI summarizes your work, tracks skills and streaks, and keeps your resume ready to go as you learn.
 
 ## Tech Stack
 
@@ -17,7 +17,7 @@ A daily study-log platform for CS students. In tech you have to consistently lea
 - Study log CRUD with AI analysis — summaries, skill extraction, next-topic recommendations
 - Goals with AI-generated roadmaps
 - Streak tracking + daily check-in
-- AI-generated resume from study logs and projects (editable, PDF export)
+- Resume always ready as you learn (editable, PDF export)
 - Portfolio page showing skills, goals, and progress
 - Push notifications (daily reminders)
 - macOS menu bar app (quick status glance)

@@ -1,7 +1,7 @@
 # til.ly Roadmap
 
 ## Vision
-Build the daily-learning habit. Log progress, get AI summaries, track skills and streaks, and generate a resume from your real work.
+Stop feeling behind. Start seeing your progress.
 
 ## Tech Stack
 - Next.js 16 (App Router, TypeScript)
@@ -37,7 +37,7 @@ User, Account, Session, VerificationToken, Skill, UserSkill, StudyLog, StudyLogF
 - Study log CRUD with AI analysis (summary, skill extraction, recommendations)
 - Goals with AI-generated roadmaps
 - Streak tracking + daily check-in
-- AI-generated resume from logs + projects (editable, PDF export)
+- AI-generated resume from logs + projects (editable, PDF export) — always ready as you learn
 - Portfolio page (compact summary: stats, skill badges, goals, recent logs/projects)
 - Push notifications (daily reminders)
 - macOS menu bar app
