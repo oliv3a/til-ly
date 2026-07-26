@@ -9,6 +9,17 @@ import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 import AnimatedCard from "@/lib/motion/components/AnimatedCard"
 import AnimatedProgress from "@/lib/motion/components/AnimatedProgress"
 
+function relativeTime(date: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  if (diffDays === 0) return "Today"
+  if (diffDays === 1) return "Yesterday"
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? "s" : ""} ago`
+  return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? "s" : ""} ago`
+}
+
 interface Props {
   initialProject: ProjectType
 }
@@ -267,28 +278,119 @@ export default function ProjectDetailClient({ initialProject }: Props) {
     setEditingStepId(null)
   }
 
+  const currentFocus = project.steps.find((s) => !s.isComplete)
+  const allComplete = project.steps.length > 0 && project.steps.every((s) => s.isComplete)
+  const lastWorkedDate = project.updates.length > 0
+    ? new Date(project.updates[0].createdAt)
+    : project.updatedAt
+      ? new Date(project.updatedAt)
+      : null
+
   return (
     <div>
-      {/* Header */}
+      {/* Back link */}
       <div className="mb-4">
         <Link href="/projects" className="btn-base btn-sm btn-interact-bg mb-3 inline-block">← Building</Link>
       </div>
-      <div className={`flex items-start justify-between gap-3 mb-4 p-3 ${editing ? "frame-block-accent" : ""}`}>
-        <div className="flex-1 min-w-0">
-          {editing ? (
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={editFields.title}
-                onChange={(e) => setEditFields({ ...editFields, title: e.target.value })}
-                className="field-coral w-full"
-              />
-              <textarea
-                value={editFields.description}
-                onChange={(e) => setEditFields({ ...editFields, description: e.target.value })}
-                rows={2}
-                className="field-coral w-full resize-y"
-              />
+
+      {/* Project Overview */}
+      <AnimatedCard className="frame-block p-4 mb-4">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="font-serif text-lg text-warm-brown">{project.title}</h1>
+            {project.description && (
+              <p className="text-[0.65rem] font-mono text-muted-ink/60 mt-1 line-clamp-2">{project.description}</p>
+            )}
+            <div className="flex items-center gap-2 mt-1.5 text-[0.5rem] font-mono text-muted-ink/40">
+              {project.techStack && <span>{project.techStack}</span>}
+              {project.repoUrl && (
+                <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-warm-brown">Repo</a>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <AnimatedButton onClick={() => setEditing(true)} variant="sm" className="!px-2 !py-1 text-[0.55rem]">✏ Edit</AnimatedButton>
+            <AnimatedButton
+              onClick={async () => {
+                if (!confirm(`Delete "${project.title}"? This cannot be undone.`)) return
+                await fetch(`/api/projects/${project.id}`, { method: "DELETE" })
+                router.push("/projects")
+              }}
+              variant="sm"
+              className="!px-2 !py-1 text-[0.55rem]"
+            >
+              🗑
+            </AnimatedButton>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[0.55rem] font-mono text-muted-ink/50 uppercase tracking-wider">Progress</span>
+            <span className="text-[0.6rem] font-mono text-warm-brown font-medium">{project.progressPct}%</span>
+          </div>
+          <AnimatedProgress value={project.progressPct} height={6} />
+        </div>
+
+        <div className="section-divider mb-3" />
+
+        {/* Current Focus */}
+        <div className="mb-3">
+          <p className="text-[0.5rem] font-mono text-muted-ink/40 uppercase tracking-wider mb-1">Current Focus</p>
+          {allComplete ? (
+            <p className="text-[0.7rem] font-mono text-muted-teal font-medium">All steps complete — nice work! 🎉</p>
+          ) : currentFocus ? (
+            <p className="text-[0.7rem] font-mono text-warm-brown font-medium">{currentFocus.topic}</p>
+          ) : (
+            <p className="text-[0.65rem] font-mono text-muted-ink/40">No steps yet — add or generate a checklist</p>
+          )}
+        </div>
+
+        {/* Last Worked */}
+        {lastWorkedDate && (
+          <div className="mb-3">
+            <p className="text-[0.5rem] font-mono text-muted-ink/40 uppercase tracking-wider mb-1">Last Worked</p>
+            <p className="text-[0.65rem] font-mono text-muted-ink/60">{relativeTime(lastWorkedDate)}</p>
+          </div>
+        )}
+
+        {/* Continue Working */}
+        <a
+          href="#checklist"
+          onClick={(e) => {
+            e.preventDefault()
+            document.getElementById("checklist")?.scrollIntoView({ behavior: "smooth" })
+          }}
+          className="btn-base btn-coral btn-interact text-[0.6rem] w-full justify-center"
+        >
+          Continue Working →
+        </a>
+      </AnimatedCard>
+
+      {/* Edit Mode — Checklist Tools */}
+      {editing && (
+        <AnimatedCard className="frame-block-accent p-3 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-serif text-sm text-warm-brown">Edit Project</h3>
+            <AnimatedButton onClick={() => setEditing(false)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">Done</AnimatedButton>
+          </div>
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={editFields.title}
+              onChange={(e) => setEditFields({ ...editFields, title: e.target.value })}
+              className="field-coral w-full"
+              placeholder="Project title"
+            />
+            <textarea
+              value={editFields.description}
+              onChange={(e) => setEditFields({ ...editFields, description: e.target.value })}
+              rows={2}
+              className="field-coral w-full resize-y"
+              placeholder="Description"
+            />
+            <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"
                 value={editFields.techStack}
@@ -303,74 +405,20 @@ export default function ProjectDetailClient({ initialProject }: Props) {
                 placeholder="Repo URL"
                 className="field-coral w-full"
               />
-              <select
-                value={editFields.status}
-                onChange={(e) => setEditFields({ ...editFields, status: e.target.value })}
-                className="field-coral w-full text-[0.6rem]"
-              >
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="archived">Archived</option>
-              </select>
-              <div className="flex gap-1">
-                <AnimatedButton onClick={saveEdit} variant="sm-primary" className="!px-3 !py-1 text-[0.6rem]">Save</AnimatedButton>
-                <AnimatedButton onClick={() => setEditing(false)} variant="sm" className="!px-3 !py-1 text-[0.6rem]">Cancel</AnimatedButton>
-              </div>
             </div>
-          ) : (
-            <>
-              <h1 className="font-serif text-lg text-warm-brown">{project.title}</h1>
-              {project.description && <p className="text-[0.65rem] font-mono text-muted-ink/60 mt-1">{project.description}</p>}
-              <div className="flex items-center gap-2 mt-1 text-[0.55rem] font-mono text-muted-ink/50">
-                {project.techStack && <span>Stack: {project.techStack}</span>}
-                {project.repoUrl && (
-                  <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="underline">Repo</a>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
-          {!editing && (
-            <>
-              <AnimatedButton onClick={() => setEditing(true)} variant="sm" className="!px-2 !py-1 text-[0.55rem]">✏ Edit</AnimatedButton>
-              <AnimatedButton
-                onClick={async () => {
-                  if (!confirm(`Delete "${project.title}"? This cannot be undone.`)) return
-                  await fetch(`/api/projects/${project.id}`, { method: "DELETE" })
-                  router.push("/projects")
-                }}
-                variant="sm"
-                className="!px-2 !py-1 text-[0.55rem]"
-              >
-                🗑
-              </AnimatedButton>
-            </>
-          )}
-          <span className={`border px-1.5 py-0.5 text-[0.55rem] font-mono ${
-            project.status === "completed" ? "border-warm-brown bg-muted-blue/10" :
-            project.status === "archived" ? "border-warm-brown opacity-50" :
-            "border-warm-brown"
-          }`}>
-            {project.status.replace("_", " ")}
-          </span>
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <AnimatedCard className="frame-block p-3 mb-4">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[0.6rem] font-mono text-muted-ink/60">Progress</span>
-          <span className="text-[0.6rem] font-mono text-warm-brown">{project.steps.length} steps · {project.progressPct}%</span>
-        </div>
-        <AnimatedProgress value={project.progressPct} height={8} />
-      </AnimatedCard>
-
-      {/* AI Overall Feedback */}
-      {project.aiOverallFeedback && (
-        <AnimatedCard className="frame-block-accent mb-4">
-          <p className="text-[0.6rem] font-mono text-muted-blue mb-1">💬 Mentor Feedback</p>
-          <p className="text-[0.65rem] font-mono text-warm-brown whitespace-pre-wrap">{project.aiOverallFeedback}</p>
+            <select
+              value={editFields.status}
+              onChange={(e) => setEditFields({ ...editFields, status: e.target.value })}
+              className="field-coral w-full text-[0.6rem]"
+            >
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="archived">Archived</option>
+            </select>
+            <div className="flex gap-1">
+              <AnimatedButton onClick={saveEdit} variant="sm-primary" className="!px-3 !py-1 text-[0.6rem]">Save Changes</AnimatedButton>
+            </div>
+          </div>
         </AnimatedCard>
       )}
 
@@ -407,37 +455,41 @@ export default function ProjectDetailClient({ initialProject }: Props) {
         )}
       </AnimatedCard>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        {/* Steps Checklist */}
-        <AnimatedCard className="frame-block p-3">
-          <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
-            <h2 className="font-serif text-sm text-warm-brown">Checklist</h2>
-            {editing && (
-              <div className="flex items-center gap-1">
-                <select
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value as "beginner" | "intermediate" | "advanced")}
-                  className="field-coral text-[0.5rem] py-0.5 w-20"
-                >
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                </select>
-                <AnimatedButton
-                  onClick={generateSteps}
-                  disabled={generating}
-                  variant="sm"
-                  className="!px-2 !py-0.5 text-[0.5rem]"
-                >
-                  {generating ? "⏳ Generating..." : "Generate Steps"}
-                </AnimatedButton>
-                <AnimatedButton onClick={() => setAddingStep(!addingStep)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">
-                  {addingStep ? "Cancel" : "+ Step"}
-                </AnimatedButton>
-                <AnimatedButton onClick={() => setChatGptOpen(!chatGptOpen)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">✨ Import</AnimatedButton>
-              </div>
-            )}
-          </div>
+      {/* Checklist */}
+      <div id="checklist" className="scroll-mt-16">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-serif text-sm text-warm-brown">Checklist</h2>
+          {!editing && (
+            <AnimatedButton onClick={() => setEditing(true)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">✏ Edit</AnimatedButton>
+          )}
+        </div>
+
+        <AnimatedCard className="frame-block p-3 mb-4">
+          {editing && (
+            <div className="flex items-center gap-1 mb-3 flex-wrap">
+              <select
+                value={level}
+                onChange={(e) => setLevel(e.target.value as "beginner" | "intermediate" | "advanced")}
+                className="field-coral text-[0.5rem] py-0.5 w-20"
+              >
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+              <AnimatedButton
+                onClick={generateSteps}
+                disabled={generating}
+                variant="sm"
+                className="!px-2 !py-0.5 text-[0.5rem]"
+              >
+                {generating ? "⏳ Generating..." : "✨ Generate"}
+              </AnimatedButton>
+              <AnimatedButton onClick={() => setAddingStep(!addingStep)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">
+                {addingStep ? "Cancel" : "+ Step"}
+              </AnimatedButton>
+              <AnimatedButton onClick={() => setChatGptOpen(!chatGptOpen)} variant="sm" className="!px-2 !py-0.5 text-[0.55rem]">📋 Import</AnimatedButton>
+            </div>
+          )}
 
           {editing && addingStep && (
             <div className="flex gap-1 mb-2">
@@ -538,36 +590,34 @@ export default function ProjectDetailClient({ initialProject }: Props) {
             ))}
           </div>
         </AnimatedCard>
-
-        {/* Quick Post Update */}
-        <AnimatedCard className="frame-block p-3">
-          <h2 className="font-serif text-sm text-warm-brown mb-2">Post Update</h2>
-
-          {error && (
-            <div className="frame-block p-2 text-[0.6rem] font-mono text-warm-brown mb-2">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={postUpdate} className="space-y-2">
-            <textarea
-              value={updateContent}
-              onChange={(e) => setUpdateContent(e.target.value)}
-              placeholder="What did you build or learn today?"
-              rows={3}
-              className="field-coral w-full resize-y text-[0.6rem]"
-            />
-            <AnimatedButton
-              type="submit"
-              disabled={postingUpdate || !updateContent.trim()}
-              variant="sm-primary"
-              className="w-full text-[0.6rem]"
-            >
-              {postingUpdate ? "Posting..." : "Post Update"}
-            </AnimatedButton>
-          </form>
-        </AnimatedCard>
       </div>
+
+      {/* Post Update */}
+      <h2 className="font-serif text-sm text-warm-brown mb-2">Post Update</h2>
+      <AnimatedCard className="frame-block p-3 mb-4">
+        {error && (
+          <div className="frame-block p-2 text-[0.6rem] font-mono text-warm-brown mb-2">
+            {error}
+          </div>
+        )}
+        <form onSubmit={postUpdate} className="space-y-2">
+          <textarea
+            value={updateContent}
+            onChange={(e) => setUpdateContent(e.target.value)}
+            placeholder="What did you build or learn today?"
+            rows={3}
+            className="field-coral w-full resize-y text-[0.6rem]"
+          />
+          <AnimatedButton
+            type="submit"
+            disabled={postingUpdate || !updateContent.trim()}
+            variant="sm-primary"
+            className="w-full text-[0.6rem]"
+          >
+            {postingUpdate ? "Posting..." : "Post Update"}
+          </AnimatedButton>
+        </form>
+      </AnimatedCard>
 
       {/* Updates Timeline */}
       <h2 className="font-serif text-sm text-warm-brown mb-2">Updates</h2>
