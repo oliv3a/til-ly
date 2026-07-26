@@ -34,6 +34,7 @@ export default async function DashboardPage() {
     currentMonthLogs,
     prevMonthLogs,
     nextMonthLogs,
+    currentProject,
   ] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
@@ -53,7 +54,7 @@ export default async function DashboardPage() {
       include: {
         roadmapItems: {
           orderBy: { order: "asc" },
-          select: { id: true, isComplete: true },
+          select: { id: true, isComplete: true, topic: true },
         },
       },
     }),
@@ -72,6 +73,16 @@ export default async function DashboardPage() {
       where: { userId, createdAt: { gte: monthRange(nextMonth.year, nextMonth.month).start, lte: monthRange(nextMonth.year, nextMonth.month).end } },
       orderBy: { createdAt: "asc" },
       include: { skillTags: { include: { skill: true } } },
+    }),
+    prisma.project.findFirst({
+      where: { userId, status: "in_progress" },
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        progressPct: true,
+        steps: { select: { isComplete: true } },
+      },
     }),
   ])
 
@@ -118,6 +129,7 @@ export default async function DashboardPage() {
         goals: JSON.parse(JSON.stringify(goals)),
         skills: JSON.parse(JSON.stringify(skills)),
         recommendation: null,
+        currentProject: currentProject ? JSON.parse(JSON.stringify(currentProject)) : null,
         initialMonthCache: JSON.parse(JSON.stringify(initialMonthCache)),
       }}
     />

@@ -90,12 +90,23 @@ export async function GET(req: NextRequest) {
       include: {
         roadmapItems: {
           orderBy: { order: "asc" },
-          select: { id: true, isComplete: true },
+          select: { id: true, isComplete: true, topic: true },
         },
       },
     })
 
     const skills = await getComputedSkills(userId)
+
+    const currentProject = await prisma.project.findFirst({
+      where: { userId, status: "in_progress" },
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        progressPct: true,
+        steps: { select: { isComplete: true } },
+      },
+    })
 
     return NextResponse.json({
       userId,
@@ -106,6 +117,7 @@ export async function GET(req: NextRequest) {
       recentProjectUpdates: projectUpdates,
       goals,
       skills,
+      currentProject: currentProject || null,
       monthlyLogsByDay,
     })
   } catch {
