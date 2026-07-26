@@ -51,10 +51,10 @@ export default function LandingPage() {
         {/* features */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mt-20 w-full animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           {[
-            { title: "📚 Learn", desc: "Stop forgetting everything. Keep your notes, understand what you learned, and always know what's next." },
-            { title: "🚀 Build", desc: "No more abandoned side projects. Turn ideas into finished projects with clear next steps." },
-            { title: "💼 Career", desc: "Internship season? You're already preparing. Your skills, projects, and resume grow while you learn." },
-            { title: "💬 Mentor", desc: "When you're stuck, don't spiral. Get guidance from a mentor that actually knows what you've been working on." },
+            { title: "📚 Stop Forgetting Everything", desc: "Stop forgetting everything. Keep your notes, understand what you learned, and always know what's next." },
+            { title: "🚀 Stop Abandoning Projects", desc: "No more abandoned side projects. Turn ideas into finished projects with clear next steps." },
+            { title: "💼 Stop Starting Your Resume Too Late", desc: "Internship season? You're already preparing. Your skills, projects, and resume grow while you learn." },
+            { title: "💬 Stop Learning Alone", desc: "When you're stuck, don't spiral. Get guidance from a mentor that actually knows what you've been working on." },
           ].map((card) => (
             <AnimatedCard key={card.title} className="frame-block">
               <h3 className="font-serif text-base text-warm-brown mb-1">{card.title}</h3>
