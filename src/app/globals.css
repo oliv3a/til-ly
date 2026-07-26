@@ -207,6 +207,8 @@ body {
 }
 .nav-dropdown-trigger {
   position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 .nav-group-btn {
   font-family: var(--font-mono);
