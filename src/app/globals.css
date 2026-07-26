@@ -164,6 +164,7 @@ body {
   max-width: 80rem;
   margin: 0 auto;
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -171,7 +172,6 @@ body {
   height: 3rem;
 }
 .nav-links {
-  display: flex;
   flex-wrap: nowrap;
   align-items: center;
   gap: 0.25rem;
