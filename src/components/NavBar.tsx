@@ -123,7 +123,7 @@ export default function NavBar() {
     <nav className="nav-bar">
       <div className="nav-bar-inner">
         <div className="flex items-center gap-2 shrink-0">
-          <Link href="/dashboard" className="flex items-center gap-2" onClick={closeMenu}>
+          <Link href="/dashboard" className="flex items-center gap-2 focus-visible:outline-none" onClick={closeMenu}>
             <BrandLogo size={28} />
           </Link>
         </div>
