@@ -1,12 +1,16 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import dynamic from "next/dynamic"
+import { auth } from "@/lib/auth"
 import PageShell from "@/components/PageShell"
 import BrandLogo from "@/components/BrandLogo"
 import AnimatedCard from "@/lib/motion/components/AnimatedCard"
 
 const MacMenuBarDemo = dynamic(() => import("@/components/MacMenuBarDemo"))
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await auth()
+  if (session?.user) redirect("/dashboard")
   return (
     <PageShell showNav={false} showFooter={false}>
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
