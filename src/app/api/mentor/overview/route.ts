@@ -27,12 +27,13 @@ export async function GET() {
         select: { title: true, status: true, progressPct: true },
       }),
       getComputedSkills(session.user.id),
-      prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, streakCount: true } }),
+      prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, streakCount: true, mentorName: true } }),
       prisma.resume.findUnique({ where: { userId: session.user.id }, select: { id: true } }),
     ])
 
     const context: MentorContext = {
       name: user?.name || "there",
+      mentorName: user?.mentorName || "Tilly",
       goals: rawGoals.map((g) => ({
         title: g.title,
         progressPct: g.roadmapItems.length > 0

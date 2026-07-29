@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
+import MentorOnboardingModal from "./MentorOnboardingModal"
 
 interface Message {
   role: "user" | "assistant"
@@ -39,6 +40,8 @@ export default function MentorClient() {
   const [overview, setOverview] = useState<Overview | null>(null)
   const [overviewLoading, setOverviewLoading] = useState(true)
   const [mode, setMode] = useState<"chat" | "review">("chat")
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [mentorName, setMentorName] = useState("Tilly")
   const [code, setCode] = useState("")
   const [fileName, setFileName] = useState("")
   const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null)
@@ -46,11 +49,6 @@ export default function MentorClient() {
   const chatEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    fetchConversations()
-    fetchOverview()
-  }, [])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -82,6 +80,37 @@ export default function MentorClient() {
       setOverviewLoading(false)
     }
   }
+
+  async function fetchOnboarding() {
+    try {
+      const res = await fetch("/api/mentor/onboarding")
+      if (res.ok) {
+        const data = await res.json()
+        if (data.completed) {
+          setMentorName(data.name || "Tilly")
+          fetchConversations()
+          fetchOverview()
+          return
+        }
+      }
+    } catch {}
+    setShowOnboarding(true)
+  }
+
+  function handleOnboardingComplete(name: string) {
+    setMentorName(name)
+    setShowOnboarding(false)
+    fetchConversations()
+    fetchOverview()
+  }
+
+  useEffect(() => {
+    async function init() {
+      await fetchOnboarding()
+    }
+    init()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function startNewConversation() {
     try {
@@ -251,6 +280,7 @@ export default function MentorClient() {
   }
 
   return (
+    <>
     <div className="max-w-4xl mx-auto">
       <div className="flex gap-4 min-h-[calc(100vh-8rem)]">
         {/* Sidebar — conversations */}
@@ -338,9 +368,16 @@ export default function MentorClient() {
           <div className="flex-1 frame-block p-4 flex flex-col min-h-[400px]">
             <div className="flex-1 overflow-y-auto space-y-3 mb-3">
               {mode === "chat" && messages.length === 0 && !loading && (
-                <div className="text-center py-8">
-                  <p className="text-[0.7rem] font-mono text-muted-ink/40">
-                    Ask me anything — coding, debugging, career advice, or study tips.
+                <div className="text-center py-12 px-4">
+                  <div className="text-3xl mb-2">🧠</div>
+                  <h2 className="poster-heading text-2xl text-warm-brown mt-1 mb-2">
+                    {mentorName}
+                  </h2>
+                  <p className="text-[0.7rem] font-mono text-muted-ink/70 mb-1">
+                    I remember everything you&apos;ve learned.
+                  </p>
+                  <p className="text-[0.55rem] font-mono text-muted-ink/40">
+                    Learning from your study logs, goals and resume.
                   </p>
                 </div>
               )}
@@ -494,5 +531,10 @@ export default function MentorClient() {
         </div>
       </div>
     </div>
+
+    {showOnboarding && (
+      <MentorOnboardingModal onComplete={handleOnboardingComplete} />
+    )}
+    </>
   )
 }
