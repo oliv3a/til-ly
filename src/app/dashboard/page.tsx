@@ -3,7 +3,6 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { getComputedSkills } from "@/lib/skills"
 import PushSetup from "@/components/PushSetup"
-import PageShell from "@/components/PageShell"
 
 import DashboardClient from "./DashboardClient"
 
@@ -117,7 +116,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <PageShell>
+    <>
       <PushSetup />
       <DashboardClient
       initialData={{
@@ -134,5 +133,5 @@ export default async function DashboardPage() {
         initialMonthCache: JSON.parse(JSON.stringify(initialMonthCache)),
       }}
     />
-    </PageShell>  )
+    </>  )
 }
