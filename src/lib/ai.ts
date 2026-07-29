@@ -788,6 +788,13 @@ Generate a JSON response with:
    - If they studied a topic recently: "You covered {topic} yesterday — want to build a small project using it?"
    - If a project is stale: "Your {project} hasn't been updated in a while. Want to pick it back up?"
    - If goals are behind: "You're at {X}% on {goal}. A couple more logs could get you to {Y}%."
+4. "promptSuggestions": Array of 5 short clickable prompts the user can tap to start a chat. Rules based on actual data:
+   - Topic in recent logs → "Continue building with {topic}" or "Deepen your {topic} knowledge"
+   - Topic in skills/roadmap but not studied recently → "Review {topic} basics"
+   - Multiple logs this week → "Summarize everything I've learned this week"
+   - Resume exists → "Update my resume from today's study"
+   - Enough depth → "Generate interview questions from my recent study"
+   Each: 3-8 words, starts with a verb, references specific topics. Never generic like "What should I study next?"
 
 Return valid JSON only, no markdown wrapping.`
 
@@ -802,6 +809,7 @@ Return valid JSON only, no markdown wrapping.`
       greeting: result.greeting || `Hey ${context.name}! 👋`,
       focus: result.focus || null,
       suggestions: Array.isArray(result.suggestions) ? result.suggestions : [],
+      promptSuggestions: Array.isArray(result.promptSuggestions) ? result.promptSuggestions : [],
     }
   } catch (err) {
     console.error("generateMentorOverview failed:", err)
@@ -809,6 +817,7 @@ Return valid JSON only, no markdown wrapping.`
       greeting: `Hey ${context.name}! 👋`,
       focus: context.goals.length > 0 ? `Working on: ${context.goals[0].title}` : "Set a learning goal to get started",
       suggestions: [],
+      promptSuggestions: [],
     }
   }
 }

@@ -21,7 +21,16 @@ interface Overview {
   greeting: string
   focus: string | null
   suggestions: string[]
+  promptSuggestions: string[]
 }
+
+const DEFAULT_PROMPTS = [
+  "What should I study next?",
+  "What am I strongest at?",
+  "Summarize everything I've learned about React.",
+  "Turn this week's study into interview questions.",
+  "Update my resume from today's study log.",
+]
 
 interface ReviewResult {
   style?: string
@@ -218,9 +227,8 @@ export default function MentorClient() {
     }
   }
 
-  async function sendMessage() {
-    if (!input.trim()) return
-    const text = input.trim()
+  async function sendText(text: string) {
+    if (!text.trim()) return
     setInput("")
 
     let convId = activeConversationId
@@ -257,6 +265,10 @@ export default function MentorClient() {
     }
   }
 
+  async function sendMessage() {
+    sendText(input.trim())
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -274,9 +286,8 @@ export default function MentorClient() {
   }
 
   function handleSuggestionClick(suggestion: string) {
-    setInput(suggestion)
     setMode("chat")
-    inputRef.current?.focus()
+    sendText(suggestion)
   }
 
   return (
@@ -376,9 +387,20 @@ export default function MentorClient() {
                   <p className="text-[0.7rem] font-mono text-muted-ink/70 mb-1">
                     I remember everything you&apos;ve learned.
                   </p>
-                  <p className="text-[0.55rem] font-mono text-muted-ink/40">
+                  <p className="text-[0.55rem] font-mono text-muted-ink/40 mb-6">
                     Learning from your study logs, goals and resume.
                   </p>
+                  <div className="flex flex-wrap justify-center gap-2 max-w-lg mx-auto">
+                    {(overview?.promptSuggestions?.length ? overview.promptSuggestions : DEFAULT_PROMPTS).map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => handleSuggestionClick(s)}
+                        className="px-3 py-1.5 text-[0.6rem] font-mono text-muted-ink/70 bg-warm-brown/5 hover:bg-warm-brown/10 hover:text-warm-brown border border-warm-brown/10 rounded-full transition-colors cursor-pointer"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -513,7 +535,7 @@ export default function MentorClient() {
                       ? "Ask a follow-up about this review..."
                       : mode === "review"
                         ? "Paste code above first..."
-                        : "Ask me anything..."
+                        : "Ask about your learning..."
                   }
                   disabled={loading}
                   className="field-coral flex-1 text-[0.6rem] font-mono disabled:opacity-40"
