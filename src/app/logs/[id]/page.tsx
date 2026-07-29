@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
+import { BackButton, DoneButton } from "./LogNavButtons"
 import ContentEditor from "./ContentEditor"
 import RoadmapLinkEditor from "./RoadmapLinkEditor"
 import AiSummaryEditor from "./AiSummaryEditor"
@@ -32,7 +33,7 @@ export default async function LogDetailPage({ params }: { params: Promise<{ id: 
   return (
     <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-2 mb-4">
-          <a href="/dashboard" className="btn-base btn-sm btn-interact-bg">← Back</a>
+          <BackButton className="btn-base btn-sm btn-interact-bg" />
           <span className="text-[0.55rem] font-mono text-muted-ink/50">
             {new Date(log.createdAt).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
           </span>
@@ -103,9 +104,7 @@ export default async function LogDetailPage({ params }: { params: Promise<{ id: 
         <NextRecommendation logId={id} initialNextStep={log.nextStep} />
 
         <div className="mt-8 text-center">
-          <a href="/dashboard" className="btn-base btn-coral btn-interact text-sm !px-6 !py-2">
-            Done ✨
-          </a>
+          <DoneButton className="btn-base btn-coral btn-interact text-sm !px-6 !py-2" />
         </div>
     </div>
   )
