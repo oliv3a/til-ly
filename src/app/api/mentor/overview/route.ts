@@ -9,7 +9,7 @@ export async function GET() {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const [rawLogs, rawGoals, rawProjects, skills, user, resume, profile] = await Promise.all([
+    const [rawLogs, rawGoals, projects, skills, user, resume] = await Promise.all([
       prisma.studyLog.findMany({
         where: { userId: session.user.id },
         orderBy: { createdAt: "desc" },
@@ -18,55 +18,33 @@ export async function GET() {
       }),
       prisma.goal.findMany({
         where: { userId: session.user.id, status: "active" },
-        include: { roadmapItems: { orderBy: { order: "asc" } } },
+        include: { roadmapItems: true },
       }),
       prisma.project.findMany({
         where: { userId: session.user.id, status: { not: "archived" } },
         orderBy: { updatedAt: "desc" },
         take: 5,
-        include: { steps: { orderBy: { order: "asc" } } },
+        select: { title: true, status: true, progressPct: true },
       }),
       getComputedSkills(session.user.id),
       prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, streakCount: true } }),
       prisma.resume.findUnique({ where: { userId: session.user.id }, select: { id: true } }),
-      prisma.menteeProfile.findUnique({ where: { userId: session.user.id } }),
     ])
 
     const context: MentorContext = {
       name: user?.name || "there",
-      profile: profile ? {
-        targetRole: profile.targetRole,
-        timeline: profile.timeline,
-        skillLevel: profile.skillLevel,
-        learningStyle: profile.learningStyle,
-        careerGoals: profile.careerGoals,
-        constraints: profile.constraints,
-      } : null,
       goals: rawGoals.map((g) => ({
         title: g.title,
         progressPct: g.roadmapItems.length > 0
           ? Math.round((g.roadmapItems.filter((r) => r.isComplete).length / g.roadmapItems.length) * 100)
           : null,
-        items: g.roadmapItems.map((r) => ({
-          topic: r.topic,
-          isComplete: r.isComplete,
-          description: r.description,
-        })),
       })),
       recentLogs: rawLogs.map((l) => ({
         title: l.title,
         createdAt: l.createdAt,
         skills: l.skillTags.map((st) => st.skill.name),
       })),
-      projects: rawProjects.map((p) => ({
-        title: p.title,
-        status: p.status,
-        progressPct: p.progressPct,
-        steps: p.steps.map((s) => ({
-          topic: s.topic,
-          isComplete: s.isComplete,
-        })),
-      })),
+      projects,
       skills: skills.map((s) => ({ name: s.skill.name, level: `${s.logCount} logs` })),
       streakCount: user?.streakCount ?? 0,
       hasResume: !!resume,
