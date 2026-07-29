@@ -31,6 +31,7 @@ model User {
   pushSubscriptions PushSubscription[]
   resume           Resume?
   mentorConversations MentorConversation[]
+  menteeProfile       MenteeProfile?
 }
 
 model Account {
@@ -275,6 +276,21 @@ model Resume {
   atsData    String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MenteeProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  targetRole    String?
+  timeline      String?
+  skillLevel    String?
+  learningStyle String?
+  careerGoals   String?
+  constraints   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
