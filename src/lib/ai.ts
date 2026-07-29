@@ -660,6 +660,7 @@ export interface MentorContext {
   skills: { name: string; level: string }[]
   streakCount: number
   hasResume: boolean
+  timezoneOffset?: number
 }
 
 export async function mentorChat(options: {
@@ -767,8 +768,10 @@ export async function generateMentorOverview(context: MentorContext) {
     : "No projects"
 
   const now = new Date()
-  const hour = now.getHours()
-  const timeOfDay = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"
+  const localHour = context.timezoneOffset != null
+    ? new Date(now.getTime() - context.timezoneOffset * 60_000).getUTCHours()
+    : now.getHours()
+  const timeOfDay = localHour < 12 ? "morning" : localHour < 17 ? "afternoon" : "evening"
 
   const prompt = `You are ${context.mentorName}, a senior CS student mentoring ${context.name}. You're encouraging, supportive, and calm — like an upperclassman.
 

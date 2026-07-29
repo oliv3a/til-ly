@@ -80,7 +80,8 @@ export default function MentorClient() {
   async function fetchOverview() {
     setOverviewLoading(true)
     try {
-      const res = await fetch("/api/mentor/overview")
+      const tz = new Date().getTimezoneOffset()
+      const res = await fetch(`/api/mentor/overview?tz=${tz}`)
       if (res.ok) {
         const data = await res.json()
         setOverview(data.overview)

@@ -4,10 +4,14 @@ import { prisma } from "@/lib/prisma"
 import { generateMentorOverview, type MentorContext } from "@/lib/ai"
 import { getComputedSkills } from "@/lib/skills"
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const url = new URL(req.url)
+    const tzOffset = url.searchParams.get("tz")
+    const timezoneOffset = tzOffset ? Number(tzOffset) : undefined
 
     const [rawLogs, rawGoals, projects, skills, user, resume] = await Promise.all([
       prisma.studyLog.findMany({
@@ -34,6 +38,7 @@ export async function GET() {
     const context: MentorContext = {
       name: user?.name || "there",
       mentorName: user?.mentorName || "Tilly",
+      timezoneOffset,
       goals: rawGoals.map((g) => ({
         title: g.title,
         progressPct: g.roadmapItems.length > 0
