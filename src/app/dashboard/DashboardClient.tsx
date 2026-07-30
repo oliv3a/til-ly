@@ -324,8 +324,8 @@ function MacSplitCard() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="dash-card p-0 overflow-visible relative flex">
-      <div className="w-[40%] flex items-center gap-3 p-3 shrink-0">
+    <div className="dash-card p-0 overflow-visible relative flex-col md:flex-row">
+      <div className="w-full md:w-[40%] flex items-center gap-3 p-3 shrink-0">
         <BrandLogo size={28} className="shrink-0" />
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
