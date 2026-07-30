@@ -93,8 +93,9 @@ export default async function LandingPage() {
                 </div>
                 <div className="text-xs font-mono font-bold text-muted-ink/50 mt-2 space-y-0.5">
                   <p>1. Download &amp; unzip</p>
-                  <p>2. Drag Tilly.app to Applications</p>
-                  <p>3. Open from Spotlight or Finder</p>
+                  <p>2. Open Terminal, paste: <code className="bg-warm-brown/10 px-1 rounded">xattr -dr com.apple.quarantine ~/Downloads/Tilly.app</code></p>
+                  <p>3. Drag Tilly.app → Applications</p>
+                  <p>4. Open Tilly (Spotlight / Finder)</p>
                 </div>
               </div>
             </div>

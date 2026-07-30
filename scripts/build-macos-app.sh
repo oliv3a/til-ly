@@ -19,6 +19,11 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 
 cp "$BUILD_DIR/tilly" "$APP_BUNDLE/Contents/MacOS/tilly"
 cp "$MACOS_DIR/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
+cp "$MACOS_DIR/Resources/logo-brand.png" "$APP_BUNDLE/Contents/Resources/AppIcon.png"
+printf "APPL????" > "$APP_BUNDLE/Contents/PkgInfo"
+
+echo "→ Signing app bundle..."
+codesign --sign - --force --entitlements "$MACOS_DIR/tilly.entitlements" --deep "$APP_BUNDLE"
 
 echo "→ Zipping..."
 rm -f "$ZIP_PATH"
