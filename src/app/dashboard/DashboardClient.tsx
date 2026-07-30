@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "motion/react"
-import BrandLogo from "@/components/BrandLogo"
 import { colorForSkill } from "@/lib/skill-colors"
 import { staggerContainer, staggerItem } from "@/lib/motion/variants"
 
@@ -289,7 +288,6 @@ function MacSplitCard() {
   return (
     <div className="dash-card flex p-0 overflow-visible relative flex-col md:flex-row">
       <div className="w-full md:w-[40%] flex items-center gap-3 p-3 shrink-0">
-        <BrandLogo size={28} className="shrink-0" />
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <p className="text-sm font-serif font-bold text-warm-brown leading-tight">til.ly: Always There.</p>
