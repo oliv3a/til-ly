@@ -660,7 +660,7 @@ export interface MentorContext {
   skills: { name: string; level: string }[]
   streakCount: number
   hasResume: boolean
-  timezoneOffset?: number
+  timeOfDay?: string
 }
 
 export async function mentorChat(options: {
@@ -767,11 +767,10 @@ export async function generateMentorOverview(context: MentorContext) {
     ? context.projects.map((p) => `- "${p.title}" [${p.status}] (${p.progressPct ?? 0}%)`).join("\n")
     : "No projects"
 
-  const now = new Date()
-  const localHour = context.timezoneOffset != null
-    ? new Date(now.getTime() - context.timezoneOffset * 60_000).getUTCHours()
-    : now.getHours()
-  const timeOfDay = localHour < 12 ? "morning" : localHour < 17 ? "afternoon" : "evening"
+  const h = new Date().getHours()
+  const timeOfDay = context.timeOfDay || (h < 12 ? "morning" : h < 17 ? "afternoon" : "evening")
+
+  const greeting = `Good ${timeOfDay} 👋, ${context.name}!`
 
   const prompt = `You are ${context.mentorName}, a senior CS student mentoring ${context.name}. You're encouraging, supportive, and calm — like an upperclassman.
 
@@ -785,20 +784,18 @@ ${logsText}
 ${projectsText}
 
 Generate a JSON response with:
-1. "greeting": A short, warm greeting with the time of day (e.g., "Good ${timeOfDay} 👋"). Keep it personal but brief.
-2. "focus": A 1-sentence summary of what they should focus on right now based on their goals and recent activity. If no goals, suggest setting one.
-3. "suggestions": Array of 2-3 specific, actionable suggestions based on their actual activity. Each should be tied to something they've done or haven't done. Examples:
+1. "focus": A 1-sentence summary of what they should focus on right now based on their goals and recent activity. If no goals, suggest setting one.
+2. "suggestions": Array of 2-3 specific, actionable suggestions based on their actual activity. Each should be tied to something they've done or haven't done. Examples:
    - If they studied a topic recently: "You covered {topic} yesterday — want to build a small project using it?"
    - If a project is stale: "Your {project} hasn't been updated in a while. Want to pick it back up?"
    - If goals are behind: "You're at {X}% on {goal}. A couple more logs could get you to {Y}%."
-4. "promptSuggestions": Array of 5 short clickable prompts the user can tap to start a chat. Rules based on actual data:
+3. "promptSuggestions": Array of 5 short clickable prompts the user can tap to start a chat. Rules based on actual data:
    - Topic in recent logs → "Continue building with {topic}" or "Deepen your {topic} knowledge"
    - Topic in skills/roadmap but not studied recently → "Review {topic} basics"
    - Multiple logs this week → "Summarize everything I've learned this week"
    - Resume exists → "Update my resume from today's study"
    - Enough depth → "Generate interview questions from my recent study"
    Each: 3-8 words, starts with a verb, references specific topics. Never generic like "What should I study next?"
-
 Return valid JSON only, no markdown wrapping.`
 
   try {
@@ -809,7 +806,7 @@ Return valid JSON only, no markdown wrapping.`
     })
     const result = JSON.parse(response.choices[0]?.message?.content || "{}")
     return {
-      greeting: result.greeting || `Hey ${context.name}! 👋`,
+      greeting,
       focus: result.focus || null,
       suggestions: Array.isArray(result.suggestions) ? result.suggestions : [],
       promptSuggestions: Array.isArray(result.promptSuggestions) ? result.promptSuggestions : [],
@@ -817,7 +814,7 @@ Return valid JSON only, no markdown wrapping.`
   } catch (err) {
     console.error("generateMentorOverview failed:", err)
     return {
-      greeting: `Hey ${context.name}! 👋`,
+      greeting,
       focus: context.goals.length > 0 ? `Working on: ${context.goals[0].title}` : "Set a learning goal to get started",
       suggestions: [],
       promptSuggestions: [],

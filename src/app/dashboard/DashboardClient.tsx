@@ -1,12 +1,11 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence } from "motion/react"
+import { motion } from "motion/react"
 import BrandLogo from "@/components/BrandLogo"
 import { colorForSkill } from "@/lib/skill-colors"
 import { staggerContainer, staggerItem } from "@/lib/motion/variants"
-import { easings } from "@/lib/motion/tokens"
 
 interface DashboardLog {
   id: string
@@ -287,44 +286,8 @@ function CompactDotCalendar({ initialMonthCache }: { initialMonthCache: Record<s
 /* ─── MacSplitCard ─────────────────────────────────────────── */
 
 function MacSplitCard() {
-  const [popover, setPopover] = useState(false)
-  const [cursorPhase, setCursorPhase] = useState<"enter" | "click" | "done">("enter")
-  const cycleRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const mountedRef = useRef(true)
-  const now = new Date()
-  const time = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-
-  function runCycle() {
-    if (!mountedRef.current) return
-    setPopover(false)
-    setCursorPhase("enter")
-    cycleRef.current = setTimeout(() => {
-      if (!mountedRef.current) return
-      setCursorPhase("click")
-      cycleRef.current = setTimeout(() => {
-        if (!mountedRef.current) return
-        setCursorPhase("done")
-        setPopover(true)
-        cycleRef.current = setTimeout(() => {
-          if (!mountedRef.current) return
-          runCycle()
-        }, 3500)
-      }, 400)
-    }, 600)
-  }
-
-  useEffect(() => {
-    mountedRef.current = true
-    const start = setTimeout(() => runCycle(), 1500)
-    return () => {
-      mountedRef.current = false
-      if (cycleRef.current) clearTimeout(cycleRef.current)
-      clearTimeout(start)
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
-    <div className="dash-card p-0 overflow-visible relative flex-col md:flex-row">
+    <div className="dash-card flex p-0 overflow-visible relative flex-col md:flex-row">
       <div className="w-full md:w-[40%] flex items-center gap-3 p-3 shrink-0">
         <BrandLogo size={28} className="shrink-0" />
         <div className="min-w-0">
@@ -351,72 +314,16 @@ function MacSplitCard() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col">
-        <div className="h-[22px] bg-[#2b2b2b] rounded-tr flex items-center px-2 select-none">
-          <div className="flex items-center gap-1.5 text-xs font-mono text-white/70">
-            <span className="text-xs leading-none"></span>
-            <span className="font-semibold text-white/90 text-xs">Tilly</span>
-          </div>
-          <div className="ml-auto flex items-center gap-2 text-xs font-mono text-white/50">
-            <span className="hidden sm:inline">📶</span>
-            <span className="hidden sm:inline">🔋</span>
-            <span>{time}</span>
-            <span className="relative inline-flex items-center justify-center">
-              <AnimatePresence>
-                {cursorPhase !== "done" && (
-                  <motion.span
-                    className="absolute z-40 text-xs pointer-events-none"
-                    initial={{ y: -10, opacity: 0, scale: 0.5 }}
-                    animate={
-                      cursorPhase === "enter"
-                        ? { y: -8, opacity: 1, scale: 1 }
-                        : cursorPhase === "click"
-                        ? { y: -2, opacity: 1, scale: 1 }
-                        : {}
-                    }
-                    exit={{ opacity: 0, scale: 0.5, y: -10 }}
-                    transition={{ duration: 0.3, ease: easings.smooth }}
-                  >
-                    👆
-                  </motion.span>
-                )}
-              </AnimatePresence>
-              <motion.div
-                animate={cursorPhase === "click" ? { scale: [1, 0.8, 1] } : {}}
-                transition={{ duration: 0.25 }}
-              >
-                <BrandLogo size={14} className="shrink-0 animate-tilly-wiggle-slow" style={{ animationDelay: "4s" }} />
-              </motion.div>
-              <motion.span
-                className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-soft-coral rounded-full"
-                animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              />
-            </span>
-          </div>
-        </div>
+      <div className="flex-1 p-3 pt-0 md:pt-3 md:pl-0 flex items-center justify-center">
+        <video
+          className="w-[70%] max-w-[280px] aspect-[8/5] object-cover rounded-lg border border-warm-brown/15"
+          src="/videos/menu-bar-demo.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
       </div>
-
-      <AnimatePresence>
-        {popover && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.2 }}
-            className="absolute top-[26px] right-1 z-50 w-36 frame-block p-2 shadow-lg"
-          >
-            <div className="flex items-center gap-1.5 w-full font-mono text-xs text-warm-paper bg-soft-coral py-1.5 px-2 border-2 border-warm-brown text-left cursor-default">
-              <span className="text-xs">✏️</span>
-              <span>New log</span>
-            </div>
-            <div className="flex items-center gap-1.5 w-full text-xs font-mono text-muted-ink/60 py-1.5 px-2 text-left cursor-default mt-px">
-              <span className="text-xs">📊</span>
-              <span>Dashboard →</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

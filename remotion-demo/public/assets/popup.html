@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tilly Popup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Satoshi";
+    src: url("Satoshi-Variable.woff2") format("woff2");
+    font-weight: 400 900;
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: "IBM Plex Mono", "SF Mono", "Menlo", monospace;
+  }
+
+  .popover {
+    background: #FFFFFF;
+    border: 2px solid #1C1C1C;
+    border-radius: 0;
+    padding: 16px;
+    width: 320px;
+  }
+
+  .mascot-wrap {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .mascot-wrap img {
+    display: inline-block;
+    width: 120px;
+    height: auto;
+  }
+
+  .greeting {
+    font-family: "Satoshi", Georgia, serif;
+    font-size: 18px;
+    color: #1C1C1C;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 9.6px;
+    font-family: "IBM Plex Mono", "SF Mono", "Menlo", monospace;
+    color: #4A4A4A;
+    opacity: 0.5;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .field-group {
+    margin-bottom: 8px;
+  }
+
+  label {
+    display: block;
+    font-size: 9.6px;
+    font-family: "IBM Plex Mono", "SF Mono", "Menlo", monospace;
+    color: #4A4A4A;
+    margin-bottom: 2px;
+  }
+
+  .field {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 11.2px;
+    font-family: "IBM Plex Mono", "SF Mono", "Menlo", monospace;
+    background: #F0F0F0;
+    border: 2px solid #1C1C1C;
+    border-radius: 0;
+    color: #1C1C1C;
+    outline: none;
+  }
+
+  .field::placeholder {
+    color: rgba(28, 28, 28, 0.25);
+  }
+
+  .field:focus {
+    border-color: #aac0bc;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    padding: 10px 20px;
+    font-size: 10.4px;
+    font-family: "IBM Plex Mono", "SF Mono", "Menlo", monospace;
+    font-weight: 500;
+    background: #aac0bc;
+    color: #1C1C1C;
+    border: 2px solid #1C1C1C;
+    border-radius: 0;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 8.8px;
+    font-family: "IBM Plex Mono", "SF Mono", "Menlo", monospace;
+    color: #4A4A4A;
+    opacity: 0.5;
+    margin-top: 12px;
+  }
+
+  .footer a {
+    color: #aac0bc;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .footer a:hover {
+    color: #1C1C1C;
+  }
+</style>
+</head>
+<body>
+
+<div class="popover">
+  <div class="mascot-wrap">
+    <img src="logo-brand.png" alt="til.ly">
+  </div>
+
+  <div class="greeting">Welcome back!</div>
+  <div class="subtitle">Log in to continue</div>
+
+  <div class="field-group">
+    <label>Email</label>
+    <input class="field" type="email" placeholder="you@example.com" value="you@example.com" readonly>
+  </div>
+
+  <div class="field-group">
+    <label>Password</label>
+    <input class="field" type="password" placeholder="••••••••" value="" readonly>
+  </div>
+
+  <div style="margin-top: 8px;">
+    <div class="btn">Log in</div>
+  </div>
+
+  <div class="footer">
+    Don't have an account? <a>Sign up</a>
+  </div>
+</div>
+
+</body>
+</html>

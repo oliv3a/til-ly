@@ -1,7 +1,6 @@
-import { type NextRequest } from "next/server"
-
-const RELEASE_URL = "https://github.com/oliv3a/til-ly/releases/latest/download/til-ly-macos.zip"
+import { NextResponse, type NextRequest } from "next/server"
 
 export async function GET(_req: NextRequest) {
-  return Response.redirect(RELEASE_URL, 302)
+  const url = new URL("/downloads/til-ly-macos.zip", _req.url)
+  return NextResponse.redirect(url, 302)
 }

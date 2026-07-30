@@ -19,6 +19,7 @@ model User {
   streakCount                Int      @default(0)
   mentorName                 String?
   mentorOnboardingCompleted  Boolean  @default(false)
+  journeyRecapSeenAt        DateTime?
   emailVerified DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -33,6 +34,7 @@ model User {
   pushSubscriptions PushSubscription[]
   resume           Resume?
   mentorConversations MentorConversation[]
+  milestones UserMilestone[]
 }
 
 model Account {
@@ -315,4 +317,17 @@ model MentorMessage {
   createdAt      DateTime @default(now())
 
   conversation MentorConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model UserMilestone {
+  id         String   @id @default(cuid())
+  userId     String
+  key        String
+  achievedAt DateTime @default(now())
+  shownAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([userId, shownAt])
 }
