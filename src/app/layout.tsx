@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
 import localFont from "next/font/local"
 import { Inter, IBM_Plex_Mono } from "next/font/google"
-import { auth } from "@/lib/auth"
 import SessionProvider from "@/components/SessionProvider"
-import DashboardShell from "@/components/DashboardShell"
+import AppShell from "@/components/AppShell"
 import { Toaster } from "sonner"
 import "./globals.css"
 
@@ -43,18 +42,12 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth()
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${satoshi.variable} ${inter.variable} ${ibmPlexMono.variable}`}>
       <body>
         <SessionProvider>
-          {session?.user ? (
-            <DashboardShell>{children}</DashboardShell>
-          ) : (
-            children
-          )}
+          <AppShell>{children}</AppShell>
           <Toaster
             position="bottom-right"
             toastOptions={{
