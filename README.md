@@ -13,15 +13,15 @@ A daily study-log platform for CS students. In tech you have to consistently lea
 - **Deploy:** Vercel
 
 ## Features
-
-- Study log CRUD with AI analysis — summaries, skill extraction, next-topic recommendations
-- Goals with AI-generated roadmaps
+- Resume that keeps up with you : auto-built from your study logs and skills, editable, PDF export, ATS-checked
+- Study log CRUD with AI analysis : summaries, skill extraction, next-topic recommendations
+- Learning goals : set a goal and get a step-by-step roadmap with estimated study time per step; check steps off as you study, link logs to show real progress, and graduate with a celebration when you finish
+- Project Building : turn ideas into shipped projects with step-by-step checklists (beginner→advanced), progress tracking, folder/code uploads, and honest, encouraging feedback on every update
+- Mentor chat : a context-aware study mentor with a real personality; warm, senior-CS-student vibes, short and human-feeling replies that reference your actual logs, goals, and skills; remembers conversations; customizable name
 - Streak tracking + daily check-in
-- Resume always ready as you learn (editable, PDF export)
 - Portfolio page showing skills, goals, and progress
-- Push notifications (daily reminders)
 - macOS menu bar app (quick status glance)
-- Forgot/reset password
+
 
 ## Live App
 
