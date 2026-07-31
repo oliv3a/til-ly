@@ -47,13 +47,6 @@ interface DashboardData {
   streakCount: number
   logCount: number
   recentLogs: DashboardLog[]
-  recentProjectUpdates: Array<{
-    id: string
-    projectId: string
-    content: string | null
-    createdAt: string
-    project: { id: string; title: string }
-  }>
   goals: DashboardGoal[]
   skills: DashboardSkill[]
   currentProject: DashboardCurrentProject | null
@@ -77,7 +70,12 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
             const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`
             updatedMonthCache[monthKey] = fresh.monthlyLogsByDay
           }
-          return { ...prev, ...fresh, initialMonthCache: updatedMonthCache }
+          return {
+            ...prev,
+            streakCount: fresh.streakCount ?? prev.streakCount,
+            logCount: fresh.logCount ?? prev.logCount,
+            initialMonthCache: updatedMonthCache,
+          }
         })
       }
     }

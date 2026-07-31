@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { getComputedSkills } from "@/lib/skills"
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,7 +8,6 @@ export async function GET(req: NextRequest) {
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const userId = session.user.id
-    const userName = session.user.name || "there"
 
     const { searchParams } = new URL(req.url)
     const monthParam = searchParams.get("month")
@@ -61,65 +59,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ monthlyLogsByDay })
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { streakCount: true },
-    })
-
-    const totalLogCount = await prisma.studyLog.count({ where: { userId } })
-
-    const logs = await prisma.studyLog.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-      include: {
-        skillTags: { include: { skill: true } },
-      },
-    })
-
-    const projectUpdates = await prisma.projectUpdate.findMany({
-      where: { project: { userId } },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-      include: {
-        project: { select: { id: true, title: true } },
-      },
-    })
-
-    const goals = await prisma.goal.findMany({
-      where: { userId, status: "active" },
-      orderBy: { createdAt: "desc" },
-      include: {
-        roadmapItems: {
-          orderBy: { order: "asc" },
-          select: { id: true, isComplete: true, topic: true },
-        },
-      },
-    })
-
-    const skills = await getComputedSkills(userId)
-
-    const currentProject = await prisma.project.findFirst({
-      where: { userId, status: "in_progress" },
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        progressPct: true,
-        steps: { select: { isComplete: true } },
-      },
-    })
+    const [user, totalLogCount] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { streakCount: true },
+      }),
+      prisma.studyLog.count({ where: { userId } }),
+    ])
 
     return NextResponse.json({
-      userId,
-      userName,
       streakCount: user?.streakCount || 0,
       logCount: totalLogCount,
-      recentLogs: logs,
-      recentProjectUpdates: projectUpdates,
-      goals,
-      skills,
-      currentProject: currentProject || null,
       monthlyLogsByDay,
     })
   } catch {

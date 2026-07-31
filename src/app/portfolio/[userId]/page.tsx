@@ -12,7 +12,7 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, name: true, avatarUrl: true, bio: true, school: true, year: true },
+    select: { id: true, name: true, avatarUrl: true, bio: true, school: true, year: true, streakCount: true },
   })
 
   if (!user) notFound()
@@ -56,11 +56,6 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
     skillTags: l.skillTags,
   }))
 
-  const userStreak = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { streakCount: true },
-  })
-
   return (
     <div className="max-w-3xl mx-auto px-4">
       <div className="frame-block p-6 mb-6 text-center">
@@ -79,7 +74,7 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
         skills={JSON.parse(JSON.stringify(skills))}
         initialProjects={JSON.parse(JSON.stringify(projects))}
         isOwner={true}
-        streakCount={userStreak?.streakCount ?? 0}
+        streakCount={user.streakCount ?? 0}
         logCount={logCount}
         projectCount={projectCount}
       />

@@ -127,7 +127,6 @@ export default async function DashboardPage() {
         streakCount: user?.streakCount || 0,
         logCount: totalLogCount,
         recentLogs: JSON.parse(JSON.stringify(logs)),
-        recentProjectUpdates: [],
         goals: JSON.parse(JSON.stringify(goals)),
         skills: JSON.parse(JSON.stringify(skills)),
         recommendation: null,
