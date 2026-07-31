@@ -66,6 +66,8 @@ export async function GET(req: NextRequest) {
       select: { streakCount: true },
     })
 
+    const totalLogCount = await prisma.studyLog.count({ where: { userId } })
+
     const logs = await prisma.studyLog.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
@@ -112,7 +114,7 @@ export async function GET(req: NextRequest) {
       userId,
       userName,
       streakCount: user?.streakCount || 0,
-      logCount: logs.length,
+      logCount: totalLogCount,
       recentLogs: logs,
       recentProjectUpdates: projectUpdates,
       goals,

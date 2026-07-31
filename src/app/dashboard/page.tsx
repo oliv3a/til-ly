@@ -28,6 +28,7 @@ export default async function DashboardPage() {
 
   const [
     user,
+    totalLogCount,
     logs,
     goals,
     skills,
@@ -40,6 +41,7 @@ export default async function DashboardPage() {
       where: { id: userId },
       select: { streakCount: true },
     }),
+    prisma.studyLog.count({ where: { userId } }),
     prisma.studyLog.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
@@ -123,7 +125,7 @@ export default async function DashboardPage() {
         userId,
         userName,
         streakCount: user?.streakCount || 0,
-        logCount: logs.length,
+        logCount: totalLogCount,
         recentLogs: JSON.parse(JSON.stringify(logs)),
         recentProjectUpdates: [],
         goals: JSON.parse(JSON.stringify(goals)),

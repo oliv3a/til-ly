@@ -10,6 +10,10 @@ export default function Footer() {
       <Link href="/privacy" className="text-[0.55rem] font-mono text-muted-ink/30 hover:text-muted-ink/60 transition-colors">
         Privacy
       </Link>
+      <span className="text-muted-ink/20">·</span>
+      <Link href="/terms" className="text-[0.55rem] font-mono text-muted-ink/30 hover:text-muted-ink/60 transition-colors">
+        Terms
+      </Link>
     </footer>
   )
 }

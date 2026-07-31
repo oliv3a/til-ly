@@ -41,7 +41,7 @@ export default function PrivacyPage() {
 
         <h2 className="text-base font-semibold text-ink mt-8">Contact</h2>
         <p>
-          For questions or deletion requests, reach out through the GitHub repository.
+          For questions or deletion requests, email <strong>studywithtilly@gmail.com</strong>.
         </p>
 
         <p className="text-[0.65rem] text-muted-ink/40 pt-8">Last updated: July 2026</p>

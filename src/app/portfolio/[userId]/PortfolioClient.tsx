@@ -1,26 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import type { PortfolioLog, PortfolioSkill, PortfolioProject } from "@/types"
 import AnimatedProgress from "@/lib/motion/components/AnimatedProgress"
 import { colorForSkill } from "@/lib/skill-colors"
-
-const COLORS = [
-  "#E88D7A", "#7BA89A", "#C49C6E", "#A8B5C4", "#D4A5A5",
-  "#8FA89B", "#C4A882", "#A5B4C4", "#D4C4A8", "#B8A8C4",
-]
-
-function pieArc(cx: number, cy: number, r: number, startDeg: number, endDeg: number): string {
-  const startRad = ((startDeg - 90) * Math.PI) / 180
-  const endRad = ((endDeg - 90) * Math.PI) / 180
-  const x1 = (cx + r * Math.cos(startRad)).toFixed(4)
-  const y1 = (cy + r * Math.sin(startRad)).toFixed(4)
-  const x2 = (cx + r * Math.cos(endRad)).toFixed(4)
-  const y2 = (cy + r * Math.sin(endRad)).toFixed(4)
-  const largeArc = endDeg - startDeg > 180 ? "1" : "0"
-  return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`
-}
 
 interface GoalInfo {
   id: string
@@ -40,28 +24,7 @@ interface Props {
 }
 
 export default function PortfolioClient({ logs, goals, skills, initialProjects, isOwner, streakCount, logCount, projectCount }: Props) {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)
-
-  const totalLogs = useMemo(() => skills.reduce((s: number, sk: PortfolioSkill) => s + sk.logCount, 0), [skills])
-  const visibleSkills = useMemo(() => skills.filter((sk: PortfolioSkill) => sk.logCount > 0), [skills])
-
-  const slices = useMemo(() => {
-    if (visibleSkills.length === 0) return []
-    const total = visibleSkills.reduce((s: number, sk: PortfolioSkill) => s + sk.logCount, 0)
-    const result: { index: number; startDeg: number; endDeg: number; color: string }[] = []
-    let currentDeg = 0
-    for (let i = 0; i < visibleSkills.length; i++) {
-      const pct = visibleSkills[i].logCount / total
-      const sliceDeg = pct * 360
-      const originalIndex = skills.indexOf(visibleSkills[i])
-      result.push({ index: originalIndex, startDeg: currentDeg, endDeg: currentDeg + sliceDeg, color: COLORS[i % COLORS.length] })
-      currentDeg += sliceDeg
-    }
-    return result
-  }, [visibleSkills, skills])
-
-  const cx = 100, cy = 100, r = 90
+  const [showAllSkills, setShowAllSkills] = useState(false)
 
   return (
     <div>
@@ -92,71 +55,29 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
       <div className="dash-section">
         <p className="dash-section-title">01 &nbsp; Skills</p>
         {skills.length > 0 ? (
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-            <div className="relative shrink-0">
-              <svg width={200} height={200} viewBox="0 0 200 200" className="max-w-full h-auto">
-                {visibleSkills.length === 0 ? (
-                  <circle cx={cx} cy={cy} r={r} fill="#f0ebe4" />
-                ) : (
-                  slices.map((slice) => (
-                    <path
-                      key={slice.index}
-                      d={pieArc(cx, cy, r, slice.startDeg, slice.endDeg)}
-                      fill={slice.color}
-                      stroke="white"
-                      strokeWidth={2}
-                      className="cursor-pointer transition-opacity"
-                      opacity={hoveredIndex === null || hoveredIndex === slice.index ? 1 : 0.4}
-                      onMouseEnter={(e) => {
-                        setHoveredIndex(slice.index)
-                        const rect = (e.currentTarget.closest("svg") as SVGElement)?.getBoundingClientRect()
-                        if (rect) setTooltipPos({ x: rect.left + rect.width / 2, y: rect.top + 20 })
-                      }}
-                      onMouseLeave={() => { setHoveredIndex(null); setTooltipPos(null) }}
-                      onMouseMove={(e) => {
-                        setTooltipPos({ x: e.clientX, y: e.clientY - 40 })
-                      }}
-                    />
-                  ))
-                )}
-              </svg>
-              {totalLogs > 0 && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="text-center">
-                    <p className="poster-heading text-xl">{totalLogs}</p>
-                    <p className="text-[0.45rem] font-mono text-muted-ink/50 uppercase tracking-wider">total logs</p>
-                  </div>
-                </div>
-              )}
-              {hoveredIndex !== null && tooltipPos && (
-                <div
-                  className="fixed z-50 px-3 py-1.5 frame-block shadow-lg pointer-events-none"
-                  style={{ left: tooltipPos.x, top: tooltipPos.y, transform: "translate(-50%, -100%)" }}
+          <div className="flex flex-wrap gap-2">
+            {(showAllSkills ? skills : skills.slice(0, 8)).map((sk: PortfolioSkill) => {
+              const color = colorForSkill(sk.skill.name)
+              return (
+                <span
+                  key={sk.skill.id}
+                  className="tag inline-flex items-center gap-1.5 text-xs"
+                  style={{ borderColor: color.border, background: color.bg }}
                 >
-                  <p className="text-[0.65rem] font-mono text-warm-brown whitespace-nowrap">{skills[hoveredIndex].skill.name}</p>
-                  <p className="text-[0.55rem] font-mono text-muted-ink/60">{skills[hoveredIndex].logCount} logs</p>
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0 w-full sm:w-auto">
-              <div className="space-y-1">
-                {skills.map((sk: PortfolioSkill, i: number) => (
-                  <div
-                    key={sk.skill.id}
-                    className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-colors hover:bg-warm-paper/60 ${sk.logCount === 0 ? "opacity-50" : ""}`}
-                    onMouseEnter={() => setHoveredIndex(i)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                  >
-                    <span
-                      className="w-2.5 h-2.5 shrink-0 rounded-sm"
-                      style={{ backgroundColor: COLORS[i % COLORS.length] }}
-                    />
-                    <span className="flex-1 text-[0.65rem] font-mono text-warm-brown truncate">{sk.skill.name}</span>
-                    <span className="text-[0.6rem] font-mono text-muted-ink/50">{sk.logCount}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  <span className="w-2 h-2 rounded-full" style={{ background: color.border }} />
+                  {sk.skill.name}
+                  <span className="text-muted-ink/40 ml-0.5">{sk.logCount}</span>
+                </span>
+              )
+            })}
+            {skills.length > 8 && (
+              <button
+                onClick={() => setShowAllSkills(!showAllSkills)}
+                className="tag text-[0.55rem] font-mono text-muted-ink/40 hover:text-muted-ink/70 transition-colors cursor-pointer"
+              >
+                {showAllSkills ? "Show less" : `+${skills.length - 8} more`}
+              </button>
+            )}
           </div>
         ) : (
           <p className="text-[0.6rem] font-mono text-muted-ink/40">No skills tracked yet</p>

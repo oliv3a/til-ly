@@ -63,16 +63,35 @@ interface DashboardData {
 
 export default function DashboardClient({ initialData }: { initialData: DashboardData }) {
   const [data, setData] = useState(initialData)
+  const [showAllSkills, setShowAllSkills] = useState(false)
 
   useEffect(() => {
     async function refresh() {
       const res = await fetch("/api/dashboard")
       if (res.ok) {
         const fresh = await res.json()
-        setData((prev) => ({ ...prev, ...fresh }))
+        setData((prev) => {
+          const updatedMonthCache = { ...prev.initialMonthCache }
+          if (fresh.monthlyLogsByDay) {
+            const today = new Date()
+            const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`
+            updatedMonthCache[monthKey] = fresh.monthlyLogsByDay
+          }
+          return { ...prev, ...fresh, initialMonthCache: updatedMonthCache }
+        })
       }
     }
+
     refresh()
+
+    const onFocus = () => refresh()
+    const onVisible = () => { if (document.visibilityState === "visible") refresh() }
+    window.addEventListener("focus", onFocus)
+    document.addEventListener("visibilitychange", onVisible)
+    return () => {
+      window.removeEventListener("focus", onFocus)
+      document.removeEventListener("visibilitychange", onVisible)
+    }
   }, [])
 
   const greeting = getGreeting()
@@ -134,21 +153,31 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           <span className="text-muted-ink/25">02 </span>Recent Learning
         </p>
         {data.skills && data.skills.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {data.skills.slice(0, 8).map((s) => {
-              const color = colorForSkill(s.skill.name)
-              return (
-                <span
-                  key={s.id}
-                  className="tag inline-flex items-center gap-1.5 text-xs"
-                  style={{ borderColor: color.border, background: color.bg }}
-                >
-                  <span className="w-2 h-2 rounded-full" style={{ background: color.border }} />
-                  {s.skill.name}
-                  <span className="text-muted-ink/40 ml-0.5">{s.logCount}</span>
-                </span>
-              )
-            })}
+          <div className="dash-card p-3">
+            <div className={`flex flex-wrap gap-2 ${showAllSkills ? "" : "max-h-28 overflow-hidden"}`}>
+              {(showAllSkills ? data.skills : data.skills.slice(0, 6)).map((s) => {
+                const color = colorForSkill(s.skill.name)
+                return (
+                  <span
+                    key={s.id}
+                    className="tag inline-flex items-center gap-1.5 text-xs"
+                    style={{ borderColor: color.border, background: color.bg }}
+                  >
+                    <span className="w-2 h-2 rounded-full" style={{ background: color.border }} />
+                    {s.skill.name}
+                    <span className="text-muted-ink/40 ml-0.5">{s.logCount}</span>
+                  </span>
+                )
+              })}
+            </div>
+            {data.skills.length > 6 && (
+              <button
+                onClick={() => setShowAllSkills(!showAllSkills)}
+                className="text-[0.55rem] font-mono text-muted-ink/40 hover:text-muted-ink/70 transition-colors mt-2"
+              >
+                {showAllSkills ? `Show less` : `+${data.skills.length - 6} more`}
+              </button>
+            )}
           </div>
         ) : (
           <div className="dash-card p-4 text-center">

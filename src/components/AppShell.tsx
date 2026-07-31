@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import DashboardShell from "./DashboardShell"
 
-const PUBLIC_PREFIXES = ["/auth/", "/privacy"]
+const PUBLIC_PREFIXES = ["/auth/", "/privacy", "/terms"]
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()

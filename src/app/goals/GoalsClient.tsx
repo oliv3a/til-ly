@@ -32,6 +32,16 @@ export default function GoalsClient({ initialGoals }: Props) {
   const [aiLoading, setAiLoading] = useState(false)
 
   const [confirmAction, setConfirmAction] = useState<{ message: string; onConfirm: () => void } | null>(null)
+  const [activeTab, setActiveTab] = useState<"current" | "completed">("current")
+  const [completingGoalId, setCompletingGoalId] = useState<string | null>(null)
+  const [aiCongrats, setAiCongrats] = useState<{ goal: GoalWithRoadmap; message: string } | null>(null)
+  const [completing, setCompleting] = useState(false)
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
+  const [editGoalFields, setEditGoalFields] = useState({ title: "", description: "", targetDate: "", category: "" })
+  const [editGoalSubmitting, setEditGoalSubmitting] = useState(false)
+
+  const currentGoals = goals.filter((g) => g.status !== "completed")
+  const completedGoals = goals.filter((g) => g.status === "completed")
 
   function updateGoalInState(goal: GoalWithRoadmap) {
     setGoals((prev) => prev.map((g) => (g.id === goal.id ? goal : g)))
@@ -208,6 +218,58 @@ export default function GoalsClient({ initialGoals }: Props) {
     })
   }
 
+  function promptComplete(goal: GoalWithRoadmap) {
+    setCompletingGoalId(goal.id)
+  }
+
+  async function confirmComplete() {
+    if (!completingGoalId) return
+    setCompleting(true)
+    try {
+      const res = await fetch(`/api/goals/${completingGoalId}/complete`, { method: "POST" })
+      if (res.ok) {
+        const data = await res.json()
+        setGoals((prev) => prev.map((g) => (g.id === data.goal.id ? data.goal : g)))
+        setCompletingGoalId(null)
+        setAiCongrats({ goal: data.goal, message: data.aiCongratulations })
+      }
+    } catch {
+    } finally {
+      setCompleting(false)
+    }
+  }
+
+  function startEditGoal(goal: GoalWithRoadmap) {
+    setEditingGoalId(goal.id)
+    setEditGoalFields({
+      title: goal.title,
+      description: goal.description || "",
+      targetDate: goal.targetDate
+        ? (() => { const d = new Date(goal.targetDate); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}` })()
+        : "",
+      category: goal.category || "",
+    })
+  }
+
+  async function saveEditGoal(goalId: string) {
+    if (!editGoalFields.title.trim() || editGoalSubmitting) return
+    setEditGoalSubmitting(true)
+    try {
+      const res = await fetch(`/api/goals/${goalId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editGoalFields),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setGoals((prev) => prev.map((g) => (g.id === goalId ? { ...g, ...updated } : g)))
+        setEditingGoalId(null)
+      }
+    } finally {
+      setEditGoalSubmitting(false)
+    }
+  }
+
   async function generateWithAI(goal: GoalWithRoadmap) {
     if (!aiInstruction.trim()) return
     setAiLoading(true)
@@ -255,30 +317,83 @@ export default function GoalsClient({ initialGoals }: Props) {
         </form>
       )}
 
-      {goals.length === 0 && !showForm && (
+      {/* Tabs */}
+      {(currentGoals.length > 0 || completedGoals.length > 0) && (
+        <div className="flex items-center gap-1 mb-4 border-b-2 border-warm-brown/10">
+          <button
+            onClick={() => setActiveTab("current")}
+            className={`text-xs font-mono py-2 px-3 border-b-2 -mb-[2px] transition-colors ${
+              activeTab === "current"
+                ? "border-soft-coral text-warm-brown font-bold"
+                : "border-transparent text-muted-ink/50 hover:text-warm-brown"
+            }`}
+          >
+            Current ({currentGoals.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("completed")}
+            className={`text-xs font-mono py-2 px-3 border-b-2 -mb-[2px] transition-colors ${
+              activeTab === "completed"
+                ? "border-soft-coral text-warm-brown font-bold"
+                : "border-transparent text-muted-ink/50 hover:text-warm-brown"
+            }`}
+          >
+            🎓 Completed ({completedGoals.length})
+          </button>
+        </div>
+      )}
+
+      {/* Empty states */}
+      {activeTab === "current" && currentGoals.length === 0 && !showForm && (
         <div className="frame-block p-6 text-center">
-          <p className="font-serif text-base text-muted-ink/50">No goals yet</p>
+          <p className="font-serif text-base text-muted-ink/50">No active goals</p>
           <p className="text-[0.65rem] font-mono text-muted-ink/40 mt-1">Set your first learning goal and we&apos;ll build a roadmap</p>
         </div>
       )}
 
+      {activeTab === "completed" && completedGoals.length === 0 && (
+        <div className="frame-block p-6 text-center">
+          <p className="font-serif text-base text-muted-ink/50">No completed goals yet</p>
+          <p className="text-[0.65rem] font-mono text-muted-ink/40 mt-1">Check off every step on a roadmap to graduate a goal</p>
+        </div>
+      )}
+
       <div className="space-y-3">
-        {goals.map((goal) => (
+        {(activeTab === "current" ? currentGoals : completedGoals).map((goal) => (
           <AnimatedCard key={goal.id} className="frame-block p-4">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <h3 className="font-serif text-sm text-warm-brown truncate">{goal.title}</h3>
+                <h3 className="font-serif text-sm text-warm-brown truncate">
+                  {goal.status === "completed" && <span className="mr-1">🎓</span>}
+                  {goal.title}
+                </h3>
                 {goal.description && <p className="text-[0.65rem] font-mono text-muted-ink/60 mt-0.5">{goal.description}</p>}
               </div>
-              <span className={`badge ${
-                goal.status === "completed" ? "badge-complete" :
-                goal.status === "abandoned" ? "badge-archived" :
-                ""
-              }`}>
-                {goal.status}
-              </span>
-              <AnimatedButton onClick={() => deleteGoal(goal.id)} variant="sm" className="shrink-0 !px-1 !py-0 text-[0.55rem]">🗑</AnimatedButton>
+              {goal.status === "completed" ? (
+                <span className="badge badge-complete">Graduated</span>
+              ) : editingGoalId === goal.id ? (
+                <AnimatedButton onClick={() => setEditingGoalId(null)} variant="sm" className="shrink-0 !px-1 !py-0 text-[0.55rem]">Cancel</AnimatedButton>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <AnimatedButton onClick={() => startEditGoal(goal)} variant="sm" className="shrink-0 !px-1 !py-0 text-[0.55rem]">✏</AnimatedButton>
+                  <AnimatedButton onClick={() => deleteGoal(goal.id)} variant="sm" className="shrink-0 !px-1 !py-0 text-[0.55rem]">🗑</AnimatedButton>
+                </div>
+              )}
             </div>
+
+            {editingGoalId === goal.id && (
+              <div className="frame-block p-3 mt-3 space-y-2">
+                <input type="text" value={editGoalFields.title} onChange={(e) => setEditGoalFields({ ...editGoalFields, title: e.target.value })} placeholder="Goal title" className="field-coral w-full text-[0.6rem]" />
+                <textarea value={editGoalFields.description} onChange={(e) => setEditGoalFields({ ...editGoalFields, description: e.target.value })} placeholder="Description" rows={2} className="field-coral w-full resize-y text-[0.6rem]" />
+                <div className="flex gap-2">
+                  <input type="text" value={editGoalFields.category} onChange={(e) => setEditGoalFields({ ...editGoalFields, category: e.target.value })} placeholder="Category" className="field-coral flex-1 text-[0.6rem]" />
+                  <input type="date" value={editGoalFields.targetDate} onChange={(e) => setEditGoalFields({ ...editGoalFields, targetDate: e.target.value })} className="field-coral text-[0.6rem]" />
+                </div>
+                <AnimatedButton onClick={() => saveEditGoal(goal.id)} disabled={editGoalSubmitting} variant="sm-primary" className="w-full justify-center text-[0.6rem]">
+                  {editGoalSubmitting ? "Saving..." : "Save Changes"}
+                </AnimatedButton>
+              </div>
+            )}
 
             <div className="mt-3 flex items-center gap-2 text-[0.55rem] font-mono text-muted-ink/70">
               <span className="tag">
@@ -289,13 +404,40 @@ export default function GoalsClient({ initialGoals }: Props) {
                   {goal.roadmapItems.reduce((s, i) => s + i._count.studyLogLinks, 0)} logs
                 </span>
               )}
+              {goal.status === "completed" && goal.completedAt && (
+                <span className="tag tag-complete">
+                  {(() => {
+                    const d = new Date(goal.completedAt)
+                    const now = new Date()
+                    const diff = now.getTime() - d.getTime()
+                    const days = Math.floor(diff / 86400000)
+                    if (days === 0) return "Completed today"
+                    if (days === 1) return "Completed yesterday"
+                    return `Completed ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                  })()}
+                </span>
+              )}
             </div>
+
+            {goal.status !== "completed" && goal.roadmapItems.length > 0 && goal.roadmapItems.every((i) => i.isComplete) && (
+              <div className="mt-3">
+                <AnimatedButton
+                  onClick={() => promptComplete(goal)}
+                  variant="coral"
+                  className="w-full justify-center text-[0.6rem]"
+                >
+                  🎓 Graduate Goal
+                </AnimatedButton>
+              </div>
+            )}
 
             <div className="mt-3">
               <div className="section-header mb-2 flex items-center justify-between">
                 <span>Roadmap</span>
                 <div className="flex items-center gap-1">
-                  {manualEditGoalId === goal.id ? (
+                  {goal.status === "completed" ? (
+                    <span className="text-[0.5rem] font-mono text-muted-ink/40">Read-only</span>
+                  ) : manualEditGoalId === goal.id ? (
                     <AnimatedButton onClick={() => { setManualEditGoalId(null); setAddingItemGoalId(null); setEditingItem(null) }} variant="sm" className="!px-1.5 !py-0 text-[0.5rem] text-warm-brown bg-white">Done</AnimatedButton>
                   ) : (
                     <AnimatedButton onClick={() => setManualEditGoalId(goal.id)} variant="sm" className="!px-1.5 !py-0 text-[0.5rem] text-warm-brown bg-white">✏ Edit</AnimatedButton>
@@ -303,7 +445,7 @@ export default function GoalsClient({ initialGoals }: Props) {
                 </div>
               </div>
 
-              {manualEditGoalId === goal.id && addingItemGoalId === goal.id && (
+              {goal.status !== "completed" && manualEditGoalId === goal.id && addingItemGoalId === goal.id && (
                 <div className="frame-block p-2 mb-2 space-y-1.5">
                   <input type="text" value={addFields.topic} onChange={(e) => setAddFields({ ...addFields, topic: e.target.value })} placeholder="Topic name" className="field-coral w-full text-[0.6rem]" />
                   <input type="text" value={addFields.description} onChange={(e) => setAddFields({ ...addFields, description: e.target.value })} placeholder="Description (optional)" className="field-coral w-full text-[0.6rem]" />
@@ -316,7 +458,7 @@ export default function GoalsClient({ initialGoals }: Props) {
                 </div>
               )}
 
-              {manualEditGoalId === goal.id && addingItemGoalId !== goal.id && (
+              {goal.status !== "completed" && manualEditGoalId === goal.id && addingItemGoalId !== goal.id && (
                 <div className="mb-2">
                   <AnimatedButton onClick={() => startAdd(goal.id)} variant="sm" className="!px-1.5 !py-0 text-[0.5rem] text-warm-brown bg-white">+ Add Step</AnimatedButton>
                 </div>
@@ -326,15 +468,15 @@ export default function GoalsClient({ initialGoals }: Props) {
                 {goal.roadmapItems.map((item) => (
                   <div
                     key={item.id}
-                    onDragOver={(e) => manualEditGoalId === goal.id && handleDragOver(e, item.id)}
+                    onDragOver={(e) => goal.status !== "completed" && manualEditGoalId === goal.id && handleDragOver(e, item.id)}
                     onDragLeave={handleDragLeave}
-                    onDrop={() => manualEditGoalId === goal.id && handleDrop(goal.id, item.id)}
+                    onDrop={() => goal.status !== "completed" && manualEditGoalId === goal.id && handleDrop(goal.id, item.id)}
                     onDragEnd={handleDragEnd}
                     className={`flex items-center gap-2 text-[0.65rem] font-mono group ${
                       dragOverItemId === item.id ? "border-t-2 border-muted-teal" : ""
                     } ${dragItemId === item.id ? "opacity-40" : ""}`}
                   >
-                    {manualEditGoalId === goal.id && (
+                    {goal.status !== "completed" && manualEditGoalId === goal.id && (
                       <span
                         draggable={!isEditing(goal.id, item.id)}
                         onDragStart={() => handleDragStart(goal.id, item.id)}
@@ -344,15 +486,15 @@ export default function GoalsClient({ initialGoals }: Props) {
 
                     <button
                       type="button"
-                      onClick={() => toggleItem(goal.id, item)}
-                      className={`w-5 h-5 border border-warm-brown flex items-center justify-center text-[0.6rem] shrink-0 cursor-pointer hover:bg-warm-paper ${
-                        item.isComplete ? "bg-muted-teal text-ink" : "bg-white text-muted-ink/50"
-                      }`}
+                      onClick={() => goal.status !== "completed" && toggleItem(goal.id, item)}
+                      className={`w-5 h-5 border border-warm-brown flex items-center justify-center text-[0.6rem] shrink-0 ${
+                        goal.status !== "completed" ? "cursor-pointer hover:bg-warm-paper" : "cursor-default"
+                      } ${item.isComplete ? "bg-muted-teal text-ink" : "bg-white text-muted-ink/50"}`}
                     >
                       {item.isComplete ? "✓" : ""}
                     </button>
 
-                    {isEditing(goal.id, item.id) ? (
+                    {isEditing(goal.id, item.id) && goal.status !== "completed" ? (
                       <div className="flex-1 flex items-center gap-1">
                         <input
                           type="text"
@@ -380,18 +522,21 @@ export default function GoalsClient({ initialGoals }: Props) {
                     ) : (
                       <>
                         <span className={`flex-1 truncate ${item.isComplete ? "text-muted-ink/40 line-through" : "text-warm-brown"}`}>
+                          {goal.status === "completed" && item.isComplete && <span className="mr-1">✓</span>}
                           {item.order}. {item.topic}
                         </span>
                         <span className="text-[0.5rem] text-muted-ink/50 shrink-0">
                           {item._count?.studyLogLinks ?? 0} logs
                         </span>
-                        <Link
-                          href={`/logs/new?roadmapItemId=${item.id}`}
-                          className="btn-base btn-sm btn-interact-bg !px-1.5 !py-0 text-[0.5rem]"
-                        >
-                          Log
-                        </Link>
-                        {manualEditGoalId === goal.id && (
+                        {goal.status !== "completed" && (
+                          <Link
+                            href={`/logs/new?roadmapItemId=${item.id}`}
+                            className="btn-base btn-sm btn-interact-bg !px-1.5 !py-0 text-[0.5rem]"
+                          >
+                            Log
+                          </Link>
+                        )}
+                        {goal.status !== "completed" && manualEditGoalId === goal.id && (
                           <>
                             <AnimatedButton onClick={() => startEdit(goal.id, item)} variant="sm" className="!px-1 !py-0 text-[0.5rem] opacity-0 group-hover:opacity-100">✏</AnimatedButton>
                             <AnimatedButton onClick={() => deleteItem(goal.id, item.id)} variant="sm" className="!px-1 !py-0 text-[0.5rem] opacity-0 group-hover:opacity-100">🗑</AnimatedButton>
@@ -404,7 +549,7 @@ export default function GoalsClient({ initialGoals }: Props) {
               </div>
             </div>
 
-            {aiGoalId === goal.id && (
+            {goal.status !== "completed" && aiGoalId === goal.id && (
               <div className="mt-3 frame-block p-3 space-y-2 bg-warm-paper/50">
                 <p className="text-[0.55rem] font-mono text-warm-brown font-medium">✨ Regenerate Roadmap</p>
                 <p className="text-[0.5rem] font-mono text-muted-ink/50">Tell us how to adjust the roadmap. It will replace all current steps.</p>
@@ -429,7 +574,7 @@ export default function GoalsClient({ initialGoals }: Props) {
               </div>
             )}
 
-            {aiGoalId !== goal.id && (
+            {goal.status !== "completed" && aiGoalId !== goal.id && (
               <div className="mt-3">
                 <AnimatedButton
                   onClick={() => { setAiGoalId(goal.id); setAiInstruction("") }}
@@ -469,6 +614,50 @@ export default function GoalsClient({ initialGoals }: Props) {
                 Cancel
               </AnimatedButton>
             </div>
+          </div>
+        </div>
+      )}
+
+      {completingGoalId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-cream border-2 border-warm-brown p-5 max-w-xs w-full mx-4">
+            <p className="text-sm font-mono text-warm-brown mb-1">🎓 Graduate this goal?</p>
+            <p className="text-[0.6rem] font-mono text-muted-ink/60 mb-4">All roadmap items are complete. This action cannot be undone.</p>
+            <div className="flex gap-2">
+              <AnimatedButton
+                onClick={confirmComplete}
+                disabled={completing}
+                variant="coral"
+                className="flex-1 justify-center"
+              >
+                {completing ? "Graduating..." : "Yes, Graduate!"}
+              </AnimatedButton>
+              <AnimatedButton
+                onClick={() => setCompletingGoalId(null)}
+                variant="sm"
+                className="flex-1 justify-center"
+                disabled={completing}
+              >
+                Cancel
+              </AnimatedButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {aiCongrats && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-cream border-2 border-warm-brown p-5 max-w-xs w-full mx-4 text-center">
+            <p className="text-2xl mb-2">🎓</p>
+            <p className="text-sm font-mono text-warm-brown font-bold mb-3">Goal Graduated!</p>
+            <p className="text-[0.65rem] font-mono text-warm-brown mb-4 leading-relaxed">{aiCongrats.message}</p>
+            <AnimatedButton
+              onClick={() => setAiCongrats(null)}
+              variant="coral"
+              className="w-full justify-center"
+            >
+              Nice!
+            </AnimatedButton>
           </div>
         </div>
       )}

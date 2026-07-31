@@ -48,6 +48,7 @@ export interface GoalWithRoadmap {
   targetDate: Date | null
   category: string | null
   status: string
+  completedAt: string | null
   roadmapItems: RoadmapItemType[]
 }
 

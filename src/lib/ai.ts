@@ -749,6 +749,41 @@ Always:
   }
 }
 
+export async function congratulateGoalCompletion(goalTitle: string): Promise<string> {
+  const client = getClient()
+  if (client) {
+    try {
+      const prompt = `Congratulate a CS student for completing a learning goal titled "${goalTitle}".
+Write ONE celebratory paragraph. Rules:
+- Gen Z language (slay, crushed, big W, vibes, etc.)
+- Under 50 words
+- Every response must be completely unique
+- Mention a real-world application related to "${goalTitle}"
+- Encouraging and rewarding tone
+- Use emojis sparingly (max 1-2)
+
+Return ONLY the congratulatory text, no JSON, no quotes wrapping.`
+
+      const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+      })
+      const text = response.choices[0]?.message?.content?.trim()
+      if (text) return text
+    } catch (err) {
+      console.error("congratulateGoalCompletion failed:", err)
+    }
+  }
+
+  const fallbacks = [
+    `🎉 You absolutely crushed "${goalTitle}"! All those late-night study sessions paid off. Now go build something epic with those skills — the real world is waiting.`,
+    `Big W! 🏆 You completed "${goalTitle}" from start to finish. This kind of dedication is how real engineers level up. Can't wait to see what you build next.`,
+    `You did it! "${goalTitle}" is officially done. Every concept you mastered is a tool in your belt for building real apps. Keep this momentum going! 🚀`,
+    `No cap — completing "${goalTitle}" is a major flex. The skills you picked up here are exactly what companies are looking for. Take a sec to appreciate how far you've come!`,
+  ]
+  return fallbacks[Math.floor(Math.random() * fallbacks.length)]
+}
+
 export async function generateMentorOverview(context: MentorContext) {
   const client = getClient()
   if (!client) {
