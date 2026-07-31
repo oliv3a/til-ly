@@ -20,11 +20,8 @@ export default async function DashboardPage() {
   const prevMonth = cm === 0 ? { year: cy - 1, month: 11 } : { year: cy, month: cm - 1 }
   const nextMonth = cm === 11 ? { year: cy + 1, month: 0 } : { year: cy, month: cm + 1 }
 
-  const monthRange = (year: number, month: number) => {
-    const start = new Date(year, month, 1)
-    const end = new Date(year, month + 1, 0, 23, 59, 59, 999)
-    return { start, end }
-  }
+  const threeMonthStart = new Date(prevMonth.year, prevMonth.month, 1)
+  const threeMonthEnd = new Date(nextMonth.year, nextMonth.month + 1, 0, 23, 59, 59, 999)
 
   const [
     user,
@@ -32,9 +29,7 @@ export default async function DashboardPage() {
     logs,
     goals,
     skills,
-    currentMonthLogs,
-    prevMonthLogs,
-    nextMonthLogs,
+    allMonthLogs,
     currentProject,
   ] = await Promise.all([
     prisma.user.findUnique({
@@ -60,19 +55,9 @@ export default async function DashboardPage() {
         },
       },
     }),
-    getComputedSkills(userId),
+    getComputedSkills(userId, 20),
     prisma.studyLog.findMany({
-      where: { userId, createdAt: { gte: monthRange(cy, cm).start, lte: monthRange(cy, cm).end } },
-      orderBy: { createdAt: "asc" },
-      include: { skillTags: { include: { skill: true } } },
-    }),
-    prisma.studyLog.findMany({
-      where: { userId, createdAt: { gte: monthRange(prevMonth.year, prevMonth.month).start, lte: monthRange(prevMonth.year, prevMonth.month).end } },
-      orderBy: { createdAt: "asc" },
-      include: { skillTags: { include: { skill: true } } },
-    }),
-    prisma.studyLog.findMany({
-      where: { userId, createdAt: { gte: monthRange(nextMonth.year, nextMonth.month).start, lte: monthRange(nextMonth.year, nextMonth.month).end } },
+      where: { userId, createdAt: { gte: threeMonthStart, lte: threeMonthEnd } },
       orderBy: { createdAt: "asc" },
       include: { skillTags: { include: { skill: true } } },
     }),
@@ -88,18 +73,20 @@ export default async function DashboardPage() {
     }),
   ])
 
-  function groupByDay(logs: typeof currentMonthLogs) {
-    const byDay: Record<number, Array<{
+  function groupByMonthAndDay(logs: typeof allMonthLogs) {
+    const byMonth: Record<string, Record<number, Array<{
       id: string
       title: string
       createdAt: Date
       aiSummary: string | null
       skillTags: Array<{ id: string; xp: number; skill: { id: string; name: string } }>
-    }>> = {}
+    }>>> = {}
     logs.forEach((log) => {
+      const monthKey = `${log.createdAt.getFullYear()}-${String(log.createdAt.getMonth() + 1).padStart(2, "0")}`
       const day = log.createdAt.getDate()
-      if (!byDay[day]) byDay[day] = []
-      byDay[day].push({
+      if (!byMonth[monthKey]) byMonth[monthKey] = {}
+      if (!byMonth[monthKey][day]) byMonth[monthKey][day] = []
+      byMonth[monthKey][day].push({
         id: log.id,
         title: log.title,
         createdAt: log.createdAt,
@@ -107,15 +94,10 @@ export default async function DashboardPage() {
         skillTags: log.skillTags,
       })
     })
-    return byDay
+    return byMonth
   }
 
-  const key = (y: number, m: number) => `${y}-${String(m + 1).padStart(2, "0")}`
-  const initialMonthCache = {
-    [key(cy, cm)]: groupByDay(currentMonthLogs),
-    [key(prevMonth.year, prevMonth.month)]: groupByDay(prevMonthLogs),
-    [key(nextMonth.year, nextMonth.month)]: groupByDay(nextMonthLogs),
-  }
+  const initialMonthCache = groupByMonthAndDay(allMonthLogs)
 
   return (
     <>

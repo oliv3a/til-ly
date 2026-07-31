@@ -10,7 +10,7 @@ export interface ComputedSkill {
   }
 }
 
-export async function getComputedSkills(userId: string): Promise<ComputedSkill[]> {
+export async function getComputedSkills(userId: string, take?: number): Promise<ComputedSkill[]> {
   const [studyLogRows, userSkills] = await Promise.all([
     prisma.studyLogSkill.findMany({
       where: { studyLog: { userId } },
@@ -42,4 +42,5 @@ export async function getComputedSkills(userId: string): Promise<ComputedSkill[]
       skill: skillMap.get(skillId)!,
     }))
     .sort((a, b) => b.logCount - a.logCount)
+    .slice(0, take)
 }
