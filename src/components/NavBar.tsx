@@ -189,6 +189,14 @@ export default function NavBar() {
         </div>
 
         <div className="hidden sm:flex items-center gap-1 shrink-0">
+          {session?.user?.isAdmin && (
+            <Link
+              href="/admin"
+              className={`nav-link ${pathname === "/admin" ? "nav-link--active" : ""}`}
+            >
+              Admin
+            </Link>
+          )}
           <Link
             href="/profile"
             className={`nav-link ${pathname === "/profile" ? "nav-link--active" : ""}`}
@@ -271,6 +279,15 @@ export default function NavBar() {
             )
           })}
           <hr className="border-t border-warm-brown/20 my-1" />
+          {session?.user?.isAdmin && (
+            <Link
+              href="/admin"
+              onClick={closeMenu}
+              className={`block font-mono text-[0.6rem] py-1.5 px-2 ${pathname === "/admin" ? "text-warm-brown font-bold" : "text-muted-ink/70"}`}
+            >
+              Admin
+            </Link>
+          )}
           <Link
             href="/profile"
             onClick={closeMenu}

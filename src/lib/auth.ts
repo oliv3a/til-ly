@@ -54,14 +54,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.role = user.role
         token.id = user.id
+        token.isAdmin =
+          !!process.env.ADMIN_EMAIL &&
+          process.env.ADMIN_EMAIL.toLowerCase() === (user.email ?? "").toLowerCase()
       }
       if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { name: true, tokenVersion: true },
+          select: { name: true, tokenVersion: true, email: true },
         })
         if (dbUser) {
           token.name = dbUser.name ?? token.name
+          token.isAdmin =
+            !!process.env.ADMIN_EMAIL &&
+            process.env.ADMIN_EMAIL.toLowerCase() === (dbUser.email ?? "").toLowerCase()
           const dbVersion = dbUser.tokenVersion ?? 0
           if (token.tokenVersion === undefined) {
             token.tokenVersion = dbVersion
@@ -81,6 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = (token.id as string) ?? ""
         session.user.role = (token.role as string) ?? "student"
+        session.user.isAdmin = token.isAdmin === true
       }
       return session
     },
