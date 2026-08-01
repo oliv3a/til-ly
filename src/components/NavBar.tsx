@@ -54,6 +54,7 @@ export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [hoveredGroup, setHoveredGroup] = useState<number | null>(null)
   const [mobileExpanded, setMobileExpanded] = useState<number | null>(null)
+  const [unreadFeedback, setUnreadFeedback] = useState(0)
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const navRef = useRef<HTMLDivElement>(null)
 
@@ -118,6 +119,25 @@ export default function NavBar() {
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (!session?.user?.isAdmin) return
+    let cancelled = false
+    const load = () => {
+      fetch("/api/feedback")
+        .then((r) => (r.ok ? r.json() : []))
+        .then((list: { status: string }[]) => {
+          if (!cancelled) setUnreadFeedback(list.filter((f) => f.status === "new").length)
+        })
+        .catch(() => {})
+    }
+    load()
+    window.addEventListener("focus", load)
+    return () => {
+      cancelled = true
+      window.removeEventListener("focus", load)
+    }
+  }, [session?.user?.isAdmin])
 
   return (
     <nav className="nav-bar">
@@ -195,8 +215,19 @@ export default function NavBar() {
               className={`nav-link ${pathname === "/admin" ? "nav-link--active" : ""}`}
             >
               Admin
+              {unreadFeedback > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-soft-coral text-[0.5rem] font-bold text-warm-brown">
+                  {unreadFeedback}
+                </span>
+              )}
             </Link>
           )}
+          <Link
+            href="/feedback"
+            className={`nav-link ${pathname === "/feedback" ? "nav-link--active" : ""}`}
+          >
+            Feedback
+          </Link>
           <Link
             href="/profile"
             className={`nav-link ${pathname === "/profile" ? "nav-link--active" : ""}`}
@@ -286,8 +317,20 @@ export default function NavBar() {
               className={`block font-mono text-[0.6rem] py-1.5 px-2 ${pathname === "/admin" ? "text-warm-brown font-bold" : "text-muted-ink/70"}`}
             >
               Admin
+              {unreadFeedback > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-soft-coral text-[0.5rem] font-bold text-warm-brown">
+                  {unreadFeedback}
+                </span>
+              )}
             </Link>
           )}
+          <Link
+            href="/feedback"
+            onClick={closeMenu}
+            className={`block font-mono text-[0.6rem] py-1.5 px-2 ${pathname === "/feedback" ? "text-warm-brown font-bold" : "text-muted-ink/70"}`}
+          >
+            Feedback
+          </Link>
           <Link
             href="/profile"
             onClick={closeMenu}

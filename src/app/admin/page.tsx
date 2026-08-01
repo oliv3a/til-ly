@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import UserList from "./UserList"
+import FeedbackList from "./FeedbackList"
 
 export const dynamic = "force-dynamic"
 
@@ -43,6 +44,7 @@ export default async function AdminPage() {
     logs7,
     logs30,
     allLogs,
+    feedback,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { email: { startsWith: "demo-" } } }),
@@ -67,6 +69,17 @@ export default async function AdminPage() {
     prisma.studyLog.findMany({
       select: { userId: true, createdAt: true },
       orderBy: { createdAt: "desc" },
+    }),
+    prisma.feedback.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        message: true,
+        isAnonymous: true,
+        status: true,
+        createdAt: true,
+        user: { select: { name: true, email: true } },
+      },
     }),
   ])
 
@@ -97,6 +110,16 @@ export default async function AdminPage() {
     isPublic: u.isPublic,
     streakCount: u.streakCount,
     lastLogAt: lastLogMap.get(u.id) ?? null,
+  }))
+
+  const feedbackRows = feedback.map((f) => ({
+    id: f.id,
+    message: f.message,
+    isAnonymous: f.isAnonymous,
+    status: f.status,
+    createdAt: f.createdAt.toISOString(),
+    userName: f.user.name,
+    userEmail: f.user.email,
   }))
 
   const statCards = [
@@ -176,6 +199,7 @@ export default async function AdminPage() {
       </div>
 
       <UserList users={userRows} />
+      <FeedbackList feedback={feedbackRows} />
     </div>
   )
 }

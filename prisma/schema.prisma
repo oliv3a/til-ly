@@ -37,6 +37,7 @@ model User {
   resume           Resume?
   mentorConversations MentorConversation[]
   milestones UserMilestone[]
+  feedback         Feedback[]
 }
 
 model Account {
@@ -340,4 +341,18 @@ model UserMilestone {
 
   @@unique([userId, key])
   @@index([userId, shownAt])
+}
+
+model Feedback {
+  id          String   @id @default(cuid())
+  userId      String
+  isAnonymous Boolean  @default(false)
+  message     String
+  status      String   @default("new") // new | resolved
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
 }
