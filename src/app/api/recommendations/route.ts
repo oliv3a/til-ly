@@ -3,10 +3,16 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getRecommendation } from "@/lib/ai"
 import { getComputedSkills } from "@/lib/skills"
+import { dbRateLimit, aiDailyKey, DAILY_MS } from "@/lib/db-rate-limit"
 
 export async function GET() {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { allowed } = await dbRateLimit(aiDailyKey(session.user.id, "recommend"), 50, DAILY_MS)
+  if (!allowed) {
+    return NextResponse.json({ error: "Daily recommendation limit reached. Try again tomorrow." }, { status: 429 })
+  }
 
   const userId = session.user.id
 

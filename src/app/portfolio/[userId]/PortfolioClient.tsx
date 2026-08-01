@@ -18,16 +18,59 @@ interface Props {
   skills: PortfolioSkill[]
   initialProjects: PortfolioProject[]
   isOwner: boolean
+  isPublic: boolean
   streakCount: number
   logCount: number
   projectCount: number
 }
 
-export default function PortfolioClient({ logs, goals, skills, initialProjects, isOwner, streakCount, logCount, projectCount }: Props) {
+export default function PortfolioClient({ logs, goals, skills, initialProjects, isOwner, isPublic, streakCount, logCount, projectCount }: Props) {
   const [showAllSkills, setShowAllSkills] = useState(false)
+  const [publicToggle, setPublicToggle] = useState(isPublic)
+  const [savingShare, setSavingShare] = useState(false)
+
+  async function togglePublic() {
+    setSavingShare(true)
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPublic: !publicToggle }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setPublicToggle(data.isPublic)
+      }
+    } finally {
+      setSavingShare(false)
+    }
+  }
 
   return (
     <div>
+      {isOwner && (
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={togglePublic}
+              disabled={savingShare}
+              className="text-[0.55rem] font-mono text-muted-ink/60 border border-warm-brown/20 rounded-full px-3 py-1 hover:bg-warm-paper/60 transition-colors disabled:opacity-50"
+            >
+              {savingShare ? "Saving..." : publicToggle ? "🔓 Portfolio is public" : "🔒 Portfolio is private"}
+            </button>
+            {publicToggle && (
+              <button
+                type="button"
+                onClick={() => navigator.clipboard?.writeText(window.location.href)}
+                className="text-[0.55rem] font-mono text-muted-teal underline hover:text-warm-brown"
+              >
+                Copy link
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
@@ -118,8 +161,8 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
         </div>
         {logs.length > 0 ? (
           <div className="space-y-1.5">
-            {logs.map((log: PortfolioLog) => (
-              <Link key={log.id} href={`/logs/${log.id}`} className="block">
+            {logs.map((log: PortfolioLog) => {
+              const card = (
                 <div className="frame-block p-2.5 hover:bg-warm-paper/80 transition-colors">
                   <div className="flex items-start justify-between">
                     <h3 className="font-serif text-sm text-warm-brown truncate">{log.title}</h3>
@@ -135,8 +178,15 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
                     </div>
                   )}
                 </div>
-              </Link>
-            ))}
+              )
+              return isOwner ? (
+                <Link key={log.id} href={`/logs/${log.id}`} className="block">
+                  {card}
+                </Link>
+              ) : (
+                <div key={log.id} className="block">{card}</div>
+              )
+            })}
           </div>
         ) : (
           <p className="text-[0.6rem] font-mono text-muted-ink/40">No study logs yet</p>
@@ -155,8 +205,8 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
         </div>
         {initialProjects.length > 0 ? (
           <div className="space-y-1.5">
-            {initialProjects.map((p: PortfolioProject) => (
-              <a key={p.id} href={`/projects/${p.id}`} className="block">
+            {initialProjects.map((p: PortfolioProject) => {
+              const card = (
                 <div className="frame-block p-2.5 hover:bg-warm-paper/80 transition-colors">
                   <div className="flex items-start justify-between">
                     <h3 className="font-serif text-sm text-warm-brown truncate">{p.title}</h3>
@@ -175,8 +225,15 @@ export default function PortfolioClient({ logs, goals, skills, initialProjects, 
                     </div>
                   )}
                 </div>
-              </a>
-            ))}
+              )
+              return isOwner ? (
+                <a key={p.id} href={`/projects/${p.id}`} className="block">
+                  {card}
+                </a>
+              ) : (
+                <div key={p.id} className="block">{card}</div>
+              )
+            })}
           </div>
         ) : (
           <p className="text-[0.6rem] font-mono text-muted-ink/40">No projects yet</p>

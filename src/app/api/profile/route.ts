@@ -10,7 +10,7 @@ export async function GET() {
     const userId = session.user.id
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { name: true, bio: true, school: true, year: true },
+      select: { name: true, bio: true, school: true, year: true, isPublic: true },
     })
 
     if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -27,7 +27,7 @@ export async function PATCH(req: Request) {
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const userId = session.user.id
-    const { name, bio, school, year } = await req.json()
+    const { name, bio, school, year, isPublic } = await req.json()
 
     if (name && (typeof name !== "string" || name.trim().length < 1 || name.length > 100)) {
       return NextResponse.json({ error: "Name must be 1-100 characters" }, { status: 400 })
@@ -49,10 +49,17 @@ export async function PATCH(req: Request) {
         bio: bio || undefined,
         school: school || undefined,
         year: year || undefined,
+        isPublic: typeof isPublic === "boolean" ? isPublic : undefined,
       },
     })
 
-    return NextResponse.json({ name: updated.name, bio: updated.bio, school: updated.school, year: updated.year })
+    return NextResponse.json({
+      name: updated.name,
+      bio: updated.bio,
+      school: updated.school,
+      year: updated.year,
+      isPublic: updated.isPublic,
+    })
   } catch (err) {
     console.error("Profile PATCH failed:", err)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })

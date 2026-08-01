@@ -2,10 +2,16 @@ import { NextResponse } from "next/server"
 import webpush from "web-push"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { dbRateLimit, aiDailyKey, HOUR_MS } from "@/lib/db-rate-limit"
 
 export async function GET() {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { allowed } = await dbRateLimit(aiDailyKey(session.user.id, "push-test"), 5, HOUR_MS)
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many test notifications. Try again later." }, { status: 429 })
+  }
 
   if (!process.env.VAPID_SUBJECT || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
     return NextResponse.json({ error: "VAPID keys not configured" }, { status: 500 })

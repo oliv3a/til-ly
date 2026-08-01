@@ -14,10 +14,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ userId: 
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, name: true, email: isOwner, avatarUrl: true, bio: true, school: true, year: true },
+    select: { id: true, name: true, email: isOwner, avatarUrl: true, bio: true, school: true, year: true, isPublic: true },
   })
 
   if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  if (!isOwner && !user.isPublic) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
 
   const [logs, totalLogs] = await Promise.all([
     prisma.studyLog.findMany({
@@ -26,7 +29,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ userId: 
       skip: offset,
       take: limit,
       include: {
-        files: true,
+        ...(isOwner ? { files: true } : {}),
         skillTags: { include: { skill: true } },
         goalLinks: { include: { goal: { select: { id: true, title: true } } } },
       },

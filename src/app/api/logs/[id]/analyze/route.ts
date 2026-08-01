@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { summarizeStudyLog, analyzeCode, matchLogToRoadmap, type AiExtractResult } from "@/lib/ai"
+import { dbRateLimit, aiDailyKey, DAILY_MS } from "@/lib/db-rate-limit"
 
 async function withRetry<T>(fn: () => Promise<T>, label: string, retries = 3): Promise<T | null> {
   for (let i = 0; i < retries; i++) {
@@ -22,6 +23,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const userId = session.user.id
+
+    const { allowed } = await dbRateLimit(aiDailyKey(userId, "analyze"), 20, DAILY_MS)
+    if (!allowed) {
+      return NextResponse.json({ error: "Daily AI analysis limit reached. Try again tomorrow." }, { status: 429 })
+    }
+
     const log = await prisma.studyLog.findUnique({
       where: { id },
       include: { files: true },

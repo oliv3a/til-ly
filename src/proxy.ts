@@ -20,11 +20,11 @@ export async function proxy(req: Request) {
   const publicPaths = ["/auth/login", "/auth/signup", "/", "/api/auth", "/api/downloads", "/menu-bar", "/downloads"]
   const isPublic = publicPaths.some((p) => pathname.startsWith(p))
 
-  if (!session && !isPublic) {
+  if (!session?.user && !isPublic) {
     return NextResponse.redirect(new URL("/auth/login", req.url))
   }
 
-  if (session && (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/signup"))) {
+  if (session?.user && (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/signup"))) {
     return NextResponse.redirect(new URL("/dashboard", req.url))
   }
 

@@ -3,11 +3,17 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { mentorChat, type MentorContext } from "@/lib/ai"
 import { getComputedSkills } from "@/lib/skills"
+import { dbRateLimit, aiDailyKey, DAILY_MS } from "@/lib/db-rate-limit"
 
 export async function POST(req: Request) {
   try {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const { allowed } = await dbRateLimit(aiDailyKey(session.user.id, "mentor-chat"), 100, DAILY_MS)
+    if (!allowed) {
+      return NextResponse.json({ error: "Daily chat limit reached. Try again tomorrow." }, { status: 429 })
+    }
 
     const { conversationId, content } = await req.json()
     if (!conversationId || !content?.trim()) {

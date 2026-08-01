@@ -2,11 +2,11 @@ import { NextResponse } from "next/server"
 import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 import { resend, RESEND_FROM } from "@/lib/email"
-import { rateLimit } from "@/lib/rate-limiter"
+import { dbRateLimit, clientIp, MINUTE_MS } from "@/lib/db-rate-limit"
 
 export async function POST(req: Request) {
   try {
-    const { allowed } = rateLimit(req, 5, 60_000)
+    const { allowed } = await dbRateLimit(`forgot:${clientIp(req)}`, 5, MINUTE_MS)
     if (!allowed) {
       return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 })
     }

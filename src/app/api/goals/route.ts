@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateRoadmap } from "@/lib/ai"
 import { processCheckin } from "@/lib/checkin"
+import { dbRateLimit, aiDailyKey, DAILY_MS } from "@/lib/db-rate-limit"
 
 export async function GET() {
   try {
@@ -30,6 +31,11 @@ export async function POST(req: Request) {
 
     const userId = session.user.id
     const { title, description, targetDate, category, timezoneOffset } = await req.json()
+
+    const { allowed } = await dbRateLimit(aiDailyKey(userId, "goal-create"), 30, DAILY_MS)
+    if (!allowed) {
+      return NextResponse.json({ error: "Daily goal creation limit reached. Try again tomorrow." }, { status: 429 })
+    }
 
     if (!title || (typeof title === "string" && title.trim().length < 1)) return NextResponse.json({ error: "Title required" }, { status: 400 })
     if (typeof title === "string" && title.length > 200) return NextResponse.json({ error: "Title must be 200 characters or less" }, { status: 400 })

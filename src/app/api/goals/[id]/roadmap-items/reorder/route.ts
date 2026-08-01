@@ -17,9 +17,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (!Array.isArray(itemIds))
       return NextResponse.json({ error: "itemIds array required" }, { status: 400 })
 
+    const owned = await prisma.roadmapItem.findMany({
+      where: { id: { in: itemIds }, goalId: gid },
+      select: { id: true },
+    })
+    const ownedIds = new Set(owned.map((i) => i.id))
+    const filtered = itemIds.filter((iid) => ownedIds.has(iid))
+
     await prisma.$transaction(async (tx) => {
-      for (let i = 0; i < itemIds.length; i++) {
-        await tx.roadmapItem.update({ where: { id: itemIds[i] }, data: { order: i + 1 } })
+      for (let i = 0; i < filtered.length; i++) {
+        await tx.roadmapItem.update({ where: { id: filtered[i] }, data: { order: i + 1 } })
       }
     })
 

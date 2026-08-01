@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { regenerateRoadmap } from "@/lib/ai"
+import { dbRateLimit, aiDailyKey, DAILY_MS } from "@/lib/db-rate-limit"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -10,6 +11,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const userId = session.user.id
+
+    const { allowed } = await dbRateLimit(aiDailyKey(userId, "roadmap-generate"), 30, DAILY_MS)
+    if (!allowed) {
+      return NextResponse.json({ error: "Daily roadmap generation limit reached. Try again tomorrow." }, { status: 429 })
+    }
+
     const goal = await prisma.goal.findUnique({
       where: { id },
       select: {

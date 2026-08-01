@@ -8,14 +8,15 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
   const { userId } = await params
 
   const session = await auth()
-  if (!session?.user || session.user.id !== userId) notFound()
+  const isOwner = !!session?.user && session.user.id === userId
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, name: true, avatarUrl: true, bio: true, school: true, year: true, streakCount: true },
+    select: { id: true, name: true, avatarUrl: true, bio: true, school: true, year: true, streakCount: true, isPublic: true },
   })
 
   if (!user) notFound()
+  if (!isOwner && !user.isPublic) notFound()
 
   const [rawLogs, skills, rawGoals, projects, logCount, projectCount] = await Promise.all([
     prisma.studyLog.findMany({
@@ -73,7 +74,8 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
         goals={JSON.parse(JSON.stringify(goals))}
         skills={JSON.parse(JSON.stringify(skills))}
         initialProjects={JSON.parse(JSON.stringify(projects))}
-        isOwner={true}
+        isOwner={isOwner}
+        isPublic={user.isPublic}
         streakCount={user.streakCount ?? 0}
         logCount={logCount}
         projectCount={projectCount}

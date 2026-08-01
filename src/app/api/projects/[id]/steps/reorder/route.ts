@@ -19,10 +19,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "stepIds array is required" }, { status: 400 })
     }
 
+    const owned = await prisma.projectStep.findMany({
+      where: { id: { in: stepIds }, projectId: id },
+      select: { id: true },
+    })
+    const ownedIds = new Set(owned.map((s) => s.id))
+    const filtered = stepIds.filter((sid) => ownedIds.has(sid))
+
     await prisma.$transaction(async (tx) => {
-      for (let i = 0; i < stepIds.length; i++) {
+      for (let i = 0; i < filtered.length; i++) {
         await tx.projectStep.update({
-          where: { id: stepIds[i] },
+          where: { id: filtered[i] },
           data: { order: i + 1 },
         })
       }

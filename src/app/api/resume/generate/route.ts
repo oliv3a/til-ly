@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { generateResume } from "@/lib/resume/generator"
 import { analyzeATS } from "@/lib/resume/ats-analyzer"
 import type { ResumeData, TargetRole, ResumeApiResponse, ResumeQuestionnaire } from "@/lib/resume/types"
+import { dbRateLimit, aiDailyKey, DAILY_MS } from "@/lib/db-rate-limit"
 
 const CACHE_TTL_MS = 60 * 60 * 1000
 
@@ -12,6 +13,11 @@ export async function POST(req: Request) {
     const session = await auth()
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { allowed } = await dbRateLimit(aiDailyKey(session.user.id, "resume"), 20, DAILY_MS)
+    if (!allowed) {
+      return NextResponse.json({ error: "Daily resume generation limit reached. Try again tomorrow." }, { status: 429 })
     }
 
     const userId = session.user.id
