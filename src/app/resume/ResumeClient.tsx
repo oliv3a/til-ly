@@ -8,7 +8,7 @@ import type {
   TargetRole,
   ResumeQuestionnaire,
 } from "@/lib/resume/types"
-import { TARGET_ROLE_LABELS } from "@/lib/resume/types"
+import { TARGET_ROLE_LABELS, MAX_UPLOADED_RESUME_CHARS } from "@/lib/resume/types"
 
 const ROLE_OPTIONS = Object.entries(TARGET_ROLE_LABELS).filter(([k]) => k !== "custom")
 
@@ -247,6 +247,20 @@ export default function ResumeClient() {
               rows={8}
               disabled={loading}
             />
+            <p
+              className={`text-[0.55rem] font-mono mt-0.5 text-right ${
+                pastedResumeText.length > MAX_UPLOADED_RESUME_CHARS ? "text-amber-700" : "text-muted-ink/40"
+              }`}
+            >
+              {pastedResumeText.length.toLocaleString()} / {MAX_UPLOADED_RESUME_CHARS.toLocaleString()} characters
+              {pastedResumeText.length > MAX_UPLOADED_RESUME_CHARS && " — only the first 5,000 will be read"}
+            </p>
+            {pastedResumeText.length <= MAX_UPLOADED_RESUME_CHARS && (
+              <p className="text-[0.55rem] font-mono text-muted-ink/40 mt-0.5">
+                Heads up — we read up to {MAX_UPLOADED_RESUME_CHARS.toLocaleString()} characters. Hackathons near the
+                bottom? Add a quick line about them in Extra Notes so they are not missed.
+              </p>
+            )}
           </div>
 
           {/* Extra notes (optional) */}

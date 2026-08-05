@@ -79,6 +79,8 @@ export type TargetRole =
   | "cloud-engineer"
   | "custom"
 
+export const MAX_UPLOADED_RESUME_CHARS = 5000
+
 export const TARGET_ROLE_LABELS: Record<TargetRole, string> = {
   "frontend-engineer": "Frontend Engineer",
   "backend-engineer": "Backend Engineer",

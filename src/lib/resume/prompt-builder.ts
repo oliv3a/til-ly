@@ -1,4 +1,5 @@
 import type { TargetRole } from "./types"
+import { MAX_UPLOADED_RESUME_CHARS } from "./types"
 import { getKeywordsForRole } from "./keyword-engine"
 
 interface UserData {
@@ -223,6 +224,7 @@ function buildConstraintsSection(): string {
 6. **Keep bullets concise** — 1-2 lines each, maximum 3 lines. No paragraphs.
 7. **Organize skills logically** — Use only the 7 categories specified.
 8. **Tech stack detection**: If the user mentions a technology, expand it with related keywords (e.g., React → Component Architecture, Hooks; Node → Express, Middleware, JWT).
+9. **"Data provided" includes the Uploaded Existing Resume Content and Extra Notes** — experience, projects, and hackathons found there are legitimate user data, not fabrication. Extract them (see Hackathon rules).
 `
 }
 
@@ -248,12 +250,30 @@ The user uploaded their existing resume or other documents. Extract and merge an
 
 Uploaded content:
 """
-${q.uploadedResumeText.slice(0, 5000)}
+${q.uploadedResumeText.slice(0, MAX_UPLOADED_RESUME_CHARS)}
 """`)
   if (parts.length === 0) return ""
   return `
 ## User Preferences
 ${parts.join("\n")}
+`
+}
+
+function buildHackathonSection(): string {
+  return `
+## Hackathons — REQUIRED Extraction
+The user's pasted resume content and extra notes may mention hackathons (hackathon, hack day, code jam, datathon, CTF, build week, "24/48-hour challenge", etc.).
+
+You MUST scan the Uploaded Existing Resume Content and Extra Notes for hackathons and include EVERY one you find:
+
+1. Detect hackathons anywhere in the pasted resume or extra notes — even if they only appear there and not in the structured user data.
+2. For each hackathon found, create a project entry in the "projects" array:
+   - "name": the hackathon (or team/project) name, e.g. "HackHarvard 2025" or "Team Orbit — TAMU Datathon"
+   - "tech": the technologies used, if mentioned
+   - "description": 1-2 sentences on what was built
+   - "highlights": 1-3 achievement bullet points — placement/prize (e.g. "Won 2nd place out of 40 teams"), team size/role, and what you personally built
+3. Do NOT drop hackathons to keep the resume short. They are high-signal achievements and must be preserved.
+4. Keep the hackathon's factual details (event name, outcome, tech) exactly as provided — do not invent placements or prizes that aren't stated.
 `
 }
 
@@ -293,6 +313,7 @@ ${userData.goals.slice(0, 5).map((g) => `- "${g.title}" (${g.progress}% complete
 
 ${userBlock}
 ${questionnaire ? buildQuestionnaireSection(questionnaire) : ""}
+${buildHackathonSection()}
 ${buildActionVerbSection()}
 ${RESUME_FORMULA_GUIDE}
 ${buildKeywordSection(targetRole, customRoleTitle)}
