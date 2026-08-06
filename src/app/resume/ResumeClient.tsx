@@ -25,6 +25,7 @@ export default function ResumeClient() {
   const [pastedResumeText, setPastedResumeText] = useState("")
 
   const [loading, setLoading] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<ResumeData | null>(null)
   const [ats, setAts] = useState<ATSSuggestion[] | null>(null)
@@ -78,6 +79,30 @@ export default function ResumeClient() {
   const handlePrint = () => window.print()
   const handleRegenerate = () => generate(true)
   const toggleEdit = () => setEditing((e) => !e)
+
+  const handleDownloadPdf = async () => {
+    if (!data) return
+    setPdfLoading(true)
+    setError(null)
+    try {
+      const { pdf } = await import("@react-pdf/renderer")
+      const { default: ResumePdf } = await import("./ResumePdf")
+      const instance = await pdf(<ResumePdf data={data} />)
+      const blob = await instance.toBlob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${(data.personalInfo.name || "resume").trim().replace(/\s+/g, "_")}_resume.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch {
+      setError("PDF generation failed. Use Print instead.")
+    } finally {
+      setPdfLoading(false)
+    }
+  }
 
   const suggestionIcon = (type: ATSSuggestion["type"]) => {
     switch (type) {
@@ -368,10 +393,17 @@ export default function ResumeClient() {
               </p>
               <div className="flex gap-2 flex-wrap">
                 <button
-                  onClick={handlePrint}
+                  onClick={handleDownloadPdf}
+                  disabled={pdfLoading}
                   className="btn-base btn-coral btn-interact text-[0.65rem]"
                 >
-                  Print / Save as PDF
+                  {pdfLoading ? "Preparing PDF..." : "Download PDF"}
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="btn-base btn-outline btn-interact text-[0.65rem]"
+                >
+                  Print
                 </button>
                 <button
                   onClick={toggleEdit}

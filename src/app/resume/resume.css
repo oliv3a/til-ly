@@ -24,7 +24,9 @@
     display: none !important;
   }
 
+  nav,
   .nav-bar,
+  header,
   footer {
     display: none !important;
   }
