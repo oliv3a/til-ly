@@ -85,10 +85,16 @@ export default function ResumeClient() {
     setPdfLoading(true)
     setError(null)
     try {
-      const { pdf } = await import("@react-pdf/renderer")
-      const { default: ResumePdf } = await import("./ResumePdf")
-      const instance = await pdf(<ResumePdf data={data} />)
-      const blob = await instance.toBlob()
+      const res = await fetch("/api/resume/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data }),
+      })
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error((errData as { error?: string }).error || "Failed to generate PDF")
+      }
+      const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
@@ -97,8 +103,8 @@ export default function ResumeClient() {
       a.click()
       a.remove()
       URL.revokeObjectURL(url)
-    } catch {
-      setError("PDF generation failed. Use Print instead.")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "PDF generation failed. Use Print instead.")
     } finally {
       setPdfLoading(false)
     }
