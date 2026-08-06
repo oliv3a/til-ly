@@ -3,6 +3,16 @@
     margin: 0.75in;
   }
 
+  html {
+    font-size: 21px !important;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
   body {
     font-family: Georgia, "Times New Roman", serif !important;
     font-size: 11pt !important;
@@ -12,6 +22,36 @@
 
   .no-print {
     display: none !important;
+  }
+
+  .nav-bar,
+  footer {
+    display: none !important;
+  }
+
+  .min-h-screen {
+    min-height: auto !important;
+    background: #fff !important;
+  }
+
+  .bg-cream {
+    background: #fff !important;
+  }
+
+  main {
+    flex: none !important;
+  }
+
+  main,
+  .max-w-4xl,
+  .max-w-5xl {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 auto;
+  }
+
+  .lg\:col-span-3 {
+    grid-column: 1 / -1 !important;
   }
 
   .resume-document {
@@ -58,6 +98,12 @@
 
   /* Keep section breaks clean */
   .resume-document > div {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Keep individual entries together across pages */
+  .resume-document > div > div {
     break-inside: avoid;
     page-break-inside: avoid;
   }
