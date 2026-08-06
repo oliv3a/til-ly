@@ -7,6 +7,7 @@ import type {
   ATSSuggestion,
   TargetRole,
   ResumeQuestionnaire,
+  ResumeExperience,
 } from "@/lib/resume/types"
 import { TARGET_ROLE_LABELS, MAX_UPLOADED_RESUME_CHARS } from "@/lib/resume/types"
 
@@ -410,9 +411,41 @@ export default function ResumeClient() {
   )
 }
 
+function BulletSection({ title, entries }: { title: string; entries: ResumeExperience[] }) {
+  if (entries.length === 0) return null
+  return (
+    <div className="mb-5">
+      <SectionTitle text={title} />
+      <div className="mt-1.5 space-y-3">
+        {entries.map((exp, i) => (
+          <div key={i}>
+            <div className="flex items-start justify-between">
+              <p className="text-[0.75rem] font-bold text-warm-brown" style={{ fontFamily: "Georgia, serif" }}>
+                {exp.title}
+              </p>
+              <p className="text-[0.6rem] text-muted-ink/50 shrink-0 ml-2" style={{ fontFamily: "Georgia, serif" }}>
+                {exp.date}
+              </p>
+            </div>
+            <ul className="mt-0.5 space-y-0.5 list-disc list-inside">
+              {exp.bullets.map((bullet, j) => (
+                <li key={j} className="text-[0.7rem] leading-snug text-muted-ink/80" style={{ fontFamily: "Georgia, serif" }}>
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function ResumeDocument({ data }: { data: ResumeData }) {
   const skillsCount = data.skills.reduce((s, c) => s + c.items.length, 0)
-  const contactParts: string[] = [data.personalInfo.email]
+  const contactParts: string[] = []
+  if (data.personalInfo.phone) contactParts.push(data.personalInfo.phone)
+  if (data.personalInfo.email) contactParts.push(data.personalInfo.email)
   if (data.personalInfo.github) contactParts.push(data.personalInfo.github)
   if (data.personalInfo.linkedin) contactParts.push(data.personalInfo.linkedin)
   if (data.personalInfo.portfolio) contactParts.push(data.personalInfo.portfolio)
@@ -442,6 +475,47 @@ function ResumeDocument({ data }: { data: ResumeData }) {
         </div>
       )}
 
+      {/* Education */}
+      {data.education.length > 0 && (
+        <div className="mb-5">
+          <SectionTitle text="Education" />
+          <div className="mt-1.5 space-y-2.5">
+            {data.education.map((edu, i) => (
+              <div key={i}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-[0.75rem] font-bold text-warm-brown" style={{ fontFamily: "Georgia, serif" }}>
+                      {edu.school}
+                    </p>
+                    {edu.degree && (
+                      <p className="text-[0.7rem] text-muted-ink/80" style={{ fontFamily: "Georgia, serif" }}>
+                        {edu.degree}
+                      </p>
+                    )}
+                  </div>
+                  {edu.date && (
+                    <p className="text-[0.6rem] text-muted-ink/50 shrink-0 ml-2" style={{ fontFamily: "Georgia, serif" }}>
+                      {edu.date}
+                    </p>
+                  )}
+                </div>
+                {edu.bullets.length > 0 && (
+                  <ul className="mt-0.5 space-y-0.5 list-disc list-inside">
+                    {edu.bullets.map((b, j) => (
+                      <li key={j} className="text-[0.65rem] text-muted-ink/70" style={{ fontFamily: "Georgia, serif" }}>
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <BulletSection title="Experience" entries={data.experience} />
+
       {/* Skills */}
       {data.skills.length > 0 && (
         <div className="mb-5">
@@ -455,34 +529,6 @@ function ResumeDocument({ data }: { data: ResumeData }) {
                 <p className="text-[0.65rem] text-muted-ink/80 leading-snug" style={{ fontFamily: "Georgia, serif" }}>
                   {cat.items.join(", ")}
                 </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Experience */}
-      {data.experience.length > 0 && (
-        <div className="mb-5">
-          <SectionTitle text="Experience" />
-          <div className="mt-1.5 space-y-3">
-            {data.experience.map((exp, i) => (
-              <div key={i}>
-                <div className="flex items-start justify-between">
-                  <p className="text-[0.75rem] font-bold text-warm-brown" style={{ fontFamily: "Georgia, serif" }}>
-                    {exp.title}
-                  </p>
-                  <p className="text-[0.6rem] text-muted-ink/50 shrink-0 ml-2" style={{ fontFamily: "Georgia, serif" }}>
-                    {exp.date}
-                  </p>
-                </div>
-                <ul className="mt-0.5 space-y-0.5 list-disc list-inside">
-                  {exp.bullets.map((bullet, j) => (
-                    <li key={j} className="text-[0.7rem] leading-snug text-muted-ink/80" style={{ fontFamily: "Georgia, serif" }}>
-                      {bullet}
-                    </li>
-                  ))}
-                </ul>
               </div>
             ))}
           </div>
@@ -524,22 +570,9 @@ function ResumeDocument({ data }: { data: ResumeData }) {
         </div>
       )}
 
-      {/* Education */}
-      {(data.education?.school || data.personalInfo?.school) && (
-        <div className="mb-5">
-          <SectionTitle text="Education" />
-          <p className="text-[0.7rem] text-warm-brown mt-1" style={{ fontFamily: "Georgia, serif" }}>
-            {data.education?.school || data.personalInfo.school}
-            {(data.education?.year || data.personalInfo.year) && (
-              <> — {data.education?.year || data.personalInfo.year}</>
-            )}
-          </p>
-        </div>
-      )}
-
       {/* Certifications */}
       {data.certifications && data.certifications.length > 0 && (
-        <div>
+        <div className="mb-5">
           <SectionTitle text="Certifications" />
           <ul className="mt-1 space-y-0.5 list-disc list-inside">
             {data.certifications.map((cert, i) => (
@@ -551,7 +584,10 @@ function ResumeDocument({ data }: { data: ResumeData }) {
         </div>
       )}
 
-      {skillsCount === 0 && data.experience.length === 0 && data.projects.length === 0 && (
+      <BulletSection title="Co-Curricular Activities" entries={data.activities} />
+      <BulletSection title="Volunteer Experience" entries={data.volunteer} />
+
+      {skillsCount === 0 && data.experience.length === 0 && data.projects.length === 0 && data.activities.length === 0 && data.volunteer.length === 0 && (
         <p className="text-[0.65rem] font-mono text-muted-ink/40 text-center py-8">
           No resume data yet. Add study logs and skills to generate a complete resume.
         </p>
@@ -577,6 +613,7 @@ function ResumeDocumentEditor({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <input className="field-coral text-[0.75rem]" value={data.personalInfo.name} onChange={(e) => update({ personalInfo: { ...data.personalInfo, name: e.target.value } })} placeholder="Name" />
           <input className="field-coral text-[0.75rem]" value={data.personalInfo.email} onChange={(e) => update({ personalInfo: { ...data.personalInfo, email: e.target.value } })} placeholder="Email" />
+          <input className="field-coral text-[0.75rem]" value={data.personalInfo.phone || ""} onChange={(e) => update({ personalInfo: { ...data.personalInfo, phone: e.target.value } })} placeholder="Phone" />
           <input className="field-coral text-[0.75rem]" value={data.personalInfo.github || ""} onChange={(e) => update({ personalInfo: { ...data.personalInfo, github: e.target.value } })} placeholder="GitHub URL" />
           <input className="field-coral text-[0.75rem]" value={data.personalInfo.linkedin || ""} onChange={(e) => update({ personalInfo: { ...data.personalInfo, linkedin: e.target.value } })} placeholder="LinkedIn URL" />
           <input className="field-coral text-[0.75rem]" value={data.personalInfo.school || ""} onChange={(e) => update({ personalInfo: { ...data.personalInfo, school: e.target.value } })} placeholder="School" />
@@ -615,39 +652,12 @@ function ResumeDocumentEditor({
         </button>
       </div>
 
-      {/* Experience */}
-      <div className="space-y-2">
-        <SectionTitle text="Experience" />
-        {data.experience.map((exp, i) => (
-          <div key={i} className="border border-warm-brown/10 p-3 rounded space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
-                <input className="field-coral text-[0.75rem]" value={exp.title} onChange={(e) => {
-                  const next = [...data.experience]
-                  next[i] = { ...next[i], title: e.target.value }
-                  update({ experience: next })
-                }} placeholder="Title" />
-                <input className="field-coral text-[0.75rem]" value={exp.date} onChange={(e) => {
-                  const next = [...data.experience]
-                  next[i] = { ...next[i], date: e.target.value }
-                  update({ experience: next })
-                }} placeholder="Date" />
-              </div>
-              <button onClick={() => update({ experience: data.experience.filter((_, j) => j !== i) })} className="text-red-600 hover:text-red-800 text-[0.6rem] font-mono underline shrink-0 mt-1">
-                Remove
-              </button>
-            </div>
-            <textarea className="field-coral text-[0.75rem] resize-y w-full" rows={3} value={exp.bullets.join("\n")} onChange={(e) => {
-              const next = [...data.experience]
-              next[i] = { ...next[i], bullets: e.target.value.split("\n").filter(Boolean) }
-              update({ experience: next })
-            }} placeholder="One bullet point per line" />
-          </div>
-        ))}
-        <button onClick={() => update({ experience: [...data.experience, { title: "", date: "", bullets: [""] }] })} className="btn-base btn-outline btn-interact text-[0.65rem]">
-          + Add Experience
-        </button>
-      </div>
+      <BulletSectionEditor
+        title="Experience"
+        entries={data.experience}
+        onChange={(v) => update({ experience: v })}
+        addLabel="+ Add Experience"
+      />
 
       {/* Projects */}
       <div className="space-y-2">
@@ -691,10 +701,40 @@ function ResumeDocumentEditor({
       {/* Education */}
       <div className="space-y-2">
         <SectionTitle text="Education" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input className="field-coral text-[0.75rem]" value={data.education?.school || ""} onChange={(e) => update({ education: { ...data.education, school: e.target.value } })} placeholder="School" />
-          <input className="field-coral text-[0.75rem]" value={data.education?.year || ""} onChange={(e) => update({ education: { ...data.education, year: e.target.value } })} placeholder="Year" />
-        </div>
+        {data.education.map((edu, i) => (
+          <div key={i} className="border border-warm-brown/10 p-3 rounded space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                <input className="field-coral text-[0.75rem]" value={edu.school} onChange={(e) => {
+                  const next = [...data.education]
+                  next[i] = { ...next[i], school: e.target.value }
+                  update({ education: next })
+                }} placeholder="School" />
+                <input className="field-coral text-[0.75rem]" value={edu.date} onChange={(e) => {
+                  const next = [...data.education]
+                  next[i] = { ...next[i], date: e.target.value }
+                  update({ education: next })
+                }} placeholder="Date range (e.g. Aug 2025 - May 2029)" />
+                <input className="field-coral text-[0.75rem] sm:col-span-2" value={edu.degree} onChange={(e) => {
+                  const next = [...data.education]
+                  next[i] = { ...next[i], degree: e.target.value }
+                  update({ education: next })
+                }} placeholder="Degree (e.g. Bachelor of Computing, Computer Science)" />
+              </div>
+              <button onClick={() => update({ education: data.education.filter((_, j) => j !== i) })} className="text-red-600 hover:text-red-800 text-[0.6rem] font-mono underline shrink-0 mt-1">
+                Remove
+              </button>
+            </div>
+            <textarea className="field-coral text-[0.75rem] resize-y w-full" rows={2} value={edu.bullets.join("\n")} onChange={(e) => {
+              const next = [...data.education]
+              next[i] = { ...next[i], bullets: e.target.value.split("\n").filter(Boolean) }
+              update({ education: next })
+            }} placeholder="One bullet per line (e.g. Relevant Modules - Data Structures and Algorithms)" />
+          </div>
+        ))}
+        <button onClick={() => update({ education: [...data.education, { school: "", degree: "", date: "", bullets: [""] }] })} className="btn-base btn-outline btn-interact text-[0.65rem]">
+          + Add Education
+        </button>
       </div>
 
       {/* Certifications */}
@@ -716,6 +756,67 @@ function ResumeDocumentEditor({
           + Add Certification
         </button>
       </div>
+
+      <BulletSectionEditor
+        title="Co-Curricular Activities"
+        entries={data.activities}
+        onChange={(v) => update({ activities: v })}
+        addLabel="+ Add Activity"
+      />
+
+      <BulletSectionEditor
+        title="Volunteer Experience"
+        entries={data.volunteer}
+        onChange={(v) => update({ volunteer: v })}
+        addLabel="+ Add Volunteer Entry"
+      />
+    </div>
+  )
+}
+
+function BulletSectionEditor({
+  title,
+  entries,
+  onChange,
+  addLabel,
+}: {
+  title: string
+  entries: ResumeExperience[]
+  onChange: (entries: ResumeExperience[]) => void
+  addLabel: string
+}) {
+  return (
+    <div className="space-y-2">
+      <SectionTitle text={title} />
+      {entries.map((exp, i) => (
+        <div key={i} className="border border-warm-brown/10 p-3 rounded space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+              <input className="field-coral text-[0.75rem]" value={exp.title} onChange={(e) => {
+                const next = [...entries]
+                next[i] = { ...next[i], title: e.target.value }
+                onChange(next)
+              }} placeholder="Title" />
+              <input className="field-coral text-[0.75rem]" value={exp.date} onChange={(e) => {
+                const next = [...entries]
+                next[i] = { ...next[i], date: e.target.value }
+                onChange(next)
+              }} placeholder="Date" />
+            </div>
+            <button onClick={() => onChange(entries.filter((_, j) => j !== i))} className="text-red-600 hover:text-red-800 text-[0.6rem] font-mono underline shrink-0 mt-1">
+              Remove
+            </button>
+          </div>
+          <textarea className="field-coral text-[0.75rem] resize-y w-full" rows={3} value={exp.bullets.join("\n")} onChange={(e) => {
+            const next = [...entries]
+            next[i] = { ...next[i], bullets: e.target.value.split("\n").filter(Boolean) }
+            onChange(next)
+          }} placeholder="One bullet point per line" />
+        </div>
+      ))}
+      <button onClick={() => onChange([...entries, { title: "", date: "", bullets: [""] }])} className="btn-base btn-outline btn-interact text-[0.65rem]">
+        {addLabel}
+      </button>
     </div>
   )
 }

@@ -22,9 +22,17 @@ export interface ResumePersonalInfo {
   bio: string
   school: string
   year: string
+  phone?: string
   github?: string
   linkedin?: string
   portfolio?: string
+}
+
+export interface ResumeEducation {
+  school: string
+  degree: string
+  date: string
+  bullets: string[]
 }
 
 export interface ResumeData {
@@ -33,11 +41,10 @@ export interface ResumeData {
   skills: ResumeSkillCategory[]
   experience: ResumeExperience[]
   projects: ResumeProject[]
-  education: {
-    school: string
-    year: string
-  }
+  education: ResumeEducation[]
   certifications: string[]
+  activities: ResumeExperience[]
+  volunteer: ResumeExperience[]
   targetRole: string
 }
 

@@ -30,7 +30,8 @@ export function analyzeATS(data: ResumeData, targetRole: TargetRole): ATSSuggest
   const weakVerbs: string[] = []
   let bulletsWithMetrics = 0
   let totalBullets = 0
-  for (const exp of data.experience) {
+  const allEntries = [...data.experience, ...data.activities, ...data.volunteer]
+  for (const exp of allEntries) {
     for (const bullet of exp.bullets) {
       totalBullets++
       if (hasMetrics(bullet)) bulletsWithMetrics++
@@ -82,7 +83,7 @@ export function analyzeATS(data: ResumeData, targetRole: TargetRole): ATSSuggest
   const allText = [
     data.summary,
     ...data.skills.flatMap((s) => s.items),
-    ...data.experience.flatMap((e) => e.bullets),
+    ...allEntries.flatMap((e) => e.bullets),
     ...data.projects.flatMap((p) => [p.description, ...p.highlights, p.tech]),
   ].join(" ").toLowerCase()
 
@@ -136,7 +137,7 @@ export function analyzeATS(data: ResumeData, targetRole: TargetRole): ATSSuggest
     })
   }
 
-  const totalBulletCount = data.experience.reduce((s, e) => s + e.bullets.length, 0)
+  const totalBulletCount = allEntries.reduce((s, e) => s + e.bullets.length, 0)
   if (totalBulletCount > 25) {
     suggestions.push({
       type: "warning",
@@ -157,7 +158,7 @@ export function analyzeATS(data: ResumeData, targetRole: TargetRole): ATSSuggest
     })
   }
 
-  const hasEducation = data.education?.school || data.personalInfo?.school
+  const hasEducation = data.education.length > 0 || !!data.personalInfo?.school
   if (!hasEducation) {
     suggestions.push({
       type: "warning",

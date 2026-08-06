@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { generateResume } from "@/lib/resume/generator"
+import { generateResume, normalizeResumeData } from "@/lib/resume/generator"
 import { analyzeATS } from "@/lib/resume/ats-analyzer"
 import type { ResumeData, TargetRole, ResumeApiResponse, ResumeQuestionnaire } from "@/lib/resume/types"
 import { dbRateLimit, aiDailyKey, DAILY_MS } from "@/lib/db-rate-limit"
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
           let ats: ReturnType<typeof analyzeATS>
 
           try {
-            data = JSON.parse(cached.content) as ResumeData
+            data = normalizeResumeData(JSON.parse(cached.content) as ResumeData)
             ats = cached.atsData
               ? (JSON.parse(cached.atsData) as ReturnType<typeof analyzeATS>)
               : analyzeATS(data, targetRole)

@@ -2,13 +2,23 @@ import OpenAI from "openai"
 import { prisma } from "@/lib/prisma"
 import { getComputedSkills } from "@/lib/skills"
 import { buildResumePrompt } from "./prompt-builder"
-import type { ResumeData, TargetRole, ResumeQuestionnaire } from "./types"
+import type { ResumeData, ResumeEducation, TargetRole, ResumeQuestionnaire } from "./types"
 
 function getClient(): OpenAI | null {
   if (!process.env.OPENAI_API_KEY) return null
   return new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   })
+}
+
+function seedEducation(school: string, year: string): ResumeEducation[] {
+  const entry: ResumeEducation = {
+    school: school || "",
+    degree: "",
+    date: year || "",
+    bullets: [],
+  }
+  return school || year ? [entry] : []
 }
 
 function fallbackResume(name: string, email: string, bio: string, school: string, year: string, targetRole: string): ResumeData {
@@ -18,9 +28,43 @@ function fallbackResume(name: string, email: string, bio: string, school: string
     skills: [],
     experience: [],
     projects: [],
-    education: { school: school || "", year: year || "" },
+    education: seedEducation(school, year),
     certifications: [],
+    activities: [],
+    volunteer: [],
     targetRole,
+  }
+}
+
+export function normalizeResumeData(data: Partial<ResumeData> | null | undefined, school?: string, year?: string): ResumeData {
+  const safe = (data || {}) as Partial<ResumeData>
+  const education = Array.isArray(safe.education)
+    ? safe.education
+    : seedEducation(
+        (safe.education as { school?: string } | undefined)?.school || school || "",
+        (safe.education as { year?: string } | undefined)?.year || year || "",
+      )
+  return {
+    personalInfo: {
+      name: safe.personalInfo?.name || "",
+      email: safe.personalInfo?.email || "",
+      bio: safe.personalInfo?.bio || "",
+      school: safe.personalInfo?.school || school || "",
+      year: safe.personalInfo?.year || year || "",
+      phone: safe.personalInfo?.phone,
+      github: safe.personalInfo?.github,
+      linkedin: safe.personalInfo?.linkedin,
+      portfolio: safe.personalInfo?.portfolio,
+    },
+    summary: safe.summary || "",
+    skills: Array.isArray(safe.skills) ? safe.skills : [],
+    experience: Array.isArray(safe.experience) ? safe.experience : [],
+    projects: Array.isArray(safe.projects) ? safe.projects : [],
+    education,
+    certifications: Array.isArray(safe.certifications) ? safe.certifications : [],
+    activities: Array.isArray(safe.activities) ? safe.activities : [],
+    volunteer: Array.isArray(safe.volunteer) ? safe.volunteer : [],
+    targetRole: safe.targetRole || "",
   }
 }
 
@@ -128,22 +172,19 @@ export async function generateResume(
 
     const parsed = JSON.parse(content) as ResumeData
 
-    const resume: ResumeData = {
-      personalInfo: {
-        name: parsed.personalInfo?.name || name,
-        email: parsed.personalInfo?.email || email,
-        bio: parsed.personalInfo?.bio || bio,
-        school: parsed.personalInfo?.school || school,
-        year: parsed.personalInfo?.year || year,
-      },
-      summary: parsed.summary || "",
-      skills: Array.isArray(parsed.skills) ? parsed.skills : [],
-      experience: Array.isArray(parsed.experience) ? parsed.experience : [],
-      projects: Array.isArray(parsed.projects) ? parsed.projects : [],
-      education: parsed.education || { school, year },
-      certifications: Array.isArray(parsed.certifications) ? parsed.certifications : [],
-      targetRole: customRoleTitle || targetRole,
+    const resume = normalizeResumeData(parsed, school, year)
+    resume.personalInfo = {
+      name: parsed.personalInfo?.name || name,
+      email: parsed.personalInfo?.email || email,
+      bio: parsed.personalInfo?.bio || bio,
+      school: parsed.personalInfo?.school || school,
+      year: parsed.personalInfo?.year || year,
+      phone: parsed.personalInfo?.phone,
+      github: parsed.personalInfo?.github,
+      linkedin: parsed.personalInfo?.linkedin,
+      portfolio: parsed.personalInfo?.portfolio,
     }
+    resume.targetRole = customRoleTitle || targetRole
 
     return resume
   } catch (err) {

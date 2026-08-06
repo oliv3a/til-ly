@@ -203,11 +203,29 @@ Respond ONLY with a valid JSON object matching this exact structure:
       "highlights": ["string — 1-3 achievement bullet points about this project"]
     }
   ],
-  "education": {
-    "school": "string",
-    "year": "string"
-  },
+  "education": [
+    {
+      "school": "string — school name",
+      "degree": "string — degree/course (e.g., 'Bachelor of Computing, Computer Science')",
+      "date": "string — date range (e.g., 'Aug 2025 - May 2029')",
+      "bullets": ["string — e.g., 'Relevant Modules - Data Structures and Algorithms'"]
+    }
+  ],
   "certifications": ["string — leave empty if none"],
+  "activities": [
+    {
+      "title": "string — co-curricular activity/role (e.g., 'Volleyball — Member')",
+      "date": "string — date range (e.g., 'Jan 2022 - May 2023')",
+      "bullets": ["string — achievement-oriented bullet point"]
+    }
+  ],
+  "volunteer": [
+    {
+      "title": "string — volunteer org/role (e.g., 'Project ACE — Tutor')",
+      "date": "string — date range (e.g., 'Nov 2024 - Dec 2024')",
+      "bullets": ["string — achievement-oriented bullet point"]
+    }
+  ],
   "targetRole": "string — the target role this resume is optimized for"
 }
 `
@@ -259,13 +277,13 @@ ${parts.join("\n")}
 `
 }
 
-function buildHackathonSection(): string {
+function buildExtractionSection(): string {
   return `
-## Hackathons — REQUIRED Extraction
-The user's pasted resume content and extra notes may mention hackathons (hackathon, hack day, code jam, datathon, CTF, build week, "24/48-hour challenge", etc.).
+## Extracted Content — REQUIRED
+The user's pasted resume content and extra notes contain valuable information that is NOT in the structured user data. You MUST extract and include it.
 
-You MUST scan the Uploaded Existing Resume Content and Extra Notes for hackathons and include EVERY one you find:
-
+### Hackathons
+Scan the Uploaded Existing Resume Content and Extra Notes for hackathons (hackathon, hack day, code jam, datathon, CTF, build week, "24/48-hour challenge", etc.) and include EVERY one you find:
 1. Detect hackathons anywhere in the pasted resume or extra notes — even if they only appear there and not in the structured user data.
 2. For each hackathon found, create a project entry in the "projects" array:
    - "name": the hackathon (or team/project) name, e.g. "HackHarvard 2025" or "Team Orbit — TAMU Datathon"
@@ -274,6 +292,17 @@ You MUST scan the Uploaded Existing Resume Content and Extra Notes for hackathon
    - "highlights": 1-3 achievement bullet points — placement/prize (e.g. "Won 2nd place out of 40 teams"), team size/role, and what you personally built
 3. Do NOT drop hackathons to keep the resume short. They are high-signal achievements and must be preserved.
 4. Keep the hackathon's factual details (event name, outcome, tech) exactly as provided — do not invent placements or prizes that aren't stated.
+
+### Education
+Build the "education" array from the profile school/year AND the uploaded resume content. List ALL schools (e.g., university AND junior college), most recent first. Each entry includes school, degree, date range, and bullets like relevant modules/subjects. If no extra education is in the pasted content, use the profile school/year as a single entry.
+
+### Co-Curricular Activities
+Extract co-curriculars from the pasted resume or extra notes — sports teams, clubs, societies, competitions, student leadership. For each, create an "activities" entry with title, date range, and 1-3 achievement bullets.
+
+### Volunteer Experience
+Extract volunteer/community work from the pasted resume or extra notes — tutoring programs, community service, mentoring. For each, create a "volunteer" entry with title, date range, and 1-3 achievement bullets.
+
+If a section has no data (nothing pasted, nothing in notes), return an empty array for it.
 `
 }
 
@@ -313,7 +342,7 @@ ${userData.goals.slice(0, 5).map((g) => `- "${g.title}" (${g.progress}% complete
 
 ${userBlock}
 ${questionnaire ? buildQuestionnaireSection(questionnaire) : ""}
-${buildHackathonSection()}
+${buildExtractionSection()}
 ${buildActionVerbSection()}
 ${RESUME_FORMULA_GUIDE}
 ${buildKeywordSection(targetRole, customRoleTitle)}
