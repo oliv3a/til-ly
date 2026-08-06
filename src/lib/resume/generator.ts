@@ -11,6 +11,15 @@ function getClient(): OpenAI | null {
   })
 }
 
+function isTillyUrl(url?: string): boolean {
+  if (!url) return false
+  return /til[l-]?y\.vercel\.app|(^|[./])til\.ly/i.test(url)
+}
+
+function cleanPortfolio(url?: string): string | undefined {
+  return url && !isTillyUrl(url) ? url : undefined
+}
+
 function seedEducation(school: string, year: string): ResumeEducation[] {
   const entry: ResumeEducation = {
     school: school || "",
@@ -54,7 +63,7 @@ export function normalizeResumeData(data: Partial<ResumeData> | null | undefined
       phone: safe.personalInfo?.phone,
       github: safe.personalInfo?.github,
       linkedin: safe.personalInfo?.linkedin,
-      portfolio: safe.personalInfo?.portfolio,
+      portfolio: cleanPortfolio(safe.personalInfo?.portfolio),
     },
     summary: safe.summary || "",
     skills: Array.isArray(safe.skills) ? safe.skills : [],
@@ -66,6 +75,133 @@ export function normalizeResumeData(data: Partial<ResumeData> | null | undefined
     volunteer: Array.isArray(safe.volunteer) ? safe.volunteer : [],
     targetRole: safe.targetRole || "",
   }
+}
+
+const HACKATHON_RE = /\b(hackathon|hack\s*-?\s*day|code\s*jam|datathon|ctf|build\s+week|build\s+day)\b|\b(?:24|48)\s*-?\s*hour\b/i
+
+const TECH_TERMS: { match: string; display: string }[] = [
+  { match: "python", display: "Python" },
+  { match: "javascript", display: "JavaScript" },
+  { match: "typescript", display: "TypeScript" },
+  { match: "react", display: "React" },
+  { match: "next.js", display: "Next.js" },
+  { match: "node.js", display: "Node.js" },
+  { match: "express", display: "Express" },
+  { match: "xgboost", display: "XGBoost" },
+  { match: "pytorch", display: "PyTorch" },
+  { match: "tensorflow", display: "TensorFlow" },
+  { match: "fastapi", display: "FastAPI" },
+  { match: "flask", display: "Flask" },
+  { match: "django", display: "Django" },
+  { match: "postgresql", display: "PostgreSQL" },
+  { match: "mongodb", display: "MongoDB" },
+  { match: "aws", display: "AWS" },
+  { match: "gcp", display: "GCP" },
+  { match: "azure", display: "Azure" },
+  { match: "docker", display: "Docker" },
+  { match: "kubernetes", display: "Kubernetes" },
+  { match: "git", display: "Git" },
+  { match: "openai", display: "OpenAI" },
+  { match: "langchain", display: "LangChain" },
+  { match: "machine learning", display: "Machine Learning" },
+  { match: "tailwind css", display: "Tailwind CSS" },
+  { match: "graphql", display: "GraphQL" },
+  { match: "prisma", display: "Prisma" },
+  { match: "redis", display: "Redis" },
+  { match: "java", display: "Java" },
+  { match: "go", display: "Go" },
+  { match: "rust", display: "Rust" },
+  { match: "sql", display: "SQL" },
+]
+
+function extractTech(text: string): string[] {
+  const lower = text.toLowerCase()
+  return TECH_TERMS.filter((t) => lower.includes(t.match)).map((t) => t.display)
+}
+
+function findHackathonBlocks(text: string): string[] {
+  const lines = text.split(/\r?\n/).map((l) => l.trim())
+  const blocks: string[] = []
+  let current = ""
+  for (const line of lines) {
+    if (!line) {
+      if (current) {
+        blocks.push(current)
+        current = ""
+      }
+      continue
+    }
+    if (current && HACKATHON_RE.test(line)) {
+      blocks.push(current)
+      current = line
+    } else if (current) {
+      current += ` ${line}`
+    } else if (HACKATHON_RE.test(line)) {
+      current = line
+    }
+  }
+  if (current) blocks.push(current)
+  return blocks
+}
+
+function titleCase(s: string): string {
+  return s.replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function hackathonProjectName(block: string): string {
+  const stripped = block.replace(/^\s*hackathon\s*[-–:]\s*/i, "").trim()
+  const m = stripped.match(
+    /(?:developed|built|created|designed|engineered)\s+(?:a|an)\s+([a-z][a-z0-9' ]{4,80}?)(?=\s+(?:to|for|that|which|using|in|with|by)|[,.;]|\s*$)/i,
+  )
+  if (m) return titleCase(m[1].trim())
+  const first = stripped.split(/[.\n]/)[0].trim()
+  if (first && first.length < 60) return titleCase(first)
+  return "Hackathon Project"
+}
+
+function toBullets(text: string, max = 3): string[] {
+  const flattened = text.replace(/\s*\n+\s*/g, ". ")
+  return flattened
+    .split(".")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, max)
+    .map((s) => (s.endsWith(".") ? s : `${s}.`))
+}
+
+function injectMissingHackathons(
+  resume: ResumeData,
+  questionnaire?: Omit<ResumeQuestionnaire, "targetRole" | "customRoleTitle">,
+): ResumeData {
+  const sources = [questionnaire?.extraNotes, questionnaire?.uploadedResumeText]
+    .filter((s): s is string => !!s && s.trim().length > 0)
+    .join("\n\n")
+  if (!sources) return resume
+
+  const existing = (resume.projects || [])
+    .map((p) => `${p.name} ${p.description} ${p.highlights.join(" ")}`)
+    .join(" ")
+    .toLowerCase()
+
+  for (const block of findHackathonBlocks(sources)) {
+    const blockKey = block.toLowerCase()
+    const name = hackathonProjectName(block)
+    const nameKey = name.toLowerCase()
+    const represented =
+      existing.includes(blockKey) ||
+      existing.includes(blockKey.slice(0, 60)) ||
+      (nameKey.length > 8 && existing.includes(nameKey))
+    if (represented) continue
+
+    const description = block.replace(/^\s*hackathon\s*[-–:]\s*/i, "").trim()
+    resume.projects.push({
+      name,
+      tech: extractTech(description).join(", "),
+      description,
+      highlights: toBullets(description),
+    })
+  }
+  return resume
 }
 
 export async function generateResume(
@@ -182,9 +318,11 @@ export async function generateResume(
       phone: parsed.personalInfo?.phone,
       github: parsed.personalInfo?.github,
       linkedin: parsed.personalInfo?.linkedin,
-      portfolio: parsed.personalInfo?.portfolio,
+      portfolio: cleanPortfolio(parsed.personalInfo?.portfolio),
     }
     resume.targetRole = customRoleTitle || targetRole
+
+    injectMissingHackathons(resume, questionnaire)
 
     return resume
   } catch (err) {

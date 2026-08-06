@@ -71,9 +71,6 @@ async function generateFresh(
   customRoleTitle?: string,
   body?: Record<string, unknown>,
 ) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://til-ly.vercel.app"
-  const portfolioUrl = `${baseUrl}/portfolio/${userId}`
-
   const questionnaire: ResumeQuestionnaire = {
     targetRole,
     customRoleTitle,
@@ -90,7 +87,6 @@ async function generateFresh(
     experienceYears: questionnaire.experienceYears,
     githubUrl: questionnaire.githubUrl,
     linkedinUrl: questionnaire.linkedinUrl,
-    portfolioUrl,
     emphasizeTech: questionnaire.emphasizeTech,
     resumeLength: questionnaire.resumeLength,
     uploadedResumeText: questionnaire.uploadedResumeText,
