@@ -13,6 +13,7 @@ const satoshi = localFont({
 })
 
 const inter = Inter({
+  weight: ["400", "700"],
   subsets: ["latin"],
   variable: "--font-sans",
 })

@@ -3,11 +3,9 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { motion } from "motion/react"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 import BrandLogo from "@/components/BrandLogo"
 import PageShell from "@/components/PageShell"
-import { fadeIn } from "@/lib/motion/variants"
 import { signIn } from "next-auth/react"
 
 export default function SignupPage() {
@@ -118,14 +116,9 @@ export default function SignupPage() {
                 />
               </div>
               {error && (
-                <motion.p
-                  initial="hidden"
-                  animate="visible"
-                  variants={fadeIn}
-                  className="text-[0.65rem] font-mono text-warm-brown bg-peach/50 px-2 py-1 border-2 border-warm-brown"
-                >
+                <p className="text-[0.65rem] font-mono text-warm-brown bg-peach/50 px-2 py-1 border-2 border-warm-brown">
                   {error}
-                </motion.p>
+                </p>
               )}
 
               <AnimatedButton

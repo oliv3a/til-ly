@@ -4,11 +4,9 @@ import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { motion } from "motion/react"
 import AnimatedButton from "@/lib/motion/components/AnimatedButton"
 import BrandLogo from "@/components/BrandLogo"
 import PageShell from "@/components/PageShell"
-import { fadeIn } from "@/lib/motion/variants"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -81,14 +79,9 @@ export default function LoginPage() {
               </div>
 
               {error && (
-                <motion.p
-                  initial="hidden"
-                  animate="visible"
-                  variants={fadeIn}
-                  className="text-[0.65rem] font-mono text-warm-brown bg-peach/50 px-2 py-1 border-2 border-warm-brown"
-                >
+                <p className="text-[0.65rem] font-mono text-warm-brown bg-peach/50 px-2 py-1 border-2 border-warm-brown">
                   {error}
-                </motion.p>
+                </p>
               )}
 
               <AnimatedButton type="submit" variant="coral" className="w-full justify-center" disabled={loading}>
